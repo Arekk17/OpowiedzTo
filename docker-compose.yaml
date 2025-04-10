@@ -1,0 +1,29 @@
+version: '3.8'
+services:
+  db:
+    image: postgres
+    container_name: opowiedzto-db
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: Wasd123zdc!
+      POSTGRES_DB: opowiedzto-db
+    ports:
+      - '5432:5432'
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: daszkowskiarek145@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: Wasd123zdc!
+    ports:
+      - '8080:80'
+
+  nest:
+    build: .
+    container_name: opowiedzto-api
+
+    ports:
+      - '3000:3000'
+    depends_on:
+      - db
