@@ -4,6 +4,7 @@
 import Header from '../../components/Header';
 import Link from 'next/link';
 import { useState } from 'react';
+import React from 'react'; // Dodajemy import React dla React.use
 
 const users = [
   { id: "1", nickname: "AnonimowyLis", createdAt: "2025-05-01T12:00:00Z", followers: 50 },
@@ -69,15 +70,18 @@ const postsData = [
 ];
 
 export default function PostPage({ params }) {
+  const resolvedParams = React.use(params); // Rozwiązujemy params za pomocą React.use
+  const id = resolvedParams.id; // Teraz możemy bezpiecznie użyć params.id
+
   const [postsState, setPostsState] = useState(postsData);
   const [newComment, setNewComment] = useState('');
   const [showComments, setShowComments] = useState(false);
   const [showReportPost, setShowReportPost] = useState(false);
-  const [showReportComment, setShowReportComment] = useState(null); // ID komentarza do zgłoszenia
+  const [showReportComment, setShowReportComment] = useState(null);
   const [reportReason, setReportReason] = useState('');
   const [reportSuccess, setReportSuccess] = useState({ post: false, comment: null });
 
-  const post = postsState.find((p) => p.id === params.id);
+  const post = postsState.find((p) => p.id === id); // Używamy rozwiniętego id
   const author = users.find((u) => u.id === post.authorId);
 
   if (!post) {
@@ -220,7 +224,7 @@ export default function PostPage({ params }) {
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Zgłoś post</h3>
                 <form onSubmit={handleSubmitReport}>
                   <textarea
-                    className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500 mb-4"
+                    className="w-full p-2 bg-white border border-gray-400 rounded-md text-gray-900 placeholder-gray-500 focus:outline-none focus:border-blue-500 mb-4"
                     placeholder="Podaj powód zgłoszenia..."
                     value={reportReason}
                     onChange={(e) => setReportReason(e.target.value)}
@@ -282,7 +286,7 @@ export default function PostPage({ params }) {
                           <div className="mt-2">
                             <form onSubmit={handleSubmitReport}>
                               <textarea
-                                className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500 mb-2"
+                                className="w-full p-2 bg-white border border-gray-400 rounded-md text-gray-900 placeholder-gray-500 focus:outline-none focus:border-blue-500 mb-2"
                                 placeholder="Podaj powód zgłoszenia..."
                                 value={reportReason}
                                 onChange={(e) => setReportReason(e.target.value)}
@@ -321,7 +325,7 @@ export default function PostPage({ params }) {
                 <input
                   type="text"
                   placeholder="Dodaj komentarz..."
-                  className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+                  className="w-full p-2 bg-white border border-gray-400 rounded-md text-gray-900 placeholder-gray-500 focus:outline-none focus:border-blue-500"
                   value={newComment}
                   onChange={(e) => setNewComment(e.target.value)}
                 />
