@@ -1,5 +1,4 @@
 // src/app/settings/page.tsx
-
 import Header from '../components/Header';
 
 export default function SettingsPage() {

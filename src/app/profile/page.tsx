@@ -1,5 +1,5 @@
 // src/app/profile/page.tsx
-
+import Header from '../components/Header';
 
 const users = [
   { id: "1", nickname: "AnonimowyLis", createdAt: "2025-05-01T12:00:00Z", followers: 50 },
@@ -63,6 +63,7 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-gray-100 py-6">
+      <Header />
       <div className="max-w-4xl mx-auto">
         {/* Sekcja profilu */}
         <div className="bg-white p-6 rounded-lg shadow-md mb-6">
