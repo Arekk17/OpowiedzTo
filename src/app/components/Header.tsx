@@ -49,6 +49,9 @@ export default function Header() {
           <Link href="/search" className="text-gray-600 hover:text-blue-600">
             Wyszukiwarka
           </Link>
+          <Link href="/login" className="text-gray-600 hover:text-blue-600">
+            Zaloguj się
+          </Link>
         </nav>
       </div>
 
@@ -76,6 +79,13 @@ export default function Header() {
               onClick={() => setIsMenuOpen(false)}
             >
               Wyszukiwarka
+            </Link>
+            <Link
+              href="/login"
+              className="text-gray-600 hover:text-blue-600"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Zaloguj się
             </Link>
           </div>
         </nav>

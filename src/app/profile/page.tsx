@@ -62,9 +62,9 @@ export default function ProfilePage() {
   const userPosts = posts.filter((post) => post.authorId === user.id);
 
   return (
-    <div className="min-h-screen bg-gray-100 py-6">
+    <div className="min-h-screen bg-gray-100">
       <Header />
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-4xl mx-auto pt-20 pb-6">
         {/* Sekcja profilu */}
         <div className="bg-white p-6 rounded-lg shadow-md mb-6">
           <div className="flex items-center gap-4 mb-4">

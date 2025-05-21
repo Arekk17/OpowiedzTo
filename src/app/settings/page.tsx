@@ -3,8 +3,9 @@ import Header from '../components/Header';
 
 export default function SettingsPage() {
   return (
-    <div className="min-h-screen bg-gray-100 py-6">
-      <div className="max-w-2xl mx-auto">
+    <div className="min-h-screen bg-gray-100">
+      <Header />
+      <div className="max-w-2xl mx-auto py-6">
         <div className="bg-white p-6 rounded-lg shadow-md">
           <h1 className="text-2xl font-bold mb-6 text-gray-900">Ustawienia</h1>
           <form className="space-y-4">
