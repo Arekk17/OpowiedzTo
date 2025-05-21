@@ -1,5 +1,7 @@
 // src/app/profile/page.tsx
+'use client'; // Dodajemy 'use client', bo używamy useSearchParams
 import Header from '../components/Header';
+import { useSearchParams } from 'next/navigation';
 
 const users = [
   { id: "1", nickname: "AnonimowyLis", createdAt: "2025-05-01T12:00:00Z", followers: 50 },
@@ -58,8 +60,10 @@ const posts = [
 ];
 
 export default function ProfilePage() {
-  const user = users.find((u) => u.id === "1");
-  const userPosts = posts.filter((post) => post.authorId === user.id);
+  const searchParams = useSearchParams();
+  const userId = searchParams.get('userId') || '1'; // Domyślnie '1', jeśli nie podano userId
+  const user = users.find((u) => u.id === userId);
+  const userPosts = posts.filter((post) => post.authorId === userId);
 
   return (
     <div className="min-h-screen bg-gray-100">

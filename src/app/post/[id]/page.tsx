@@ -79,7 +79,7 @@ export default function PostPage({ params }) {
           <h1 className="text-2xl font-bold text-gray-900 mb-2">{generateTitle(post.content)}</h1>
           <p className="text-gray-800 mb-4">{post.content}</p>
           <p className="text-sm text-gray-600 mb-2">
-            Autor: <Link href={`/profile`} className="text-blue-600 hover:underline">{author.nickname}</Link>
+            Autor: <Link href={`/profile?userId=${author.id}`} className="text-blue-600 hover:underline">{author.nickname}</Link>
           </p>
           <div className="flex gap-2 mb-2">
             {post.tags.map((tag) => (

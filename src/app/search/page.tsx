@@ -58,10 +58,9 @@ export default function SearchPage() {
   const filteredPosts = posts.filter(
     (post) =>
       post.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      post.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+      post.tags.some((tag) => tag.toLowerCase().includes(query.toLowerCase()))
   );
 
-  // Funkcja do generowania tytułu z treści (pierwsze kilka słów)
   const generateTitle = (content) => {
     const words = content.split(' ').slice(0, 5).join(' ');
     return words.length < content.length ? `${words}...` : words;
@@ -71,15 +70,15 @@ export default function SearchPage() {
     <div className="min-h-screen bg-gray-100">
       <Header />
       <div className="max-w-4xl mx-auto py-6 px-4">
-        <h1 className="text-2xl font-bold text-gray-900 mb-4">Wyszukiwarka</h1>
+        <h1 className="text-2xl font-bold text-gray-900 mb-6">Wyszukiwarka</h1>
         <input
           type="text"
           placeholder="Szukaj postów..."
-          className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500 mb-4"
+          className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500 mb-6"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
-        <div className="space-y-4">
+        <div className="space-y-8"> {/* Zwiększono do space-y-8 dla większego odstępu */}
           {filteredPosts.length > 0 ? (
             filteredPosts.map((post) => (
               <Link href={`/post/${post.id}`} key={post.id}>
