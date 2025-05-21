@@ -4,7 +4,7 @@
 import Header from '../../components/Header';
 import Link from 'next/link';
 import { useState } from 'react';
-import React from 'react'; // Dodajemy import React dla React.use
+import React from 'react';
 
 const users = [
   { id: "1", nickname: "AnonimowyLis", createdAt: "2025-05-01T12:00:00Z", followers: 50 },
@@ -70,8 +70,8 @@ const postsData = [
 ];
 
 export default function PostPage({ params }) {
-  const resolvedParams = React.use(params); // Rozwiązujemy params za pomocą React.use
-  const id = resolvedParams.id; // Teraz możemy bezpiecznie użyć params.id
+  const resolvedParams = React.use(params);
+  const id = resolvedParams.id;
 
   const [postsState, setPostsState] = useState(postsData);
   const [newComment, setNewComment] = useState('');
@@ -81,7 +81,7 @@ export default function PostPage({ params }) {
   const [reportReason, setReportReason] = useState('');
   const [reportSuccess, setReportSuccess] = useState({ post: false, comment: null });
 
-  const post = postsState.find((p) => p.id === id); // Używamy rozwiniętego id
+  const post = postsState.find((p) => p.id === id);
   const author = users.find((u) => u.id === post.authorId);
 
   if (!post) {
@@ -105,7 +105,7 @@ export default function PostPage({ params }) {
 
     const newCommentObj = {
       id: `c${Date.now()}`,
-      authorId: "1", // Zakładamy, że zalogowanym użytkownikiem jest AnonimowyLis
+      authorId: "1",
       content: newComment,
       createdAt: new Date().toISOString(),
     };
@@ -219,7 +219,7 @@ export default function PostPage({ params }) {
 
           {/* Formularz zgłoszenia posta */}
           {showReportPost && (
-            <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+            <div className="fixed inset-0 bg-gray-500 bg-opacity-30 backdrop-blur-sm flex items-center justify-center z-50">
               <div className="bg-white p-6 rounded-lg shadow-md w-full max-w-md">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Zgłoś post</h3>
                 <form onSubmit={handleSubmitReport}>

@@ -15,7 +15,7 @@ export default function RegisterPage() {
                 type="email"
                 id="email"
                 placeholder="Twój email"
-                className="p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+                className="p-2 bg-white border border-gray-400 rounded-md text-gray-900 placeholder-gray-500 focus:outline-none focus:border-blue-500"
                 required
               />
             </div>
@@ -25,7 +25,7 @@ export default function RegisterPage() {
                 type="password"
                 id="password"
                 placeholder="Twoje hasło"
-                className="p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+                className="p-2 bg-white border border-gray-400 rounded-md text-gray-900 placeholder-gray-500 focus:outline-none focus:border-blue-500"
                 required
               />
             </div>
@@ -35,7 +35,7 @@ export default function RegisterPage() {
                 type="password"
                 id="confirm-password"
                 placeholder="Potwierdź hasło"
-                className="p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+                className="p-2 bg-white border border-gray-400 rounded-md text-gray-900 placeholder-gray-500 focus:outline-none focus:border-blue-500"
                 required
               />
             </div>

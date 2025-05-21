@@ -58,7 +58,7 @@ export default function SearchPage() {
   const filteredPosts = posts.filter(
     (post) =>
       post.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      post.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase())) // Poprawiono z 'query' na 'searchQuery'
+      post.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   const generateTitle = (content) => {
@@ -74,15 +74,15 @@ export default function SearchPage() {
         <input
           type="text"
           placeholder="Szukaj postów..."
-          className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500 mb-6"
+          className="w-full p-2 bg-white border border-gray-400 rounded-md text-gray-900 placeholder-gray-500 focus:outline-none focus:border-blue-500 mb-6"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
-        <div className="space-y-12"> {/* Zwiększono do space-y-12 dla większego odstępu */}
+        <div className="space-y-12">
           {filteredPosts.length > 0 ? (
             filteredPosts.map((post) => (
               <Link href={`/post/${post.id}`} key={post.id}>
-                <div className="bg-white p-4 rounded-lg shadow-md hover:bg-gray-50 transition-colors my-4"> {/* Dodano my-4 dla dodatkowego marginesu */}
+                <div className="bg-white p-4 rounded-lg shadow-md hover:bg-gray-50 transition-colors my-4">
                   <h2 className="text-lg font-semibold text-gray-900">{generateTitle(post.content)}</h2>
                   <p className="text-gray-800 mt-1">{post.content}</p>
                   <div className="flex gap-2 mt-2">
