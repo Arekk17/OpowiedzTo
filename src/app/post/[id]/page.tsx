@@ -1,6 +1,9 @@
 // src/app/post/[id]/page.tsx
+'use client';
+
 import Header from '../../components/Header';
 import Link from 'next/link';
+import { useState } from 'react';
 
 const users = [
   { id: "1", nickname: "AnonimowyLis", createdAt: "2025-05-01T12:00:00Z", followers: 50 },
@@ -10,7 +13,7 @@ const users = [
   { id: "5", nickname: "SkrytyJeż", createdAt: "2025-05-09T10:35:00Z", followers: 45 },
 ];
 
-const posts = [
+const postsData = [
   {
     id: "101",
     authorId: "1",
@@ -18,7 +21,10 @@ const posts = [
     createdAt: "2025-05-20T14:12:00Z",
     tags: ["friendship", "life", "unexpected"],
     likes: 125,
-    commentsCount: 8,
+    comments: [
+      { id: "c101", authorId: "2", content: "To brzmi niesamowicie!", createdAt: "2025-05-20T14:30:00Z" },
+      { id: "c102", authorId: "3", content: "Gdzie to było?", createdAt: "2025-05-20T14:45:00Z" },
+    ],
   },
   {
     id: "102",
@@ -27,7 +33,9 @@ const posts = [
     createdAt: "2025-05-19T09:47:00Z",
     tags: ["life", "nostalgia", "relationships"],
     likes: 87,
-    commentsCount: 5,
+    comments: [
+      { id: "c103", authorId: "1", content: "Cieszę się, że się odezwała!", createdAt: "2025-05-19T10:00:00Z" },
+    ],
   },
   {
     id: "103",
@@ -36,7 +44,7 @@ const posts = [
     createdAt: "2025-05-18T18:30:00Z",
     tags: ["kindness", "everyday", "hope"],
     likes: 200,
-    commentsCount: 14,
+    comments: [],
   },
   {
     id: "104",
@@ -45,7 +53,9 @@ const posts = [
     createdAt: "2025-05-17T21:05:00Z",
     tags: ["mental_health", "reflection", "selflove"],
     likes: 173,
-    commentsCount: 12,
+    comments: [
+      { id: "c104", authorId: "5", content: "To bardzo mądre!", createdAt: "2025-05-17T21:30:00Z" },
+    ],
   },
   {
     id: "105",
@@ -54,12 +64,16 @@ const posts = [
     createdAt: "2025-05-16T16:50:00Z",
     tags: ["emotions", "support", "healing"],
     likes: 149,
-    commentsCount: 9,
+    comments: [],
   },
 ];
 
 export default function PostPage({ params }) {
-  const post = posts.find((p) => p.id === params.id);
+  const [postsState, setPostsState] = useState(postsData);
+  const [newComment, setNewComment] = useState('');
+  const [showComments, setShowComments] = useState(false);
+
+  const post = postsState.find((p) => p.id === params.id);
   const author = users.find((u) => u.id === post.authorId);
 
   if (!post) {
@@ -71,16 +85,51 @@ export default function PostPage({ params }) {
     return words.length < content.length ? `${words}...` : words;
   };
 
+  const handleLike = () => {
+    setPostsState((prevPosts) =>
+      prevPosts.map((p) =>
+        p.id === post.id ? { ...p, likes: p.likes + 1 } : p
+      )
+    );
+  };
+
+  const handleCommentSubmit = (e) => {
+    e.preventDefault();
+    if (!newComment.trim()) return;
+
+    const newCommentObj = {
+      id: `c${Date.now()}`,
+      authorId: "1", // Zakładamy, że zalogowanym użytkownikiem jest AnonimowyLis
+      content: newComment,
+      createdAt: new Date().toISOString(),
+    };
+
+    setPostsState((prevPosts) =>
+      prevPosts.map((p) =>
+        p.id === post.id ? { ...p, comments: [...p.comments, newCommentObj] } : p
+      )
+    );
+    setNewComment('');
+  };
+
   return (
     <div className="min-h-screen bg-gray-100">
       <Header />
       <div className="max-w-4xl mx-auto py-6 px-4">
         <div className="bg-white p-6 rounded-lg shadow-md">
+          <div className="flex items-start gap-4 mb-4">
+            <div className="w-12 h-12 bg-gray-300 rounded-full flex-shrink-0"></div> {/* Placeholder dla awatara */}
+            <div>
+              <Link href={`/profile?userId=${author.id}`} className="text-lg font-semibold text-blue-600 hover:underline">
+                {author.nickname}
+              </Link>
+              <p className="text-sm text-gray-500">
+                {new Date(post.createdAt).toLocaleDateString()}
+              </p>
+            </div>
+          </div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">{generateTitle(post.content)}</h1>
           <p className="text-gray-800 mb-4">{post.content}</p>
-          <p className="text-sm text-gray-600 mb-2">
-            Autor: <Link href={`/profile?userId=${author.id}`} className="text-blue-600 hover:underline">{author.nickname}</Link>
-          </p>
           <div className="flex gap-2 mb-2">
             {post.tags.map((tag) => (
               <span key={tag} className="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded-full">
@@ -88,13 +137,103 @@ export default function PostPage({ params }) {
               </span>
             ))}
           </div>
-          <div className="text-sm text-gray-600">
-            <span>Likes: {post.likes}</span> • <span>Komentarze: {post.commentsCount}</span> •{' '}
-            <span>{new Date(post.createdAt).toLocaleDateString()}</span>
+          <div className="flex gap-4 text-sm text-gray-600 mb-4">
+            <button
+              onClick={handleLike}
+              className="flex items-center gap-1 text-gray-600 hover:text-blue-600 transition-colors"
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                />
+              </svg>
+              <span>Likes: {post.likes}</span>
+            </button>
+            <button
+              onClick={() => setShowComments(!showComments)}
+              className="flex items-center gap-1 text-gray-600 hover:text-blue-600 transition-colors"
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                />
+              </svg>
+              <span>Komentarze: {post.comments.length}</span>
+            </button>
           </div>
+
+          {/* Sekcja komentarzy */}
+          {showComments && (
+            <div className="mt-4">
+              <h3 className="text-sm font-semibold text-gray-900 mb-2">Komentarze</h3>
+              {post.comments.length > 0 ? (
+                <div className="space-y-3 mb-4">
+                  {post.comments.map((comment) => {
+                    const commentAuthor = users.find((u) => u.id === comment.authorId);
+                    return (
+                      <div key={comment.id} className="border-l-2 border-gray-200 pl-3">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 bg-gray-300 rounded-full flex-shrink-0"></div>
+                          <div>
+                            <Link
+                              href={`/profile?userId=${commentAuthor.id}`}
+                              className="text-sm font-semibold text-blue-600 hover:underline"
+                            >
+                              {commentAuthor.nickname}
+                            </Link>
+                            <p className="text-xs text-gray-500">
+                              {new Date(comment.createdAt).toLocaleDateString()}
+                            </p>
+                          </div>
+                        </div>
+                        <p className="text-gray-700 text-sm mt-1">{comment.content}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="text-sm text-gray-600 mb-4">Brak komentarzy. Bądź pierwszy!</p>
+              )}
+
+              {/* Formularz dodawania komentarza */}
+              <form onSubmit={handleCommentSubmit} className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="Dodaj komentarz..."
+                  className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                />
+                <button
+                  type="submit"
+                  className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
+                >
+                  Wyślij
+                </button>
+              </form>
+            </div>
+          )}
         </div>
-        <Link href="/search" className="mt-4 inline-block text-blue-600 hover:underline">
-          Powrót do wyszukiwarki
+        <Link href="/" className="mt-4 inline-block text-blue-600 hover:underline">
+          Powrót do strony głównej
         </Link>
       </div>
     </div>

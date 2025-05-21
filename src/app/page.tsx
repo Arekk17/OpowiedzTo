@@ -1,8 +1,8 @@
 // src/app/page.tsx
-'use client'; // Oznaczenie jako Client Component, bo używamy Link
+'use client';
 
 import Header from './components/Header';
-import Link from 'next/link'; // Poprawny import Link z next/link
+import Link from 'next/link';
 
 const users = [
   { id: "1", nickname: "AnonimowyLis", createdAt: "2025-05-01T12:00:00Z", followers: 50 },
@@ -20,7 +20,10 @@ const posts = [
     createdAt: "2025-05-20T14:12:00Z",
     tags: ["friendship", "life", "unexpected"],
     likes: 125,
-    commentsCount: 8,
+    comments: [
+      { id: "c101", authorId: "2", content: "To brzmi niesamowicie!", createdAt: "2025-05-20T14:30:00Z" },
+      { id: "c102", authorId: "3", content: "Gdzie to było?", createdAt: "2025-05-20T14:45:00Z" },
+    ],
   },
   {
     id: "102",
@@ -29,7 +32,9 @@ const posts = [
     createdAt: "2025-05-19T09:47:00Z",
     tags: ["life", "nostalgia", "relationships"],
     likes: 87,
-    commentsCount: 5,
+    comments: [
+      { id: "c103", authorId: "1", content: "Cieszę się, że się odezwała!", createdAt: "2025-05-19T10:00:00Z" },
+    ],
   },
   {
     id: "103",
@@ -38,7 +43,7 @@ const posts = [
     createdAt: "2025-05-18T18:30:00Z",
     tags: ["kindness", "everyday", "hope"],
     likes: 200,
-    commentsCount: 14,
+    comments: [],
   },
   {
     id: "104",
@@ -47,7 +52,9 @@ const posts = [
     createdAt: "2025-05-17T21:05:00Z",
     tags: ["mental_health", "reflection", "selflove"],
     likes: 173,
-    commentsCount: 12,
+    comments: [
+      { id: "c104", authorId: "5", content: "To bardzo mądre!", createdAt: "2025-05-17T21:30:00Z" },
+    ],
   },
   {
     id: "105",
@@ -56,11 +63,16 @@ const posts = [
     createdAt: "2025-05-16T16:50:00Z",
     tags: ["emotions", "support", "healing"],
     likes: 149,
-    commentsCount: 9,
+    comments: [],
   },
 ];
 
 export default function HomePage() {
+  const generateTitle = (content) => {
+    const words = content.split(' ').slice(0, 5).join(' ');
+    return words.length < content.length ? `${words}...` : words;
+  };
+
   return (
     <div className="min-h-screen bg-gray-100">
       <Header />
@@ -75,30 +87,32 @@ export default function HomePage() {
           {posts.map((post) => {
             const author = users.find((u) => u.id === post.authorId);
             return (
-              <div key={post.id} className="bg-white p-6 rounded-lg shadow-md">
-                <div className="flex items-start gap-4 mb-4">
-                  <div className="w-12 h-12 bg-gray-300 rounded-full flex-shrink-0"></div> {/* Placeholder dla awatara */}
-                  <div>
-                    <Link href={`/profile?userId=${author.id}`} className="text-lg font-semibold text-blue-600 hover:underline">
-                      {author.nickname}
-                    </Link>
-                    <p className="text-sm text-gray-500">
-                      {new Date(post.createdAt).toLocaleDateString()}
-                    </p>
+              <Link href={`/post/${post.id}`} key={post.id}>
+                <div className="bg-white p-6 rounded-lg shadow-md hover:bg-gray-50 transition-colors my-4"> {/* Dodano my-4 dla dodatkowego marginesu */}
+                  <div className="flex items-start gap-4 mb-4">
+                    <div className="w-12 h-12 bg-gray-300 rounded-full flex-shrink-0"></div> {/* Placeholder dla awatara */}
+                    <div>
+                      <Link href={`/profile?userId=${author.id}`} className="text-lg font-semibold text-blue-600 hover:underline">
+                        {author.nickname}
+                      </Link>
+                      <p className="text-sm text-gray-500">
+                        {new Date(post.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                  <p className="text-gray-800 mb-4">{generateTitle(post.content)}</p>
+                  <div className="flex gap-2 mb-2">
+                    {post.tags.map((tag) => (
+                      <span key={tag} className="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded-full">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    <span>Likes: {post.likes}</span> • <span>Komentarze: {post.comments.length}</span>
                   </div>
                 </div>
-                <p className="text-gray-800 mb-4">{post.content}</p>
-                <div className="flex gap-2 mb-2">
-                  {post.tags.map((tag) => (
-                    <span key={tag} className="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded-full">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-                <div className="text-sm text-gray-600">
-                  <span>Likes: {post.likes}</span> • <span>Komentarze: {post.commentsCount}</span>
-                </div>
-              </div>
+              </Link>
             );
           })}
         </div>
