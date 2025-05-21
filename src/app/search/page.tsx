@@ -1,7 +1,9 @@
+// src/app/search/page.tsx
 'use client';
 
 import { useState } from 'react';
 import Header from '../components/Header';
+import Link from 'next/link';
 
 const posts = [
   {
@@ -59,6 +61,12 @@ export default function SearchPage() {
       post.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
+  // Funkcja do generowania tytułu z treści (pierwsze kilka słów)
+  const generateTitle = (content) => {
+    const words = content.split(' ').slice(0, 5).join(' ');
+    return words.length < content.length ? `${words}...` : words;
+  };
+
   return (
     <div className="min-h-screen bg-gray-100">
       <Header />
@@ -74,23 +82,26 @@ export default function SearchPage() {
         <div className="space-y-4">
           {filteredPosts.length > 0 ? (
             filteredPosts.map((post) => (
-              <div key={post.id} className="bg-white p-4 rounded-lg shadow-md">
-                <p className="text-gray-800">{post.content}</p>
-                <div className="flex gap-2 mt-2">
-                  {post.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded-full"
-                    >
-                      {tag}
-                    </span>
-                  ))}
+              <Link href={`/post/${post.id}`} key={post.id}>
+                <div className="bg-white p-4 rounded-lg shadow-md hover:bg-gray-50 transition-colors">
+                  <h2 className="text-lg font-semibold text-gray-900">{generateTitle(post.content)}</h2>
+                  <p className="text-gray-800 mt-1">{post.content}</p>
+                  <div className="flex gap-2 mt-2">
+                    {post.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded-full"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="mt-2 text-sm text-gray-600">
+                    <span>Likes: {post.likes}</span> • <span>Komentarze: {post.commentsCount}</span> •{' '}
+                    <span>{new Date(post.createdAt).toLocaleDateString()}</span>
+                  </div>
                 </div>
-                <div className="mt-2 text-sm text-gray-600">
-                  <span>Likes: {post.likes}</span> • <span>Komentarze: {post.commentsCount}</span> •{' '}
-                  <span>{new Date(post.createdAt).toLocaleDateString()}</span>
-                </div>
-              </div>
+              </Link>
             ))
           ) : (
             <p className="text-gray-600">Brak wyników dla "{searchQuery}".</p>
