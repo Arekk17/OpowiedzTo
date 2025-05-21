@@ -1,4 +1,7 @@
 // src/app/settings/page.tsx
+
+import Header from '../components/Header';
+
 export default function SettingsPage() {
   return (
     <div className="min-h-screen bg-gray-100 py-6">

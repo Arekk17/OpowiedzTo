@@ -1,13 +1,7 @@
-// src/app/profile/page.tsx
+'use client';
 
-
-const users = [
-  { id: "1", nickname: "AnonimowyLis", createdAt: "2025-05-01T12:00:00Z", followers: 50 },
-  { id: "2", nickname: "CichaSowa", createdAt: "2025-05-03T15:20:00Z", followers: 30 },
-  { id: "3", nickname: "DobreSerce", createdAt: "2025-05-05T08:45:00Z", followers: 75 },
-  { id: "4", nickname: "MyślącyWilk", createdAt: "2025-05-07T19:10:00Z", followers: 20 },
-  { id: "5", nickname: "SkrytyJeż", createdAt: "2025-05-09T10:35:00Z", followers: 45 },
-];
+import { useState } from 'react';
+import Header from '../components/Header';
 
 const posts = [
   {
@@ -57,38 +51,29 @@ const posts = [
   },
 ];
 
-export default function ProfilePage() {
-  const user = users.find((u) => u.id === "1");
-  const userPosts = posts.filter((post) => post.authorId === user.id);
+export default function SearchPage() {
+  const [searchQuery, setSearchQuery] = useState('');
+  const filteredPosts = posts.filter(
+    (post) =>
+      post.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      post.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
 
   return (
-    <div className="min-h-screen bg-gray-100 py-6">
-      <div className="max-w-4xl mx-auto">
-        {/* Sekcja profilu */}
-        <div className="bg-white p-6 rounded-lg shadow-md mb-6">
-          <div className="flex items-center gap-4 mb-4">
-            <div className="w-16 h-16 bg-gray-300 rounded-full"></div> {/* Placeholder dla awatara */}
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">{user.nickname}</h1>
-              <p className="text-sm text-gray-600">
-                Dołączono: {new Date(user.createdAt).toLocaleDateString()}
-              </p>
-            </div>
-          </div>
-          <div className="flex gap-6 text-sm text-gray-600">
-            <span>Follows: 25</span> {/* Placeholder dla liczby osób, które ten użytkownik obserwuje */}
-            <span>Followers: {user.followers}</span>
-          </div>
-          <a href="/settings" className="mt-4 inline-block text-blue-600 hover:underline">
-            Ustawienia
-          </a>
-        </div>
-
-        {/* Sekcja postów */}
+    <div className="min-h-screen bg-gray-100">
+      <Header />
+      <div className="max-w-4xl mx-auto py-6 px-4">
+        <h1 className="text-2xl font-bold text-gray-900 mb-4">Wyszukiwarka</h1>
+        <input
+          type="text"
+          placeholder="Szukaj postów..."
+          className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500 mb-4"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
         <div className="space-y-4">
-          <h2 className="text-xl font-semibold text-gray-900">Posty użytkownika</h2>
-          {userPosts.length > 0 ? (
-            userPosts.map((post) => (
+          {filteredPosts.length > 0 ? (
+            filteredPosts.map((post) => (
               <div key={post.id} className="bg-white p-4 rounded-lg shadow-md">
                 <p className="text-gray-800">{post.content}</p>
                 <div className="flex gap-2 mt-2">
@@ -108,7 +93,7 @@ export default function ProfilePage() {
               </div>
             ))
           ) : (
-            <p className="text-gray-600">Ten użytkownik nie ma jeszcze postów.</p>
+            <p className="text-gray-600">Brak wyników dla "{searchQuery}".</p>
           )}
         </div>
       </div>
