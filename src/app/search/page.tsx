@@ -70,7 +70,7 @@ export default function SearchPage() {
     <div className="min-h-screen bg-gray-100">
       <Header />
       <div className="max-w-4xl mx-auto py-6 px-4">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">Wyszukiwarka</h1>
+        <h1 className="text-2xl font-bold text-gray-900 mb-6">Wyszukiwarka historii</h1>
         <input
           type="text"
           placeholder="Szukaj postów..."

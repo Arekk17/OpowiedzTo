@@ -72,6 +72,10 @@ export default function PostPage({ params }) {
   const [postsState, setPostsState] = useState(postsData);
   const [newComment, setNewComment] = useState('');
   const [showComments, setShowComments] = useState(false);
+  const [showReportPost, setShowReportPost] = useState(false);
+  const [showReportComment, setShowReportComment] = useState(null); // ID komentarza do zgłoszenia
+  const [reportReason, setReportReason] = useState('');
+  const [reportSuccess, setReportSuccess] = useState({ post: false, comment: null });
 
   const post = postsState.find((p) => p.id === params.id);
   const author = users.find((u) => u.id === post.authorId);
@@ -87,9 +91,7 @@ export default function PostPage({ params }) {
 
   const handleLike = () => {
     setPostsState((prevPosts) =>
-      prevPosts.map((p) =>
-        p.id === post.id ? { ...p, likes: p.likes + 1 } : p
-      )
+      prevPosts.map((p) => (p.id === post.id ? { ...p, likes: p.likes + 1 } : p))
     );
   };
 
@@ -112,17 +114,42 @@ export default function PostPage({ params }) {
     setNewComment('');
   };
 
+  const handleReportPost = () => {
+    setShowReportPost(true);
+  };
+
+  const handleReportComment = (commentId) => {
+    setShowReportComment(commentId);
+  };
+
+  const handleSubmitReport = (e) => {
+    e.preventDefault();
+    if (reportReason.trim()) {
+      if (showReportComment) {
+        setReportSuccess((prev) => ({ ...prev, comment: showReportComment }));
+      } else {
+        setReportSuccess((prev) => ({ ...prev, post: true }));
+      }
+      setReportReason('');
+      setTimeout(() => {
+        setShowReportPost(false);
+        setShowReportComment(null);
+        setReportSuccess({ post: false, comment: null });
+      }, 2000);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-100">
       <Header />
       <div className="max-w-4xl mx-auto py-6 px-4">
         <div className="bg-white p-6 rounded-lg shadow-md">
           <div className="flex items-start gap-4 mb-4">
-            <div className="w-12 h-12 bg-gray-300 rounded-full flex-shrink-0"></div> {/* Placeholder dla awatara */}
+            <div className="w-12 h-12 bg-gray-300 rounded-full flex-shrink-0"></div>
             <div>
-              <Link href={`/profile?userId=${author.id}`} className="text-lg font-semibold text-blue-600 hover:underline">
+              <a href={`/profile?userId=${author.id}`} className="text-lg font-semibold text-blue-600 hover:underline">
                 {author.nickname}
-              </Link>
+              </a>
               <p className="text-sm text-gray-500">
                 {new Date(post.createdAt).toLocaleDateString()}
               </p>
@@ -178,7 +205,48 @@ export default function PostPage({ params }) {
               </svg>
               <span>Komentarze: {post.comments.length}</span>
             </button>
+            <button
+              onClick={handleReportPost}
+              className="text-gray-600 hover:text-red-600 transition-colors"
+            >
+              Zgłoś post
+            </button>
           </div>
+
+          {/* Formularz zgłoszenia posta */}
+          {showReportPost && (
+            <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white p-6 rounded-lg shadow-md w-full max-w-md">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Zgłoś post</h3>
+                <form onSubmit={handleSubmitReport}>
+                  <textarea
+                    className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500 mb-4"
+                    placeholder="Podaj powód zgłoszenia..."
+                    value={reportReason}
+                    onChange={(e) => setReportReason(e.target.value)}
+                  />
+                  <div className="flex justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowReportPost(false)}
+                      className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                    >
+                      Anuluj
+                    </button>
+                    <button
+                      type="submit"
+                      className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors"
+                    >
+                      Wyślij zgłoszenie
+                    </button>
+                  </div>
+                </form>
+                {reportSuccess.post && (
+                  <p className="text-green-600 mt-4">Zgłoszenie zostało wysłane!</p>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Sekcja komentarzy */}
           {showComments && (
@@ -193,18 +261,53 @@ export default function PostPage({ params }) {
                         <div className="flex items-center gap-2">
                           <div className="w-8 h-8 bg-gray-300 rounded-full flex-shrink-0"></div>
                           <div>
-                            <Link
-                              href={`/profile?userId=${commentAuthor.id}`}
-                              className="text-sm font-semibold text-blue-600 hover:underline"
-                            >
+                            <a href={`/profile?userId=${commentAuthor.id}`} className="text-sm font-semibold text-blue-600 hover:underline">
                               {commentAuthor.nickname}
-                            </Link>
+                            </a>
                             <p className="text-xs text-gray-500">
                               {new Date(comment.createdAt).toLocaleDateString()}
                             </p>
                           </div>
                         </div>
                         <p className="text-gray-700 text-sm mt-1">{comment.content}</p>
+                        <button
+                          onClick={() => handleReportComment(comment.id)}
+                          className="text-xs text-gray-600 hover:text-red-600 mt-1"
+                        >
+                          Zgłoś komentarz
+                        </button>
+
+                        {/* Formularz zgłoszenia komentarza */}
+                        {showReportComment === comment.id && (
+                          <div className="mt-2">
+                            <form onSubmit={handleSubmitReport}>
+                              <textarea
+                                className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500 mb-2"
+                                placeholder="Podaj powód zgłoszenia..."
+                                value={reportReason}
+                                onChange={(e) => setReportReason(e.target.value)}
+                              />
+                              <div className="flex justify-end gap-2">
+                                <button
+                                  type="button"
+                                  onClick={() => setShowReportComment(null)}
+                                  className="px-2 py-1 text-gray-600 hover:text-gray-800"
+                                >
+                                  Anuluj
+                                </button>
+                                <button
+                                  type="submit"
+                                  className="bg-red-600 text-white px-2 py-1 rounded-md hover:bg-red-700 transition-colors"
+                                >
+                                  Wyślij zgłoszenie
+                                </button>
+                              </div>
+                            </form>
+                            {reportSuccess.comment === comment.id && (
+                              <p className="text-green-600 mt-2">Zgłoszenie zostało wysłane!</p>
+                            )}
+                          </div>
+                        )}
                       </div>
                     );
                   })}
