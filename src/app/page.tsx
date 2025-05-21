@@ -1,101 +1,108 @@
-import Image from "next/image";
+// src/app/page.tsx
+'use client'; // Oznaczenie jako Client Component, bo używamy Link
 
-export default function Home() {
+import Header from './components/Header';
+import Link from 'next/link'; // Poprawny import Link z next/link
+
+const users = [
+  { id: "1", nickname: "AnonimowyLis", createdAt: "2025-05-01T12:00:00Z", followers: 50 },
+  { id: "2", nickname: "CichaSowa", createdAt: "2025-05-03T15:20:00Z", followers: 30 },
+  { id: "3", nickname: "DobreSerce", createdAt: "2025-05-05T08:45:00Z", followers: 75 },
+  { id: "4", nickname: "MyślącyWilk", createdAt: "2025-05-07T19:10:00Z", followers: 20 },
+  { id: "5", nickname: "SkrytyJeż", createdAt: "2025-05-09T10:35:00Z", followers: 45 },
+];
+
+const posts = [
+  {
+    id: "101",
+    authorId: "1",
+    content: "Nigdy nie zapomnę, jak przypadkiem poznałem swojego najlepszego przyjaciela, gdy zgubiłem się w obcym mieście.",
+    createdAt: "2025-05-20T14:12:00Z",
+    tags: ["friendship", "life", "unexpected"],
+    likes: 125,
+    commentsCount: 8,
+  },
+  {
+    id: "102",
+    authorId: "2",
+    content: "Po latach milczenia napisała do mnie osoba, której bardzo brakowało mi w życiu.",
+    createdAt: "2025-05-19T09:47:00Z",
+    tags: ["life", "nostalgia", "relationships"],
+    likes: 87,
+    commentsCount: 5,
+  },
+  {
+    id: "103",
+    authorId: "3",
+    content: "Zgubiłem portfel, ale ktoś go zwrócił z karteczką: 'Dobro wraca'.",
+    createdAt: "2025-05-18T18:30:00Z",
+    tags: ["kindness", "everyday", "hope"],
+    likes: 200,
+    commentsCount: 14,
+  },
+  {
+    id: "104",
+    authorId: "4",
+    content: "Zrozumiałem, że nie muszę być idealny, żeby być wystarczający.",
+    createdAt: "2025-05-17T21:05:00Z",
+    tags: ["mental_health", "reflection", "selflove"],
+    likes: 173,
+    commentsCount: 12,
+  },
+  {
+    id: "105",
+    authorId: "5",
+    content: "Pierwszy raz od lat poczułem, że naprawdę komuś na mnie zależy.",
+    createdAt: "2025-05-16T16:50:00Z",
+    tags: ["emotions", "support", "healing"],
+    likes: 149,
+    commentsCount: 9,
+  },
+];
+
+export default function HomePage() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    <div className="min-h-screen bg-gray-100">
+      <Header />
+      <div className="max-w-4xl mx-auto py-6 px-4">
+        <div className="text-center mb-10">
+          <h1 className="text-4xl font-bold text-gray-900">OpowiedzTo</h1>
+          <p className="text-lg text-gray-600 mt-2">
+            Najlepsze miejsce na podzielenie się swoimi przeżyciami i odkrycie historii innych!
+          </p>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+        <div className="space-y-12">
+          {posts.map((post) => {
+            const author = users.find((u) => u.id === post.authorId);
+            return (
+              <div key={post.id} className="bg-white p-6 rounded-lg shadow-md">
+                <div className="flex items-start gap-4 mb-4">
+                  <div className="w-12 h-12 bg-gray-300 rounded-full flex-shrink-0"></div> {/* Placeholder dla awatara */}
+                  <div>
+                    <Link href={`/profile?userId=${author.id}`} className="text-lg font-semibold text-blue-600 hover:underline">
+                      {author.nickname}
+                    </Link>
+                    <p className="text-sm text-gray-500">
+                      {new Date(post.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+                <p className="text-gray-800 mb-4">{post.content}</p>
+                <div className="flex gap-2 mb-2">
+                  {post.tags.map((tag) => (
+                    <span key={tag} className="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded-full">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+                <div className="text-sm text-gray-600">
+                  <span>Likes: {post.likes}</span> • <span>Komentarze: {post.commentsCount}</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }
