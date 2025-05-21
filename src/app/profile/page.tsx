@@ -112,9 +112,9 @@ export default function ProfilePage() {
                   <div className="flex items-start gap-4 mb-4">
                     <div className="w-12 h-12 bg-gray-300 rounded-full flex-shrink-0"></div>
                     <div>
-                      <Link href={`/profile?userId=${user.id}`} className="text-lg font-semibold text-blue-600 hover:underline">
+                      <a href={`/profile?userId=${user.id}`} className="text-lg font-semibold text-blue-600 hover:underline">
                         {user.nickname}
-                      </Link>
+                      </a>
                       <p className="text-sm text-gray-500">
                         {new Date(post.createdAt).toLocaleDateString()}
                       </p>

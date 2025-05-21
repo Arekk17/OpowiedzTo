@@ -88,13 +88,13 @@ export default function HomePage() {
             const author = users.find((u) => u.id === post.authorId);
             return (
               <Link href={`/post/${post.id}`} key={post.id}>
-                <div className="bg-white p-6 rounded-lg shadow-md hover:bg-gray-50 transition-colors my-4"> {/* Dodano my-4 dla dodatkowego marginesu */}
+                <div className="bg-white p-6 rounded-lg shadow-md hover:bg-gray-50 transition-colors my-4">
                   <div className="flex items-start gap-4 mb-4">
-                    <div className="w-12 h-12 bg-gray-300 rounded-full flex-shrink-0"></div> {/* Placeholder dla awatara */}
+                    <div className="w-12 h-12 bg-gray-300 rounded-full flex-shrink-0"></div>
                     <div>
-                      <Link href={`/profile?userId=${author.id}`} className="text-lg font-semibold text-blue-600 hover:underline">
+                      <a href={`/profile?userId=${author.id}`} className="text-lg font-semibold text-blue-600 hover:underline">
                         {author.nickname}
-                      </Link>
+                      </a>
                       <p className="text-sm text-gray-500">
                         {new Date(post.createdAt).toLocaleDateString()}
                       </p>
