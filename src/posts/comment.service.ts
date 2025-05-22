@@ -2,11 +2,13 @@ import {
   Injectable,
   NotFoundException,
   ForbiddenException,
+  BadRequestException,
 } from '@nestjs/common';
 import { CommentRepository } from './repositories/comment.repository';
 import { PostRepository } from './repositories/post.repository';
 import { Comment } from './entities/comment.entity';
 import { CreateCommentDto } from './dto/create-comment.dto';
+import { BANNED_WORDS } from '../common/constants/banned-words';
 
 @Injectable()
 export class CommentService {
@@ -23,6 +25,14 @@ export class CommentService {
     const post = await this.postRepository.findOne({ where: { id: postId } });
     if (!post) {
       throw new NotFoundException('Post nie istnieje');
+    }
+
+    const contentLower = createCommentDto.content.toLowerCase();
+    const containsBanned = BANNED_WORDS.some((word) =>
+      contentLower.includes(word),
+    );
+    if (containsBanned) {
+      throw new BadRequestException('Komentarz zawiera niedozwolone słowa');
     }
 
     const comment = this.commentRepository.create({
