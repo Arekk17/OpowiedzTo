@@ -21,6 +21,84 @@
   <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
   [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
+# OpowiedzTo API
+
+API do zarządzania postami użytkowników zbudowane w NestJS z TypeORM i PostgreSQL.
+
+## Technologie
+
+- NestJS (framework)
+- TypeScript
+- TypeORM (ORM)
+- PostgreSQL (baza danych)
+- Swagger (dokumentacja API)
+- Docker & Docker Compose
+
+## Struktura projektu
+
+```
+src/
+├── config/              # Konfiguracja aplikacji
+├── posts/               # Moduł postów
+│   ├── dto/             # Obiekty transferu danych
+│   ├── entities/        # Encje bazy danych
+│   ├── posts.controller.ts
+│   ├── posts.module.ts
+│   └── posts.service.ts
+├── seed/                # Moduł inicjalizacji danych
+├── app.module.ts        # Główny moduł aplikacji
+└── main.ts              # Punkt wejściowy aplikacji
+```
+
+## Funkcjonalności
+
+- Tworzenie, edycja, usuwanie i pobieranie postów
+- Filtrowanie postów po tagach i autorze
+- Pobieranie wszystkich postów konkretnego autora
+- Zabezpieczenie edycji/usuwania postów (tylko przez autora)
+- Inicjalizacja bazy danych przykładowymi danymi
+
+## Endpointy API
+
+- `GET /posts` - Pobierz wszystkie posty z opcjonalną filtracją
+  - Query params: `tag`, `authorId`
+- `GET /posts/:id` - Pobierz post po ID
+- `GET /posts/author/:authorId` - Pobierz wszystkie posty danego autora
+- `POST /posts` - Dodaj nowy post
+- `PATCH /posts/:id` - Edytuj post (tylko autor)
+- `DELETE /posts/:id` - Usuń post (tylko autor)
+
+## Uruchomienie aplikacji
+
+### Za pomocą Docker Compose
+
+```bash
+# Uruchom kontenery
+docker-compose up -d
+```
+
+### Lokalnie
+
+```bash
+# Instalacja zależności
+npm install
+
+# Uruchomienie w trybie deweloperskim
+npm run start:dev
+
+# Uruchomienie w trybie produkcyjnym
+npm run build
+npm run start:prod
+```
+
+## Dokumentacja API
+
+Dokumentacja API w formacie Swagger dostępna jest pod adresem:
+
+```
+http://localhost:3000/api
+```
+
 ## Description
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
