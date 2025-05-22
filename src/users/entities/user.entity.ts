@@ -5,9 +5,11 @@ import {
   CreateDateColumn,
   BeforeInsert,
   UpdateDateColumn,
+  OneToMany,
 } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
 import { ApiProperty } from '@nestjs/swagger';
+import { Follow } from './follow.entity';
 
 export enum Gender {
   MALE = 'male',
@@ -47,6 +49,12 @@ export class User {
   @ApiProperty({ example: '2024-01-01T12:00:00Z' })
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @OneToMany(() => Follow, (follow) => follow.follower)
+  following: Follow[];
+
+  @OneToMany(() => Follow, (follow) => follow.following)
+  followers: Follow[];
 
   @BeforeInsert()
   async hashPassword() {

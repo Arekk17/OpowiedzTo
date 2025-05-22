@@ -3,36 +3,28 @@ import {
   NotFoundException,
   ForbiddenException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { Post } from './entities/post.entity';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { User } from '../users/entities/user.entity';
+import { PostRepository } from './repositories/post.repository';
 
 @Injectable()
 export class PostsService {
-  constructor(
-    @InjectRepository(Post)
-    private postsRepository: Repository<Post>,
-  ) {}
+  constructor(private readonly postRepository: PostRepository) {}
 
   async findAll(tag?: string, authorId?: string): Promise<Post[]> {
-    const query = this.postsRepository.createQueryBuilder('post');
-
     if (tag) {
-      query.where('post.tags LIKE :tag', { tag: `%${tag}%` });
+      return this.postRepository.findByTagWithAuthor(tag);
     }
-
     if (authorId) {
-      query.andWhere('post.authorId = :authorId', { authorId });
+      return this.postRepository.findByAuthor(authorId);
     }
-
-    return query.getMany();
+    return this.postRepository.findAllWithAuthors();
   }
 
   async findOne(id: string): Promise<Post> {
-    const post = await this.postsRepository.findOne({ where: { id } });
+    const post = await this.postRepository.findWithAuthor(id);
     if (!post) {
       throw new NotFoundException(`Post o ID ${id} nie został znaleziony`);
     }
@@ -40,15 +32,15 @@ export class PostsService {
   }
 
   async findByAuthor(authorId: string): Promise<Post[]> {
-    return this.postsRepository.find({ where: { authorId } });
+    return this.postRepository.findByAuthor(authorId);
   }
 
   async create(createPostDto: CreatePostDto, user: User): Promise<Post> {
-    const post = this.postsRepository.create({
+    const post = this.postRepository.create({
       ...createPostDto,
       authorId: user.id,
     });
-    return this.postsRepository.save(post);
+    return this.postRepository.save(post);
   }
 
   async update(id: string, updatePostDto: UpdatePostDto): Promise<Post> {
@@ -72,7 +64,7 @@ export class PostsService {
       post.tags = updatePostDto.tags;
     }
 
-    return this.postsRepository.save(post);
+    return this.postRepository.save(post);
   }
 
   async remove(id: string, authorId: string): Promise<void> {
@@ -85,6 +77,6 @@ export class PostsService {
       );
     }
 
-    await this.postsRepository.remove(post);
+    await this.postRepository.remove(post);
   }
 }
