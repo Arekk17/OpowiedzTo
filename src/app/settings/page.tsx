@@ -1,8 +1,11 @@
 // src/app/settings/page.tsx
+import Header from '../components/Header';
+
 export default function SettingsPage() {
   return (
-    <div className="min-h-screen bg-gray-100 py-6">
-      <div className="max-w-2xl mx-auto">
+    <div className="min-h-screen bg-gray-100">
+      <Header />
+      <div className="max-w-2xl mx-auto py-6">
         <div className="bg-white p-6 rounded-lg shadow-md">
           <h1 className="text-2xl font-bold mb-6 text-gray-900">Ustawienia</h1>
           <form className="space-y-4">
@@ -14,7 +17,7 @@ export default function SettingsPage() {
                 type="text"
                 id="nickname"
                 placeholder="Nowa nazwa"
-                className="p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+                className="p-2 bg-white border border-gray-400 rounded-md text-gray-900 placeholder-gray-500 focus:outline-none focus:border-blue-500"
               />
               <button
                 type="submit"
@@ -31,7 +34,7 @@ export default function SettingsPage() {
                 type="password"
                 id="password"
                 placeholder="Nowe hasło"
-                className="p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+                className="p-2 bg-white border border-gray-400 rounded-md text-gray-900 placeholder-gray-500 focus:outline-none focus:border-blue-500"
               />
               <button
                 type="submit"
