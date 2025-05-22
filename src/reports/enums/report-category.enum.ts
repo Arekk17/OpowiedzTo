@@ -1,0 +1,7 @@
+export enum ReportCategory {
+  SPAM = 'SPAM',
+  OFFENSIVE = 'OFFENSIVE',
+  FALSE_INFO = 'FALSE_INFO',
+  INAPPROPRIATE = 'INAPPROPRIATE',
+  OTHER = 'OTHER',
+}
