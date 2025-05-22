@@ -24,6 +24,7 @@ export class SeedService implements OnApplicationBootstrap {
       {
         id: '101',
         authorId: '1',
+        title: 'Przypadkowe spotkanie',
         content:
           'Nigdy nie zapomnę, jak przypadkiem poznałem swojego najlepszego przyjaciela, gdy zgubiłem się w obcym mieście.',
         createdAt: new Date('2025-05-20T14:12:00Z'),
@@ -34,6 +35,7 @@ export class SeedService implements OnApplicationBootstrap {
       {
         id: '102',
         authorId: '2',
+        title: 'Powrót z przeszłości',
         content:
           'Po latach milczenia napisała do mnie osoba, której bardzo brakowało mi w życiu.',
         createdAt: new Date('2025-05-19T09:47:00Z'),
@@ -44,6 +46,7 @@ export class SeedService implements OnApplicationBootstrap {
       {
         id: '103',
         authorId: '3',
+        title: 'Dobro wraca',
         content:
           "Zgubiłem portfel, ale ktoś go zwrócił z karteczką: 'Dobro wraca'.",
         createdAt: new Date('2025-05-18T18:30:00Z'),
@@ -54,6 +57,7 @@ export class SeedService implements OnApplicationBootstrap {
       {
         id: '104',
         authorId: '4',
+        title: 'Wystarczająco dobry',
         content:
           'Zrozumiałem, że nie muszę być idealny, żeby być wystarczający.',
         createdAt: new Date('2025-05-17T21:05:00Z'),
@@ -64,6 +68,7 @@ export class SeedService implements OnApplicationBootstrap {
       {
         id: '105',
         authorId: '5',
+        title: 'Ktoś, komu zależy',
         content:
           'Pierwszy raz od lat poczułem, że naprawdę komuś na mnie zależy.',
         createdAt: new Date('2025-05-16T16:50:00Z'),

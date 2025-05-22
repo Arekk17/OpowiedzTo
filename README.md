@@ -68,28 +68,62 @@ src/
 - `PATCH /posts/:id` - Edytuj post (tylko autor)
 - `DELETE /posts/:id` - Usuń post (tylko autor)
 
-## Uruchomienie aplikacji
+## Konfiguracja Docker
 
-### Za pomocą Docker Compose
+Projekt zawiera konfigurację Docker dla środowisk deweloperskiego i produkcyjnego.
 
-```bash
-# Uruchom kontenery
-docker-compose up -d
-```
-
-### Lokalnie
+### Uruchomienie środowiska deweloperskiego
 
 ```bash
-# Instalacja zależności
-npm install
-
-# Uruchomienie w trybie deweloperskim
-npm run start:dev
-
-# Uruchomienie w trybie produkcyjnym
-npm run build
-npm run start:prod
+docker compose -f docker-compose.dev.yml up --build
 ```
+
+### Uruchomienie środowiska produkcyjnego
+
+```bash
+docker compose -f docker-compose.prod.yml up --build
+```
+
+### Dane dostępowe do bazy danych
+
+- Host: `localhost` (lub `db` z poziomu kontenera)
+- Port: `5432`
+- Użytkownik: `postgres`
+- Hasło: `postgres`
+- Baza danych: `opowiedzto`
+
+### Ważne informacje
+
+#### Środowisko deweloperskie
+
+- Aplikacja działa z hot-reloadem
+- Kod źródłowy jest montowany do kontenera
+- Baza danych jest dostępna na porcie 5432
+- Dane są przechowywane w volume `postgres_data_dev`
+
+#### Środowisko produkcyjne
+
+- Aplikacja jest zbudowana i uruchomiona w trybie produkcyjnym
+- Używa Alpine Linux dla mniejszego rozmiaru obrazu
+- Baza danych jest dostępna na porcie 5432
+- Dane są przechowywane w volume `postgres_data_prod`
+
+#### Bezpieczeństwo
+
+- W produkcji należy zmienić hasła i klucze JWT
+- Dane dostępowe do bazy danych powinny być zmienione w plikach `.env`
+- W produkcji zaleca się użycie silnego hasła do bazy danych
+
+#### Połączenie z bazą danych
+
+- Z poziomu hosta: `localhost:5432`
+- Z poziomu kontenera: `db:5432`
+- Można użyć dowolnego klienta PostgreSQL (np. pgAdmin, DBeaver)
+
+#### Migracje
+
+- W środowisku deweloperskim synchronizacja schematu jest włączona
+- W produkcji należy używać migracji (synchronizacja jest wyłączona)
 
 ## Dokumentacja API
 

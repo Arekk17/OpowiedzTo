@@ -15,7 +15,12 @@ async function bootstrap() {
   );
 
   // Konfiguracja CORS
-  app.enableCors();
+  app.enableCors({
+    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+    credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  });
 
   // Konfiguracja Swagger
   const config = new DocumentBuilder()
@@ -23,6 +28,8 @@ async function bootstrap() {
     .setDescription('API do zarządzania postami użytkowników')
     .setVersion('1.0')
     .addTag('posts')
+    .addTag('auth')
+    .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);

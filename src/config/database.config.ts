@@ -1,4 +1,5 @@
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
+import { User } from '../users/entities/user.entity';
 import { Post } from '../posts/entities/post.entity';
 
 export const databaseConfig: TypeOrmModuleOptions = {
@@ -8,6 +9,9 @@ export const databaseConfig: TypeOrmModuleOptions = {
   username: process.env.DB_USERNAME || 'postgres',
   password: process.env.DB_PASSWORD || 'postgres',
   database: process.env.DB_DATABASE || 'opowiedzto',
-  entities: [Post],
-  synchronize: process.env.NODE_ENV !== 'production',
+  entities: [User, Post],
+  synchronize: false,
+  logging: process.env.NODE_ENV !== 'production',
+  migrations: ['dist/migrations/**/*.js'],
+  migrationsRun: true,
 };

@@ -8,6 +8,7 @@ import { Repository } from 'typeorm';
 import { Post } from './entities/post.entity';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
+import { User } from '../users/entities/user.entity';
 
 @Injectable()
 export class PostsService {
@@ -42,8 +43,11 @@ export class PostsService {
     return this.postsRepository.find({ where: { authorId } });
   }
 
-  async create(createPostDto: CreatePostDto): Promise<Post> {
-    const post = this.postsRepository.create(createPostDto);
+  async create(createPostDto: CreatePostDto, user: User): Promise<Post> {
+    const post = this.postsRepository.create({
+      ...createPostDto,
+      authorId: user.id,
+    });
     return this.postsRepository.save(post);
   }
 
@@ -56,6 +60,10 @@ export class PostsService {
     }
 
     // Aktualizacja tylko podanych pól
+    if (updatePostDto.title) {
+      post.title = updatePostDto.title;
+    }
+
     if (updatePostDto.content) {
       post.content = updatePostDto.content;
     }
