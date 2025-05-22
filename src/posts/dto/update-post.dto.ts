@@ -11,6 +11,15 @@ export class UpdatePostDto {
   authorId: string;
 
   @ApiProperty({
+    description: 'Tytuł posta',
+    example: 'Zaktualizowany tytuł posta',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  title?: string;
+
+  @ApiProperty({
     description: 'Treść posta',
     example: 'Zaktualizowana treść posta',
     required: false,

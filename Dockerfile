@@ -1,14 +1,35 @@
+# Build stage
+FROM node:20-alpine AS builder
 
-FROM node:20-alpine
+WORKDIR /app
 
-WORKDIR /usr/src/app
-
+# Kopiowanie plików konfiguracyjnych
 COPY package*.json ./
+COPY tsconfig*.json ./
 
-RUN npm install
+# Instalacja zależności
+RUN npm ci
 
+# Kopiowanie kodu źródłowego
 COPY . .
 
-EXPOSE 3000
+# Budowanie aplikacji
+RUN npm run build
 
-CMD ["npm", "run", "start:dev"]
+# Production stage
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Kopiowanie plików konfiguracyjnych i zależności
+COPY package*.json ./
+RUN npm ci --only=production
+
+# Kopiowanie zbudowanej aplikacji
+COPY --from=builder /app/dist ./dist
+
+# Ustawienie zmiennych środowiskowych
+ENV NODE_ENV=production
+
+# Uruchomienie aplikacji
+CMD ["node", "dist/main.js"]

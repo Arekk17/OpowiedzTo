@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { databaseConfig } from './config/database.config';
+import { UsersModule } from './users/users.module';
+import { AuthModule } from './auth/auth.module';
 import { PostsModule } from './posts/posts.module';
-import { SeedModule } from './seed/seed.module';
+import { databaseConfig } from './config/database.config';
 
 @Module({
   imports: [
@@ -11,8 +12,9 @@ import { SeedModule } from './seed/seed.module';
       isGlobal: true,
     }),
     TypeOrmModule.forRoot(databaseConfig),
+    UsersModule,
+    AuthModule,
     PostsModule,
-    SeedModule,
   ],
 })
 export class AppModule {}

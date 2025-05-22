@@ -3,12 +3,12 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class CreatePostDto {
   @ApiProperty({
-    description: 'ID autora posta',
-    example: '1',
+    description: 'Tytuł posta',
+    example: 'Mój pierwszy post',
   })
   @IsNotEmpty()
   @IsString()
-  authorId: string;
+  title: string;
 
   @ApiProperty({
     description: 'Treść posta',
