@@ -10,6 +10,9 @@ import {
 import * as bcrypt from 'bcryptjs';
 import { ApiProperty } from '@nestjs/swagger';
 import { Follow } from './follow.entity';
+import { Post } from '../../posts/entities/post.entity';
+import { Comment } from '../../posts/entities/comment.entity';
+import { PostLike } from '../../posts/entities/post-like.entity';
 
 export enum Gender {
   MALE = 'male',
@@ -55,6 +58,15 @@ export class User {
 
   @OneToMany(() => Follow, (follow) => follow.following)
   followers: Follow[];
+
+  @OneToMany(() => Post, (post) => post.author)
+  posts: Post[];
+
+  @OneToMany(() => Comment, (comment) => comment.author)
+  comments: Comment[];
+
+  @OneToMany(() => PostLike, (like) => like.user)
+  likes: PostLike[];
 
   @BeforeInsert()
   async hashPassword() {

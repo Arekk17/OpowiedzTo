@@ -5,6 +5,7 @@ import {
   CreateDateColumn,
   ManyToOne,
   JoinColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { Post } from './post.entity';
@@ -31,6 +32,10 @@ export class Comment {
   @ApiProperty({ example: '2024-01-01T12:00:00Z' })
   @CreateDateColumn()
   createdAt: Date;
+
+  @ApiProperty({ example: '2024-01-01T12:00:00Z' })
+  @UpdateDateColumn()
+  updatedAt: Date;
 
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'authorId' })

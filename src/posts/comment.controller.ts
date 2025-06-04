@@ -5,8 +5,8 @@ import {
   Get,
   Body,
   Param,
-  UseGuards,
   Request,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { CommentService } from './comment.service';
@@ -22,11 +22,11 @@ interface RequestWithUser extends Request {
 
 @ApiTags('comments')
 @Controller()
-@UseGuards(JwtAuthGuard)
 export class CommentController {
   constructor(private readonly commentService: CommentService) {}
 
   @Post('posts/:id/comments')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Dodaj komentarz do posta' })
   @ApiResponse({
     status: 201,
@@ -59,6 +59,7 @@ export class CommentController {
   }
 
   @Delete('comments/:id')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Usuń komentarz' })
   @ApiResponse({ status: 200, description: 'Komentarz został usunięty' })
   @ApiResponse({ status: 403, description: 'Brak uprawnień' })

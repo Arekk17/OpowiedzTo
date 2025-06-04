@@ -1,6 +1,9 @@
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { User } from '../users/entities/user.entity';
 import { Post } from '../posts/entities/post.entity';
+import { Follow } from '../users/entities/follow.entity';
+import { Comment } from '../posts/entities/comment.entity';
+import { PostLike } from '../posts/entities/post-like.entity';
 import { config } from 'dotenv';
 
 // Wczytanie zmiennych środowiskowych z pliku .env
@@ -14,7 +17,7 @@ export const dataSourceOptions: DataSourceOptions = {
   username: process.env.DB_USERNAME || 'postgres',
   password: process.env.DB_PASSWORD || 'postgres',
   database: process.env.DB_DATABASE || 'opowiedzto',
-  entities: [User, Post],
+  entities: [User, Post, Follow, Comment, PostLike],
   migrations: ['src/migrations/**/*.ts'],
   migrationsTableName: 'migrations',
 };
