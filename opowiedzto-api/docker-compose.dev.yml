@@ -9,6 +9,7 @@ services:
     volumes:
       - .:/app
       - /app/node_modules
+      - ./uploads/avatars:/app/uploads/avatars
     ports:
       - '3001:3001'
     env_file:

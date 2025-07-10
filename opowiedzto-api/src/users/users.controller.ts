@@ -6,11 +6,18 @@ import {
   Param,
   UseGuards,
   Request,
+  Post,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { User } from './entities/user.entity';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
+import { GetUser } from 'src/auth/decorators/get-user.decorator';
 
 interface RequestWithUser extends Request {
   user: {
@@ -54,5 +61,54 @@ export class UsersController {
       throw new Error('Nie masz uprawnień do edycji tego użytkownika');
     }
     return this.usersService.update(id, updateData);
+  }
+  @Post('file')
+  @UseGuards(JwtAuthGuard)
+  @ApiResponse({
+    status: 200,
+    description: 'Avatar został dodany',
+    type: File,
+  })
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: './uploads',
+        filename: (
+          req,
+          file,
+          cb: (error: Error | null, filename: string) => void,
+        ) => {
+          const uniqueSufix = Date.now() + '-' + Math.round(Math.random());
+          const ext = extname(file.originalname);
+          cb(null, `file-${uniqueSufix}${ext}`);
+        },
+      }),
+      fileFilter: (
+        req,
+        file,
+        cb: (error: Error | null, acceptFile: boolean) => void,
+      ) => {
+        if (!file.mimetype.match(/^image\/(jpeg|png|jpg|webp)$/)) {
+          return cb(new Error('Only image files are allowed!'), false);
+        }
+        cb(null, false);
+      },
+      limits: {
+        fileSize: 2 * 1024 * 1024,
+      },
+    }),
+  )
+  async uploadFile(
+    @UploadedFile() file: Express.Multer.File,
+    @GetUser() user: User,
+  ) {
+    const avatarPath = `/uploads/${file.filename}`;
+    await this.usersService.update(user.id, { avatar: avatarPath });
+
+    return {
+      message: 'file upload',
+      filename: file.filename,
+      path: `/uploads/${file.filename}`,
+    };
   }
 }
