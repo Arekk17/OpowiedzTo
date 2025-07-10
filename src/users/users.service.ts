@@ -92,4 +92,15 @@ export class UsersService {
     Object.assign(user, updateData);
     return this.userRepository.save(user);
   }
+  async uploadAvatar(userId: string, avatarPath: string): Promise<void> {
+    const user = await this.findOne(userId);
+    user.avatar = avatarPath;
+    await this.userRepository.save(user);
+  }
+
+  async updateAvatar(id: string, avatarPath: string): Promise<User> {
+    const user = await this.findOne(id);
+    user.avatar = avatarPath;
+    return this.userRepository.save(user);
+  }
 }

@@ -53,6 +53,10 @@ export class User {
   @UpdateDateColumn()
   updatedAt: Date;
 
+  @ApiProperty({ example: 'avatars/user123_1234567890.jpg' })
+  @Column({ nullable: true })
+  avatar: string;
+
   @OneToMany(() => Follow, (follow) => follow.follower)
   following: Follow[];
 
