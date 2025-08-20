@@ -5,6 +5,7 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { Response } from 'express';
 import { User } from '../users/entities/user.entity';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -19,7 +20,10 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async register(registerDto: RegisterDto): Promise<AuthResponseDto> {
+  async register(
+    registerDto: RegisterDto,
+    res: Response,
+  ): Promise<AuthResponseDto> {
     const { email, password, nickname, gender } = registerDto;
 
     const existingUser = await this.usersService.findByEmail(email);
@@ -34,10 +38,14 @@ export class AuthService {
       gender,
     );
 
-    return this.generateToken(user);
+    const token = this.generateToken(user);
+
+    this.setAuthCookie(res, token.accessToken);
+
+    return token;
   }
 
-  async login(loginDto: LoginDto): Promise<AuthResponseDto> {
+  async login(loginDto: LoginDto, res: Response): Promise<AuthResponseDto> {
     const { email, password } = loginDto;
 
     const user = await this.usersService.findByEmail(email);
@@ -50,7 +58,17 @@ export class AuthService {
       throw new UnauthorizedException('Nieprawidłowy email lub hasło');
     }
 
-    return this.generateToken(user);
+    const token = this.generateToken(user);
+
+    this.setAuthCookie(res, token.accessToken);
+
+    return token;
+  }
+
+  logout(res: Response): { message: string } {
+    this.clearAuthCookie(res);
+
+    return { message: 'Wylogowano pomyślnie' };
   }
 
   async generateNickname(): Promise<string> {
@@ -78,5 +96,28 @@ export class AuthService {
       userId: user.id,
       nickname: user.nickname,
     };
+  }
+
+  private setAuthCookie(res: Response, token: string): void {
+    const isProduction = process.env.NODE_ENV === 'production';
+
+    res.cookie('accessToken', token, {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? 'strict' : 'lax',
+      maxAge: 24 * 60 * 60 * 1000,
+      path: '/',
+    });
+  }
+
+  private clearAuthCookie(res: Response): void {
+    const isProduction = process.env.NODE_ENV === 'production';
+
+    res.clearCookie('accessToken', {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? 'strict' : 'lax',
+      path: '/',
+    });
   }
 }

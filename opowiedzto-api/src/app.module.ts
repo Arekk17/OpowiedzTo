@@ -6,6 +6,7 @@ import { AuthModule } from './auth/auth.module';
 import { PostsModule } from './posts/posts.module';
 import { ReportsModule } from './reports/reports.module';
 import dataSource from './config/typeorm.config';
+import { SeedModule } from './seed/seed.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import dataSource from './config/typeorm.config';
     AuthModule,
     PostsModule,
     ReportsModule,
+    SeedModule,
   ],
 })
 export class AppModule {}

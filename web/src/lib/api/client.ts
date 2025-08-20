@@ -1,6 +1,5 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 import { API_CONFIG } from "../config/api";
-import { getAccessToken } from "./auth-header";
 
 export const createAxiosInstance = (opts?: {
   cookie?: string;
@@ -17,8 +16,6 @@ export const createAxiosInstance = (opts?: {
 
   instance.interceptors.request.use(
     (config) => {
-      const token = getAccessToken();
-      if (token) config.headers.Authorization = `Bearer ${token}`;
       return config;
     },
     (error) => Promise.reject(error)

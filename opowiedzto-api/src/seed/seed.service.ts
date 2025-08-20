@@ -2,27 +2,88 @@ import { Injectable, OnApplicationBootstrap } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Post } from '../posts/entities/post.entity';
+import { User } from '../users/entities/user.entity';
 
 @Injectable()
 export class SeedService implements OnApplicationBootstrap {
   constructor(
     @InjectRepository(Post)
     private postsRepository: Repository<Post>,
+    @InjectRepository(User)
+    private usersRepository: Repository<User>,
   ) {}
 
   async onApplicationBootstrap() {
     const postsCount = await this.postsRepository.count();
+    const usersCount = await this.usersRepository.count();
+
+    if (usersCount === 0) {
+      await this.seedUsers();
+    }
 
     if (postsCount === 0) {
       await this.seedPosts();
     }
   }
 
+  private async seedUsers() {
+    const usersData = [
+      {
+        email: 'user1@example.com',
+        password: 'password123',
+        nickname: 'AnonimowyAutor1',
+      },
+      {
+        email: 'user2@example.com',
+        password: 'password123',
+        nickname: 'AnonimowyAutor2',
+      },
+      {
+        email: 'user3@example.com',
+        password: 'password123',
+        nickname: 'AnonimowyAutor3',
+      },
+      {
+        email: 'user4@example.com',
+        password: 'password123',
+        nickname: 'AnonimowyAutor4',
+      },
+      {
+        email: 'user5@example.com',
+        password: 'password123',
+        nickname: 'AnonimowyAutor5',
+      },
+    ];
+
+    const createdUsers = [];
+    for (const userData of usersData) {
+      const user = this.usersRepository.create(userData);
+      const savedUser = await this.usersRepository.save(user);
+      createdUsers.push(savedUser);
+    }
+
+    console.log(
+      'Baza danych została zainicjalizowana przykładowymi użytkownikami',
+    );
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    return createdUsers;
+  }
+
   private async seedPosts() {
+    // Pobierz wszystkich użytkowników z bazy danych
+    const users = await this.usersRepository.find();
+
+    if (users.length === 0) {
+      console.log(
+        'Brak użytkowników w bazie danych. Najpierw uruchom seedUsers().',
+      );
+      return;
+    }
+
     const seedData = [
       {
-        id: '101',
-        authorId: '1',
+        authorId: users[0].id,
         title: 'Przypadkowe spotkanie',
         content:
           'Nigdy nie zapomnę, jak przypadkiem poznałem swojego najlepszego przyjaciela, gdy zgubiłem się w obcym mieście.',
@@ -32,8 +93,7 @@ export class SeedService implements OnApplicationBootstrap {
         commentsCount: 8,
       },
       {
-        id: '102',
-        authorId: '2',
+        authorId: users[1]?.id || users[0].id,
         title: 'Powrót z przeszłości',
         content:
           'Po latach milczenia napisała do mnie osoba, której bardzo brakowało mi w życiu.',
@@ -43,8 +103,7 @@ export class SeedService implements OnApplicationBootstrap {
         commentsCount: 5,
       },
       {
-        id: '103',
-        authorId: '3',
+        authorId: users[2]?.id || users[0].id,
         title: 'Dobro wraca',
         content:
           "Zgubiłem portfel, ale ktoś go zwrócił z karteczką: 'Dobro wraca'.",
@@ -54,8 +113,7 @@ export class SeedService implements OnApplicationBootstrap {
         commentsCount: 14,
       },
       {
-        id: '104',
-        authorId: '4',
+        authorId: users[3]?.id || users[0].id,
         title: 'Wystarczająco dobry',
         content:
           'Zrozumiałem, że nie muszę być idealny, żeby być wystarczający.',
@@ -65,8 +123,7 @@ export class SeedService implements OnApplicationBootstrap {
         commentsCount: 12,
       },
       {
-        id: '105',
-        authorId: '5',
+        authorId: users[4]?.id || users[0].id,
         title: 'Ktoś, komu zależy',
         content:
           'Pierwszy raz od lat poczułem, że naprawdę komuś na mnie zależy.',

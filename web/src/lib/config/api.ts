@@ -9,6 +9,7 @@ export const API_CONFIG = {
 export const AUTH_ENDPOINTS = {
   login: "/auth/login",
   register: "/auth/register",
+  logout: "/auth/logout",
   me: "/auth/me",
   generateNickname: "/auth/generate-nickname",
 } as const;

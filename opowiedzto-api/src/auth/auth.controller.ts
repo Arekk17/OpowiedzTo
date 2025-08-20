@@ -6,7 +6,9 @@ import {
   HttpStatus,
   Get,
   UseGuards,
+  Res,
 } from '@nestjs/common';
+import { Response } from 'express';
 import {
   ApiTags,
   ApiOperation,
@@ -38,8 +40,11 @@ export class AuthController {
     description: 'Email już istnieje w systemie',
   })
   @Post('register')
-  async register(@Body() registerDto: RegisterDto): Promise<AuthResponseDto> {
-    return this.authService.register(registerDto);
+  async register(
+    @Body() registerDto: RegisterDto,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<AuthResponseDto> {
+    return this.authService.register(registerDto, res);
   }
 
   @ApiOperation({ summary: 'Logowanie użytkownika' })
@@ -54,8 +59,11 @@ export class AuthController {
   })
   @HttpCode(HttpStatus.OK)
   @Post('login')
-  async login(@Body() loginDto: LoginDto): Promise<AuthResponseDto> {
-    return this.authService.login(loginDto);
+  async login(
+    @Body() loginDto: LoginDto,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<AuthResponseDto> {
+    return this.authService.login(loginDto, res);
   }
 
   @ApiOperation({ summary: 'Pobranie danych zalogowanego użytkownika' })

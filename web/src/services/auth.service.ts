@@ -1,4 +1,3 @@
-import { setAccessToken } from "@/lib/api/auth-header";
 import { apiClient } from "@/lib/api/client";
 import { AUTH_ENDPOINTS } from "@/lib/config/api";
 import { LoginFormData, RegisterFormData } from "@/types/auth";
@@ -9,18 +8,25 @@ export interface AuthApiResponse {
   nickname: string;
 }
 
+export interface CurrentUserResponse {
+  id: string;
+  email: string;
+  nickname: string;
+  createdAt: string;
+}
+
 export const login = async (data: LoginFormData): Promise<AuthApiResponse> => {
   try {
     const resp = await apiClient.post<AuthApiResponse>(
       AUTH_ENDPOINTS.login,
       data
     );
-    setAccessToken(resp.accessToken);
     return resp;
   } catch (error) {
     throw new Error(error instanceof Error ? error.message : "Błąd logowania");
   }
 };
+
 export const register = async (
   data: RegisterFormData
 ): Promise<AuthApiResponse> => {
@@ -29,7 +35,6 @@ export const register = async (
       AUTH_ENDPOINTS.register,
       data
     );
-    setAccessToken(resp.accessToken);
     return resp;
   } catch (error) {
     throw new Error(
@@ -37,12 +42,19 @@ export const register = async (
     );
   }
 };
-export interface CurrentUserResponse {
-  id: string;
-  email: string;
-  nickname: string;
-  createdAt: string;
-}
+
+export const logout = async (): Promise<{ message: string }> => {
+  try {
+    const resp = await apiClient.post<{ message: string }>(
+      AUTH_ENDPOINTS.logout
+    );
+    return resp;
+  } catch (error) {
+    throw new Error(
+      error instanceof Error ? error.message : "Błąd wylogowania"
+    );
+  }
+};
 
 export const getCurrentUser = async (): Promise<CurrentUserResponse> => {
   try {
@@ -53,6 +65,7 @@ export const getCurrentUser = async (): Promise<CurrentUserResponse> => {
     );
   }
 };
+
 export const generateNickname = async (): Promise<{ nickname: string }> => {
   try {
     return apiClient.get<{ nickname: string }>(AUTH_ENDPOINTS.generateNickname);
