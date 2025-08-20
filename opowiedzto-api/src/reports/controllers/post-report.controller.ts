@@ -5,21 +5,17 @@ import {
   Body,
   Param,
   UseGuards,
-  Request,
   HttpCode,
   HttpStatus,
+  ParseUUIDPipe,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { PostReportService } from '../services/post-report.service';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { GetUser } from '../../auth/decorators/get-user.decorator';
+import { User } from '../../users/entities/user.entity';
 import { CreateReportDto } from '../dto/create-report.dto';
 import { PostReport } from '../entities/post-report.entity';
-
-interface RequestWithUser extends Request {
-  user: {
-    id: string;
-  };
-}
 
 @ApiTags('post-reports')
 @Controller('posts')
@@ -30,6 +26,7 @@ export class PostReportController {
   @Post(':id/report')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Zgłoś post' })
+  @ApiParam({ name: 'id', description: 'ID posta' })
   @ApiResponse({
     status: 201,
     description: 'Post został zgłoszony',
@@ -39,34 +36,38 @@ export class PostReportController {
   @ApiResponse({ status: 403, description: 'Brak uprawnień' })
   @ApiResponse({ status: 404, description: 'Post nie znaleziony' })
   async reportPost(
-    @Param('id') postId: string,
+    @Param('id', ParseUUIDPipe) postId: string,
     @Body() createReportDto: CreateReportDto,
-    @Request() req: RequestWithUser,
+    @GetUser() user: User,
   ): Promise<PostReport> {
     return this.postReportService.createReport(
       postId,
-      req.user.id,
+      user.id,
       createReportDto,
     );
   }
 
   @Get(':id/reports')
   @ApiOperation({ summary: 'Pobierz zgłoszenia posta' })
+  @ApiParam({ name: 'id', description: 'ID posta' })
   @ApiResponse({
     status: 200,
     description: 'Lista zgłoszeń',
     type: [PostReport],
   })
   @ApiResponse({ status: 404, description: 'Post nie znaleziony' })
-  async getReports(@Param('id') postId: string): Promise<PostReport[]> {
+  async getReports(
+    @Param('id', ParseUUIDPipe) postId: string,
+  ): Promise<PostReport[]> {
     return this.postReportService.getReportsForPost(postId);
   }
 
   @Get(':id/reports/count')
   @ApiOperation({ summary: 'Pobierz liczbę zgłoszeń posta' })
+  @ApiParam({ name: 'id', description: 'ID posta' })
   @ApiResponse({ status: 200, description: 'Liczba zgłoszeń' })
   async getReportCount(
-    @Param('id') postId: string,
+    @Param('id', ParseUUIDPipe) postId: string,
   ): Promise<{ count: number }> {
     const count = await this.postReportService.getReportCount(postId);
     return { count };

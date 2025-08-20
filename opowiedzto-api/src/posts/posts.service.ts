@@ -13,14 +13,43 @@ import { PostRepository } from './repositories/post.repository';
 export class PostsService {
   constructor(private readonly postRepository: PostRepository) {}
 
-  async findAll(tag?: string, authorId?: string): Promise<Post[]> {
+  async findAll(
+    tag?: string,
+    authorId?: string,
+    page: number = 1,
+    limit: number = 10,
+  ): Promise<{ data: Post[]; meta: any }> {
+    let result: { posts: Post[]; total: number };
+
     if (tag) {
-      return this.postRepository.findByTagWithAuthor(tag);
+      result = await this.postRepository.findByTagWithPagination(
+        tag,
+        page,
+        limit,
+      );
+    } else if (authorId) {
+      result = await this.postRepository.findByAuthorWithPagination(
+        authorId,
+        page,
+        limit,
+      );
+    } else {
+      result = await this.postRepository.findAllWithPagination(page, limit);
     }
-    if (authorId) {
-      return this.postRepository.findByAuthor(authorId);
-    }
-    return this.postRepository.findAllWithAuthors();
+
+    const totalPages = Math.ceil(result.total / limit);
+
+    return {
+      data: result.posts,
+      meta: {
+        page,
+        limit,
+        total: result.total,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPreviousPage: page > 1,
+      },
+    };
   }
 
   async findOne(id: string): Promise<Post> {
@@ -43,15 +72,17 @@ export class PostsService {
     return this.postRepository.save(post);
   }
 
-  async update(id: string, updatePostDto: UpdatePostDto): Promise<Post> {
+  async update(
+    id: string,
+    updatePostDto: UpdatePostDto,
+    user: User,
+  ): Promise<Post> {
     const post = await this.findOne(id);
 
-    // Sprawdzenie czy autorId się zgadza
-    if (post.authorId !== updatePostDto.authorId) {
+    if (post.authorId !== user.id) {
       throw new ForbiddenException('Nie masz uprawnień do edycji tego posta');
     }
 
-    // Aktualizacja tylko podanych pól
     if (updatePostDto.title) {
       post.title = updatePostDto.title;
     }
@@ -70,7 +101,6 @@ export class PostsService {
   async remove(id: string, authorId: string): Promise<void> {
     const post = await this.findOne(id);
 
-    // Sprawdzenie czy autorId się zgadza
     if (post.authorId !== authorId) {
       throw new ForbiddenException(
         'Nie masz uprawnień do usunięcia tego posta',
@@ -78,5 +108,33 @@ export class PostsService {
     }
 
     await this.postRepository.remove(post);
+  }
+
+  async search(
+    searchTerm: string,
+    page: number = 1,
+    limit: number = 10,
+  ): Promise<{ data: Post[]; meta: any }> {
+    const result = await this.postRepository.searchWithPagination(
+      searchTerm,
+      page,
+      limit,
+    );
+    const totalPages = Math.ceil(result.total / limit);
+
+    const response: { data: Post[]; meta: any } = {
+      data: result.posts,
+      meta: {
+        page,
+        limit,
+        total: result.total,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPreviousPage: page > 1,
+        searchTerm,
+      },
+    };
+
+    return response;
   }
 }

@@ -42,4 +42,77 @@ export class PostRepository extends Repository<Post> {
       .orderBy('post.createdAt', 'DESC')
       .getMany();
   }
+
+  async findAllWithPagination(
+    page: number = 1,
+    limit: number = 10,
+  ): Promise<{ posts: Post[]; total: number }> {
+    const skip = (page - 1) * limit;
+
+    const [posts, total] = await this.createQueryBuilder('post')
+      .leftJoinAndSelect('post.author', 'author')
+      .orderBy('post.createdAt', 'DESC')
+      .skip(skip)
+      .take(limit)
+      .getManyAndCount();
+
+    return { posts, total };
+  }
+
+  async findByTagWithPagination(
+    tag: string,
+    page: number = 1,
+    limit: number = 10,
+  ): Promise<{ posts: Post[]; total: number }> {
+    const skip = (page - 1) * limit;
+
+    const [posts, total] = await this.createQueryBuilder('post')
+      .leftJoinAndSelect('post.author', 'author')
+      .where('post.tags LIKE :tag', { tag: `%${tag}%` })
+      .orderBy('post.createdAt', 'DESC')
+      .skip(skip)
+      .take(limit)
+      .getManyAndCount();
+
+    return { posts, total };
+  }
+
+  async findByAuthorWithPagination(
+    authorId: string,
+    page: number = 1,
+    limit: number = 10,
+  ): Promise<{ posts: Post[]; total: number }> {
+    const skip = (page - 1) * limit;
+
+    const [posts, total] = await this.createQueryBuilder('post')
+      .leftJoinAndSelect('post.author', 'author')
+      .where('post.authorId = :authorId', { authorId })
+      .orderBy('post.createdAt', 'DESC')
+      .skip(skip)
+      .take(limit)
+      .getManyAndCount();
+
+    return { posts, total };
+  }
+
+  async searchWithPagination(
+    searchTerm: string,
+    page: number = 1,
+    limit: number = 10,
+  ): Promise<{ posts: Post[]; total: number }> {
+    const skip = (page - 1) * limit;
+
+    const [posts, total] = await this.createQueryBuilder('post')
+      .leftJoinAndSelect('post.author', 'author')
+      .where(
+        'post.title ILIKE :searchTerm OR post.content ILIKE :searchTerm OR post.tags::text ILIKE :searchTerm',
+        { searchTerm: `%${searchTerm}%` },
+      )
+      .orderBy('post.createdAt', 'DESC')
+      .skip(skip)
+      .take(limit)
+      .getManyAndCount();
+
+    return { posts, total };
+  }
 }

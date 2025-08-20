@@ -5,21 +5,17 @@ import {
   Body,
   Param,
   UseGuards,
-  Request,
   HttpCode,
   HttpStatus,
+  ParseUUIDPipe,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { CommentReportService } from '../services/comment-report.service';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { GetUser } from '../../auth/decorators/get-user.decorator';
+import { User } from '../../users/entities/user.entity';
 import { CreateReportDto } from '../dto/create-report.dto';
 import { CommentReport } from '../entities/comment-report.entity';
-
-interface RequestWithUser extends Request {
-  user: {
-    id: string;
-  };
-}
 
 @ApiTags('comment-reports')
 @Controller('comments')
@@ -30,6 +26,7 @@ export class CommentReportController {
   @Post(':id/report')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Zgłoś komentarz' })
+  @ApiParam({ name: 'id', description: 'ID komentarza' })
   @ApiResponse({
     status: 201,
     description: 'Komentarz został zgłoszony',
@@ -39,34 +36,38 @@ export class CommentReportController {
   @ApiResponse({ status: 403, description: 'Brak uprawnień' })
   @ApiResponse({ status: 404, description: 'Komentarz nie znaleziony' })
   async reportComment(
-    @Param('id') commentId: string,
+    @Param('id', ParseUUIDPipe) commentId: string,
     @Body() createReportDto: CreateReportDto,
-    @Request() req: RequestWithUser,
+    @GetUser() user: User,
   ): Promise<CommentReport> {
     return this.commentReportService.createReport(
       commentId,
-      req.user.id,
+      user.id,
       createReportDto,
     );
   }
 
   @Get(':id/reports')
   @ApiOperation({ summary: 'Pobierz zgłoszenia komentarza' })
+  @ApiParam({ name: 'id', description: 'ID komentarza' })
   @ApiResponse({
     status: 200,
     description: 'Lista zgłoszeń',
     type: [CommentReport],
   })
   @ApiResponse({ status: 404, description: 'Komentarz nie znaleziony' })
-  async getReports(@Param('id') commentId: string): Promise<CommentReport[]> {
+  async getReports(
+    @Param('id', ParseUUIDPipe) commentId: string,
+  ): Promise<CommentReport[]> {
     return this.commentReportService.getReportsForComment(commentId);
   }
 
   @Get(':id/reports/count')
   @ApiOperation({ summary: 'Pobierz liczbę zgłoszeń komentarza' })
+  @ApiParam({ name: 'id', description: 'ID komentarza' })
   @ApiResponse({ status: 200, description: 'Liczba zgłoszeń' })
   async getReportCount(
-    @Param('id') commentId: string,
+    @Param('id', ParseUUIDPipe) commentId: string,
   ): Promise<{ count: number }> {
     const count = await this.commentReportService.getReportCount(commentId);
     return { count };

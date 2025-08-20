@@ -22,13 +22,11 @@ export class AuthService {
   async register(registerDto: RegisterDto): Promise<AuthResponseDto> {
     const { email, password, nickname, gender } = registerDto;
 
-    // Sprawdź, czy użytkownik już istnieje
     const existingUser = await this.usersService.findByEmail(email);
     if (existingUser) {
       throw new ConflictException('Email już istnieje w systemie');
     }
 
-    // Utwórz nowego użytkownika
     const user = await this.usersService.create(
       email,
       password,
@@ -36,26 +34,22 @@ export class AuthService {
       gender,
     );
 
-    // Wygeneruj JWT token
     return this.generateToken(user);
   }
 
   async login(loginDto: LoginDto): Promise<AuthResponseDto> {
     const { email, password } = loginDto;
 
-    // Znajdź użytkownika po email
     const user = await this.usersService.findByEmail(email);
     if (!user) {
       throw new UnauthorizedException('Nieprawidłowy email lub hasło');
     }
 
-    // Sprawdź hasło
     const isPasswordValid = await user.validatePassword(password);
     if (!isPasswordValid) {
       throw new UnauthorizedException('Nieprawidłowy email lub hasło');
     }
 
-    // Wygeneruj JWT token
     return this.generateToken(user);
   }
 

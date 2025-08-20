@@ -12,9 +12,18 @@ import { UsersModule } from '../users/users.module';
     UsersModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
-      secret: process.env.JWT_SECRET || 'dev_secret',
+      secret:
+        process.env.JWT_SECRET ||
+        (() => {
+          if (process.env.NODE_ENV === 'production') {
+            throw new Error(
+              'JWT_SECRET must be defined in production environment',
+            );
+          }
+          return 'dev_secret_only_for_development';
+        })(),
       signOptions: {
-        expiresIn: '24h',
+        expiresIn: process.env.JWT_EXPIRATION_TIME || '24h',
       },
     }),
     ConfigModule,

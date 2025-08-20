@@ -1,19 +1,19 @@
 FROM node:20-alpine
 
+# Instalacja netcat dla skryptu wait-for-db.sh
+RUN apk add --no-cache netcat-openbsd
+
 WORKDIR /app
 
-# Kopiowanie plików konfiguracyjnych
 COPY package*.json ./
 COPY tsconfig*.json ./
+COPY wait-for-db.sh ./
 
-# Instalacja zależności
 RUN npm install
 
-# Kopiowanie kodu źródłowego
 COPY . .
 
-# Ustawienie zmiennych środowiskowych
-ENV NODE_ENV=development
+# Upewnij się, że skrypt ma uprawnienia do wykonania
+RUN chmod +x wait-for-db.sh
 
-# Uruchomienie aplikacji w trybie deweloperskim
-CMD ["npm", "run", "start:dev"] 
+CMD ["npm", "run", "start:dev"]

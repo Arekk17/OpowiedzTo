@@ -6,7 +6,6 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
-  // Walidacja danych wejściowych
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -16,7 +15,6 @@ async function bootstrap() {
   app.useStaticAssets(join(__dirname, '..', 'uploads'), {
     prefix: '/uploads/',
   });
-  // Konfiguracja CORS
   app.enableCors({
     origin: process.env.FRONTEND_URL || 'http://localhost:3000',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
@@ -24,7 +22,6 @@ async function bootstrap() {
     allowedHeaders: ['Content-Type', 'Authorization'],
   });
 
-  // Konfiguracja Swagger
   const config = new DocumentBuilder()
     .setTitle('OpowiedzTo API')
     .setDescription('API do zarządzania postami użytkowników')

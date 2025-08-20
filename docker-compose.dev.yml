@@ -1,20 +1,22 @@
-version: "3.8"
-
 services:
-  frontend:
-    build:
-      context: ./web
-      dockerfile: Dockerfile.dev
-    container_name: opowiedzto-frontend-dev
-    volumes:
-      - ./web:/app
-      - /app/node_modules
-    ports:
-      - "3000:3000"
+  db:
+    image: postgres:16-alpine
+    container_name: opowiedzto-db-dev
     environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:3001
-    depends_on:
-      - api
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=opowiedzto
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d opowiedzto"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
 
   api:
     build:
@@ -30,26 +32,27 @@ services:
     env_file:
       - ./opowiedzto-api/.env
     depends_on:
-      - db
-    environment:
-      - DATABASE_HOST=db
-      - DATABASE_PORT=5432
-      - DATABASE_USERNAME=postgres
-      - DATABASE_PASSWORD=postgres
-      - DATABASE_NAME=opowiedzto
-    command: npm run start:dev
+      db:
+        condition: service_healthy
+    command: ["./wait-for-db.sh", "db", "npm", "run", "start:dev"]
+    restart: unless-stopped
 
-  db:
-    image: postgres:16-alpine
-    container_name: opowiedzto-db-dev
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=opowiedzto
-    ports:
-      - "5432:5432"
+  frontend:
+    build:
+      context: ./web
+      dockerfile: Dockerfile.dev
+    container_name: opowiedzto-frontend-dev
     volumes:
-      - postgres_data_dev:/var/lib/postgresql/data
+      - ./web:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:3001
+    depends_on:
+      api:
+        condition: service_started
+    restart: unless-stopped
 
   pgadmin:
     image: dpage/pgadmin4
@@ -60,7 +63,9 @@ services:
     ports:
       - "5050:80"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+    restart: unless-stopped
 
 volumes:
   postgres_data_dev:

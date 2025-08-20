@@ -8,7 +8,16 @@ import { UsersService } from '../../users/users.service';
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(private readonly usersService: UsersService) {
-    const secretKey = process.env.JWT_SECRET || 'dev_secret';
+    const secretKey =
+      process.env.JWT_SECRET ||
+      (() => {
+        if (process.env.NODE_ENV === 'production') {
+          throw new Error(
+            'JWT_SECRET must be defined in production environment',
+          );
+        }
+        return 'dev_secret_only_for_development';
+      })();
 
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -18,12 +27,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: JwtPayload): Promise<User> {
-    console.log('JWT payload:', payload);
     const { userId } = payload;
     const user = await this.usersService.findOne(userId);
-    console.log('User found for token:', user);
     if (!user) {
-      console.log('User not found for token!');
       throw new UnauthorizedException('Użytkownik nie został znaleziony');
     }
     return user;

@@ -5,20 +5,16 @@ import {
   Get,
   Body,
   Param,
-  Request,
   UseGuards,
+  ParseUUIDPipe,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { CommentService } from './comment.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { GetUser } from '../auth/decorators/get-user.decorator';
+import { User } from '../users/entities/user.entity';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { Comment } from './entities/comment.entity';
-
-interface RequestWithUser extends Request {
-  user: {
-    id: string;
-  };
-}
 
 @ApiTags('comments')
 @Controller()
@@ -28,6 +24,7 @@ export class CommentController {
   @Post('posts/:id/comments')
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Dodaj komentarz do posta' })
+  @ApiParam({ name: 'id', description: 'ID posta' })
   @ApiResponse({
     status: 201,
     description: 'Komentarz został dodany',
@@ -36,47 +33,48 @@ export class CommentController {
   @ApiResponse({ status: 400, description: 'Nieprawidłowe żądanie' })
   @ApiResponse({ status: 404, description: 'Post nie znaleziony' })
   async createComment(
-    @Param('id') postId: string,
+    @Param('id', ParseUUIDPipe) postId: string,
     @Body() createCommentDto: CreateCommentDto,
-    @Request() req: RequestWithUser,
+    @GetUser() user: User,
   ): Promise<Comment> {
-    return this.commentService.createComment(
-      postId,
-      req.user.id,
-      createCommentDto,
-    );
+    return this.commentService.createComment(postId, user.id, createCommentDto);
   }
 
   @Get('posts/:id/comments')
   @ApiOperation({ summary: 'Pobierz komentarze do posta' })
+  @ApiParam({ name: 'id', description: 'ID posta' })
   @ApiResponse({
     status: 200,
     description: 'Lista komentarzy',
     type: [Comment],
   })
-  async getComments(@Param('id') postId: string): Promise<Comment[]> {
+  async getComments(
+    @Param('id', ParseUUIDPipe) postId: string,
+  ): Promise<Comment[]> {
     return this.commentService.getComments(postId);
   }
 
   @Delete('comments/:id')
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Usuń komentarz' })
+  @ApiParam({ name: 'id', description: 'ID komentarza' })
   @ApiResponse({ status: 200, description: 'Komentarz został usunięty' })
   @ApiResponse({ status: 403, description: 'Brak uprawnień' })
   @ApiResponse({ status: 404, description: 'Komentarz nie znaleziony' })
   async deleteComment(
-    @Param('id') commentId: string,
-    @Request() req: RequestWithUser,
+    @Param('id', ParseUUIDPipe) commentId: string,
+    @GetUser() user: User,
   ): Promise<{ message: string }> {
-    await this.commentService.deleteComment(commentId, req.user.id);
+    await this.commentService.deleteComment(commentId, user.id);
     return { message: 'Komentarz został usunięty' };
   }
 
   @Get('posts/:id/comments/count')
   @ApiOperation({ summary: 'Pobierz liczbę komentarzy do posta' })
+  @ApiParam({ name: 'id', description: 'ID posta' })
   @ApiResponse({ status: 200, description: 'Liczba komentarzy' })
   async getCommentCount(
-    @Param('id') postId: string,
+    @Param('id', ParseUUIDPipe) postId: string,
   ): Promise<{ count: number }> {
     const count = await this.commentService.getCommentCount(postId);
     return { count };

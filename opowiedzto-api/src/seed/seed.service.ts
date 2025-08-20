@@ -13,7 +13,6 @@ export class SeedService implements OnApplicationBootstrap {
   async onApplicationBootstrap() {
     const postsCount = await this.postsRepository.count();
 
-    // Wypełnij bazę danych tylko jeśli jest pusta
     if (postsCount === 0) {
       await this.seedPosts();
     }
