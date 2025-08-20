@@ -4,7 +4,6 @@ import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class PaginationDto {
   @ApiPropertyOptional({
-    description: 'Numer strony (domyślnie 1)',
     minimum: 1,
     example: 1,
   })
@@ -15,7 +14,6 @@ export class PaginationDto {
   page?: number = 1;
 
   @ApiPropertyOptional({
-    description: 'Liczba elementów na stronę (domyślnie 10, maksymalnie 100)',
     minimum: 1,
     maximum: 100,
     example: 10,
@@ -30,7 +28,6 @@ export class PaginationDto {
 
 export class SearchDto extends PaginationDto {
   @ApiPropertyOptional({
-    description: 'Termin wyszukiwania',
     example: 'życie',
   })
   @IsOptional()
@@ -39,14 +36,12 @@ export class SearchDto extends PaginationDto {
 
 export class PostFiltersDto extends PaginationDto {
   @ApiPropertyOptional({
-    description: 'Filtrowanie po tagu',
     example: 'życie',
   })
   @IsOptional()
   tag?: string;
 
   @ApiPropertyOptional({
-    description: 'Filtrowanie po autorze (UUID)',
     example: '123e4567-e89b-12d3-a456-426614174000',
   })
   @IsOptional()

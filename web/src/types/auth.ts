@@ -1,0 +1,79 @@
+import { z } from "zod";
+import { User } from "./user";
+
+export type { User } from "./user";
+
+export enum Gender {
+  MALE = "male",
+  FEMALE = "female",
+  OTHER = "other",
+}
+
+export interface AuthResponse {
+  user: User;
+  accessToken: string;
+  refreshToken: string;
+}
+
+export interface JwtPayload {
+  sub: string;
+  email: string;
+  nickname: string;
+  iat: number;
+  exp: number;
+}
+
+export interface LoginForm {
+  email: string;
+  password: string;
+}
+
+export interface RegisterForm {
+  email: string;
+  password: string;
+  nickname?: string;
+  gender?: Gender;
+}
+
+export const loginSchema = z.object({
+  email: z
+    .string()
+    .trim()
+    .min(1, "Email jest wymagany")
+    .refine((val) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val), {
+      message: "Nieprawidłowy format email",
+    }),
+  password: z
+    .string()
+    .min(1, "Hasło jest wymagane")
+    .min(8, "Hasło musi mieć minimum 8 znaków"),
+});
+
+export const registerSchema = z.object({
+  email: z
+    .string()
+    .trim()
+    .min(1, "Email jest wymagany")
+    .refine((val) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val), {
+      message: "Nieprawidłowy format email",
+    }),
+  password: z
+    .string()
+    .min(8, "Hasło musi mieć minimum 8 znaków")
+    .regex(
+      /((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/,
+      "Hasło musi zawierać małe i wielkie litery, cyfry lub znaki specjalne"
+    ),
+  nickname: z
+    .string()
+    .trim()
+    .regex(
+      /^[a-zA-Z0-9_-]{3,20}$/,
+      "Nickname może zawierać tylko litery, cyfry, podkreślenia i myślniki (3-20 znaków)"
+    )
+    .optional(),
+  gender: z.enum([Gender.MALE, Gender.FEMALE, Gender.OTHER]).optional(),
+});
+
+export type LoginFormData = z.infer<typeof loginSchema>;
+export type RegisterFormData = z.infer<typeof registerSchema>;

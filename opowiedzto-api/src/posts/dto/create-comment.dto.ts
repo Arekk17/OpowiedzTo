@@ -4,7 +4,6 @@ import { IsString, MinLength, MaxLength } from 'class-validator';
 export class CreateCommentDto {
   @ApiProperty({
     example: 'Świetny post!',
-    description: 'Treść komentarza',
   })
   @IsString()
   @MinLength(1, { message: 'Komentarz nie może być pusty' })

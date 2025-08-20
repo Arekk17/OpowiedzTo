@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
 import { Post } from '../entities/post.entity';
+import { PostWithDetailsDto } from '../dto/post-with-details.dto';
 
 @Injectable()
 export class PostRepository extends Repository<Post> {
@@ -8,17 +9,159 @@ export class PostRepository extends Repository<Post> {
     super(Post, dataSource.createEntityManager());
   }
 
-  async findByTag(tag: string): Promise<Post[]> {
-    return this.createQueryBuilder('post')
-      .where('post.tags LIKE :tag', { tag: `%${tag}%` })
-      .getMany();
+  async findAllWithDetails(
+    page: number = 1,
+    limit: number = 10,
+    userId?: string,
+    tag?: string,
+    authorId?: string,
+  ): Promise<{ posts: PostWithDetailsDto[]; total: number }> {
+    const skip = (page - 1) * limit;
+
+    const queryBuilder = this.createQueryBuilder('post')
+      .leftJoinAndSelect('post.author', 'author')
+      .addSelect((subQuery) => {
+        return subQuery
+          .select('COUNT(c.id)')
+          .from('comment', 'c')
+          .where('c.postId = post.id');
+      }, 'commentsCount')
+      .addSelect((subQuery) => {
+        return subQuery
+          .select('COUNT(pl.id)')
+          .from('post_like', 'pl')
+          .where('pl.postId = post.id');
+      }, 'likesCount')
+      .orderBy('post.createdAt', 'DESC');
+
+    if (tag) {
+      queryBuilder.andWhere('post.tags LIKE :tag', { tag: `%${tag}%` });
+    }
+
+    if (authorId) {
+      queryBuilder.andWhere('post.authorId = :authorId', { authorId });
+    }
+
+    const total = await queryBuilder.getCount();
+
+    const rawResult = await queryBuilder
+      .skip(skip)
+      .take(limit)
+      .getRawAndEntities();
+
+    if (rawResult.entities.length === 0) {
+      return { posts: [], total };
+    }
+
+    const postIds = rawResult.entities.map((post) => post.id);
+
+    let userLikedPostIds = new Set<string>();
+    if (userId) {
+      const userLikes = await this.dataSource
+        .createQueryBuilder()
+        .select('pl.postId', 'postId')
+        .from('post_like', 'pl')
+        .where('pl.postId IN (:...postIds)', { postIds })
+        .andWhere('pl.userId = :userId', { userId })
+        .getRawMany();
+
+      userLikedPostIds = new Set(
+        userLikes.map((like: { postId: string }) => like.postId),
+      );
+    }
+
+    const postsWithDetails: PostWithDetailsDto[] = rawResult.entities.map(
+      (post, index) => {
+        const rawData = rawResult.raw[index] as {
+          commentsCount: string;
+          likesCount: string;
+        };
+
+        return {
+          ...post,
+          commentsCount: parseInt(rawData.commentsCount || '0'),
+          likesCount: parseInt(rawData.likesCount || '0'),
+          isLiked: userLikedPostIds.has(post.id),
+        };
+      },
+    );
+
+    return { posts: postsWithDetails, total };
   }
 
-  async findByAuthor(authorId: string): Promise<Post[]> {
-    return this.find({
-      where: { authorId },
-      order: { createdAt: 'DESC' },
-    });
+  async searchWithDetails(
+    searchTerm: string,
+    page: number = 1,
+    limit: number = 10,
+    userId?: string,
+  ): Promise<{ posts: PostWithDetailsDto[]; total: number }> {
+    const skip = (page - 1) * limit;
+
+    const queryBuilder = this.createQueryBuilder('post')
+      .leftJoinAndSelect('post.author', 'author')
+      .addSelect((subQuery) => {
+        return subQuery
+          .select('COUNT(c.id)')
+          .from('comment', 'c')
+          .where('c.postId = post.id');
+      }, 'commentsCount')
+      .addSelect((subQuery) => {
+        return subQuery
+          .select('COUNT(pl.id)')
+          .from('post_like', 'pl')
+          .where('pl.postId = post.id');
+      }, 'likesCount')
+      .where(
+        'post.title ILIKE :searchTerm OR post.content ILIKE :searchTerm OR post.tags::text ILIKE :searchTerm',
+        { searchTerm: `%${searchTerm}%` },
+      )
+      .orderBy('post.createdAt', 'DESC');
+
+    const total = await queryBuilder.getCount();
+
+    const rawResult = await queryBuilder
+      .skip(skip)
+      .take(limit)
+      .getRawAndEntities();
+
+    if (rawResult.entities.length === 0) {
+      return { posts: [], total };
+    }
+
+    const postIds = rawResult.entities.map((post) => post.id);
+
+    let userLikedPostIds = new Set<string>();
+    if (userId) {
+      const userLikes = await this.dataSource
+        .createQueryBuilder()
+        .select('pl.postId', 'postId')
+        .from('post_like', 'pl')
+        .where('pl.postId IN (:...postIds)', { postIds })
+        .andWhere('pl.userId = :userId', { userId })
+        .getRawMany();
+
+      userLikedPostIds = new Set(
+        userLikes.map((like: { postId: string }) => like.postId),
+      );
+    }
+
+    const postsWithDetails: PostWithDetailsDto[] = rawResult.entities.map(
+      (post, index) => {
+        const rawData = rawResult.raw[index] as {
+          commentsCount: string;
+          likesCount: string;
+        };
+
+        return {
+          ...post,
+          commentsCount: parseInt(rawData.commentsCount || '0'),
+          likesCount: parseInt(rawData.likesCount || '0'),
+          isLiked: userLikedPostIds.has(post.id),
+        };
+      },
+    );
+
+    return { posts: postsWithDetails, total };
   }
 
   async findWithAuthor(id: string): Promise<Post | null> {
@@ -28,91 +171,10 @@ export class PostRepository extends Repository<Post> {
     });
   }
 
-  async findAllWithAuthors(): Promise<Post[]> {
+  async findByAuthor(authorId: string): Promise<Post[]> {
     return this.find({
-      relations: ['author'],
+      where: { authorId },
       order: { createdAt: 'DESC' },
     });
-  }
-
-  async findByTagWithAuthor(tag: string): Promise<Post[]> {
-    return this.createQueryBuilder('post')
-      .leftJoinAndSelect('post.author', 'author')
-      .where('post.tags LIKE :tag', { tag: `%${tag}%` })
-      .orderBy('post.createdAt', 'DESC')
-      .getMany();
-  }
-
-  async findAllWithPagination(
-    page: number = 1,
-    limit: number = 10,
-  ): Promise<{ posts: Post[]; total: number }> {
-    const skip = (page - 1) * limit;
-
-    const [posts, total] = await this.createQueryBuilder('post')
-      .leftJoinAndSelect('post.author', 'author')
-      .orderBy('post.createdAt', 'DESC')
-      .skip(skip)
-      .take(limit)
-      .getManyAndCount();
-
-    return { posts, total };
-  }
-
-  async findByTagWithPagination(
-    tag: string,
-    page: number = 1,
-    limit: number = 10,
-  ): Promise<{ posts: Post[]; total: number }> {
-    const skip = (page - 1) * limit;
-
-    const [posts, total] = await this.createQueryBuilder('post')
-      .leftJoinAndSelect('post.author', 'author')
-      .where('post.tags LIKE :tag', { tag: `%${tag}%` })
-      .orderBy('post.createdAt', 'DESC')
-      .skip(skip)
-      .take(limit)
-      .getManyAndCount();
-
-    return { posts, total };
-  }
-
-  async findByAuthorWithPagination(
-    authorId: string,
-    page: number = 1,
-    limit: number = 10,
-  ): Promise<{ posts: Post[]; total: number }> {
-    const skip = (page - 1) * limit;
-
-    const [posts, total] = await this.createQueryBuilder('post')
-      .leftJoinAndSelect('post.author', 'author')
-      .where('post.authorId = :authorId', { authorId })
-      .orderBy('post.createdAt', 'DESC')
-      .skip(skip)
-      .take(limit)
-      .getManyAndCount();
-
-    return { posts, total };
-  }
-
-  async searchWithPagination(
-    searchTerm: string,
-    page: number = 1,
-    limit: number = 10,
-  ): Promise<{ posts: Post[]; total: number }> {
-    const skip = (page - 1) * limit;
-
-    const [posts, total] = await this.createQueryBuilder('post')
-      .leftJoinAndSelect('post.author', 'author')
-      .where(
-        'post.title ILIKE :searchTerm OR post.content ILIKE :searchTerm OR post.tags::text ILIKE :searchTerm',
-        { searchTerm: `%${searchTerm}%` },
-      )
-      .orderBy('post.createdAt', 'DESC')
-      .skip(skip)
-      .take(limit)
-      .getManyAndCount();
-
-    return { posts, total };
   }
 }
