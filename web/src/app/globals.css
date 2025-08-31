@@ -1,26 +1,85 @@
 @import "tailwindcss";
 
+@theme {
+  --color-primary: #2d1b69;
+  --color-primary-light: #4c3a89;
+  --color-primary-dark: #1a0f3d;
+  --color-primary-accent: #7c5dfa;
+
+  --color-content-primary: #1f2937;
+  --color-content-secondary: #6b7280;
+  --color-content-muted: #9ca3af;
+  --color-content-inverse: #f9fafb;
+
+  --color-background-default: #fefefe;
+  --color-background-paper: #ffffff;
+  --color-background-subtle: #f8fafc;
+  --color-background-muted: #f1f5f9;
+
+  --color-accent-warm: #f59e0b;
+  --color-accent-cool: #06b6d4;
+  --color-accent-success: #10b981;
+  --color-accent-warning: #f59e0b;
+  --color-accent-error: #ef4444;
+  --color-accent-mystery: #8b5a2b;
+
+  --color-ui-border: #e5e7eb;
+  --color-ui-hover: #f3f4f6;
+  --color-ui-focus: #7c5dfa;
+  --color-ui-notification: #e8edf5;
+
+  --color-story-anonymous: #6366f1;
+  --color-story-featured: #f59e0b;
+  --color-story-trending: #ef4444;
+  --color-story-new: #10b981;
+
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+
+  --radius-card: 0.75rem;
+  --radius-button: 0.5rem;
+
+  --font-size-story-title: 1.125rem;
+  --font-size-story-content: 0.875rem;
+
+  --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px 0 rgb(0 0 0 / 0.06);
+  --shadow-story: 0 4px 6px -1px rgb(0 0 0 / 0.1),
+    0 2px 4px -1px rgb(0 0 0 / 0.06);
+
+  --font-family-jakarta: "Plus Jakarta Sans", system-ui, sans-serif;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --background: #fefefe;
+  --foreground: #1f2937;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Plus Jakarta Sans", Arial, Helvetica, sans-serif;
+}
+
+* {
+  scroll-behavior: smooth;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #9ca3af;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
 }

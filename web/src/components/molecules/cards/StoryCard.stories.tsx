@@ -1,0 +1,107 @@
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { StoryCard } from "./StoryCard";
+
+const meta = {
+  title: "Molecules/StoryCard",
+  component: StoryCard,
+  parameters: {
+    layout: "padded",
+  },
+  tags: ["autodocs"],
+  argTypes: {
+    category: {
+      control: { type: "select" },
+      options: ["anonymous", "featured", "trending", "new"],
+    },
+    isAnonymous: {
+      control: "boolean",
+    },
+    title: {
+      control: "text",
+    },
+    excerpt: {
+      control: "text",
+    },
+    author: {
+      control: "text",
+    },
+    timestamp: {
+      control: "text",
+    },
+  },
+} satisfies Meta<typeof StoryCard>;
+
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+export const Anonymous: Story = {
+  args: {
+    title: "Tajemnicza historia z dawnych czasów",
+    excerpt:
+      "To była ciemna noc, gdy zdecydowałam się podzielić tą historią. Nikt nie wie, kim jestem, ale moja historia zasługuje na opowiedzenie...",
+    author: "Jan Kowalski",
+    timestamp: "2 godziny temu",
+    category: "anonymous",
+    isAnonymous: true,
+  },
+};
+
+export const Featured: Story = {
+  args: {
+    title: "Niesamowita przygoda w górach",
+    excerpt:
+      "Podczas wędrówki w Tatrach natknęliśmy się na coś, czego nigdy nie spodziewaliśmy się zobaczyć. Ta historia zmieni wasze postrzeganie natury...",
+    author: "Anna Nowak",
+    timestamp: "1 dzień temu",
+    category: "featured",
+    isAnonymous: false,
+  },
+};
+
+export const Trending: Story = {
+  args: {
+    title: "Historia, która poruszyła całą społeczność",
+    excerpt:
+      "Nie spodziewałem się, że ta historia stanie się tak popularna. Dziękuję wszystkim za wsparcie i komentarze...",
+    author: "Piotr Wiśniewski",
+    timestamp: "3 dni temu",
+    category: "trending",
+    isAnonymous: false,
+  },
+};
+
+export const New: Story = {
+  args: {
+    title: "Świeżo dodana historia o miłości",
+    excerpt:
+      "Poznałem ją w najbardziej nieoczekiwanym miejscu. Ta historia pokazuje, że miłość może zdarzyć się wszędzie...",
+    author: "Maria Kowalczyk",
+    timestamp: "30 minut temu",
+    category: "new",
+    isAnonymous: false,
+  },
+};
+
+export const LongTitle: Story = {
+  args: {
+    title:
+      "To jest bardzo długi tytuł historii, który ma pokazać jak komponenet radzi sobie z długimi tytułami i czy odpowiednio je obcina",
+    excerpt: "Krótki opis",
+    author: "Test User",
+    timestamp: "1 godzina temu",
+    category: "anonymous",
+    isAnonymous: true,
+  },
+};
+
+export const LongExcerpt: Story = {
+  args: {
+    title: "Historia z długim opisem",
+    excerpt:
+      "To jest bardzo długi opis historii, który ma sprawdzić jak komponenet radzi sobie z długimi opisami i czy odpowiednio je obcina. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation.",
+    author: "Test User",
+    timestamp: "2 godziny temu",
+    category: "featured",
+    isAnonymous: false,
+  },
+};

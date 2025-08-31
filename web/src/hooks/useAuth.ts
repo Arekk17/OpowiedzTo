@@ -101,11 +101,11 @@ export function useAuth() {
     setIsInitialized(true);
   }, []);
 
-  useEffect(() => {
-    if (userError && (userError as AxiosError)?.response?.status === 401) {
-      logoutMutation.mutate();
-    }
-  }, [userError, logoutMutation]);
+  // useEffect(() => {
+  //   if (userError && (userError as AxiosError)?.response?.status === 401) {
+  //     logoutMutation.mutate();
+  //   }
+  // }, [userError, logoutMutation]);
 
   const authState: AuthState = {
     user: user || null,
@@ -128,32 +128,6 @@ export function useAuth() {
     userError,
     isInitialized,
   };
-}
-
-export function useRequireAuth(redirectTo = "/auth/login") {
-  const { user, isLoading, isAuthenticated } = useAuth();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.push(redirectTo);
-    }
-  }, [isLoading, isAuthenticated, router, redirectTo]);
-
-  return { user, isLoading, isAuthenticated };
-}
-
-export function useRequireGuest(redirectTo = "/profile") {
-  const { user, isLoading, isAuthenticated } = useAuth();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (!isLoading && isAuthenticated) {
-      router.push(redirectTo);
-    }
-  }, [isLoading, isAuthenticated, router, redirectTo]);
-
-  return { user, isLoading, isAuthenticated };
 }
 
 export function useUser() {
