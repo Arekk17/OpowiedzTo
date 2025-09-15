@@ -1,71 +1,60 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import React from "react";
+import Header from "./Header";
 
-const MockUserActions = ({ isLoggedIn = false }: { isLoggedIn?: boolean }) => {
-  if (!isLoggedIn) {
-    return (
-      <div className="flex items-center justify-end gap-8 w-[760px] h-10 flex-1">
-        <a
-          href="/login"
-          className="text-content-primary font-jakarta font-medium text-sm"
-        >
-          Zaloguj się
-        </a>
-        <a
-          href="/register"
-          className="bg-primary text-content-inverse px-4 py-2 rounded-md"
-        >
-          Zarejestruj się
-        </a>
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex items-center justify-end gap-8 w-[760px] h-10 flex-1">
-      <div className="w-8 h-8 bg-gray-200 rounded-full"></div>
-      <div className="w-8 h-8 bg-gray-300 rounded-full"></div>
-    </div>
-  );
-};
-
-const MockHeader = ({ isLoggedIn = false }: { isLoggedIn?: boolean }) => (
-  <header className="w-full h-[65px] bg-background-paper border-b border-ui-border">
-    <div className="flex items-center justify-between px-10 py-3 h-full">
-      <div className="flex items-center gap-8 w-[440px] h-[23px]">
-        <div>Logo</div>
-        <div>Navigation</div>
-      </div>
-      <MockUserActions isLoggedIn={isLoggedIn} />
-    </div>
-  </header>
+const LoggedOutActions: React.FC = () => (
+  <div className="flex items-center justify-end gap-8 w-[760px] h-10 flex-1">
+    <button className="text-content-primary font-jakarta font-medium text-sm leading-[21px]">
+      Zaloguj się
+    </button>
+    <button className="bg-primary text-content-inverse px-4 py-2 rounded-md font-jakarta font-medium text-sm">
+      Zarejestruj się
+    </button>
+  </div>
 );
 
-const meta: Meta<typeof MockHeader> = {
-  title: "Organisms/Header",
-  component: MockHeader,
+const LoggedInActions: React.FC = () => (
+  <div className="flex items-center justify-end gap-8 w-[760px] h-10 flex-1">
+    <div className="w-10 h-10 rounded-full bg-ui-border" />
+    <div className="w-10 h-10 rounded-full bg-ui-border" />
+  </div>
+);
+
+const meta: Meta<typeof Header> = {
+  title: "Organisms/Layout/Header",
+  component: Header,
   parameters: {
     layout: "fullscreen",
   },
-  decorators: [
-    (Story) => (
-      <div className="min-h-screen bg-background">
-        <Story />
-      </div>
-    ),
-  ],
+  decorators: [],
+  tags: ["autodocs"],
 };
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const LoggedOut: Story = {
-  args: {
-    isLoggedIn: false,
+  name: "User Logged Out",
+  render: () => <Header UserActionsComponent={LoggedOutActions} />,
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Header state when user is not authenticated. Shows login and register buttons.",
+      },
+    },
   },
 };
 
 export const LoggedIn: Story = {
-  args: {
-    isLoggedIn: true,
+  name: "User Logged In",
+  render: () => <Header UserActionsComponent={LoggedInActions} />,
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Header state when user is authenticated. Shows notification icon and profile avatar.",
+      },
+    },
   },
 };

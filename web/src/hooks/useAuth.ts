@@ -101,12 +101,6 @@ export function useAuth() {
     setIsInitialized(true);
   }, []);
 
-  // useEffect(() => {
-  //   if (userError && (userError as AxiosError)?.response?.status === 401) {
-  //     logoutMutation.mutate();
-  //   }
-  // }, [userError, logoutMutation]);
-
   const authState: AuthState = {
     user: user || null,
     isLoading: isLoadingUser && !isInitialized,

@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { ProfileAvatar } from "./ProfileAvatar";
 
 const meta = {
-  title: "Atoms/ProfileAvatar",
+  title: "Atoms/Icons/ProfileAvatar",
   component: ProfileAvatar,
   parameters: {
     layout: "centered",

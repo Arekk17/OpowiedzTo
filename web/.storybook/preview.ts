@@ -1,15 +1,7 @@
 import type { Preview } from "@storybook/nextjs-vite";
-import * as NextImage from "next/image";
 import React from "react";
-import "../src/app/globals.css";
-
-const OriginalNextImage = NextImage.default;
-
-Object.defineProperty(NextImage, "default", {
-  configurable: true,
-  value: (props: React.ComponentProps<typeof OriginalNextImage>) =>
-    React.createElement(OriginalNextImage, { ...props, unoptimized: true }),
-});
+import "./preview.css";
+import { QueryProvider } from "../src/providers/query-provider";
 
 const preview: Preview = {
   parameters: {
@@ -38,6 +30,24 @@ const preview: Preview = {
       ],
     },
   },
+
+  decorators: [
+    (Story) =>
+      React.createElement(
+        QueryProvider,
+        null,
+        React.createElement(
+          "div",
+          {
+            className: "font-jakarta antialiased",
+            style: {
+              fontFamily: '"Plus Jakarta Sans", system-ui, sans-serif',
+            },
+          },
+          React.createElement(Story)
+        )
+      ),
+  ],
 };
 
 export default preview;

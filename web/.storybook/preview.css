@@ -1,10 +1,21 @@
 @import "tailwindcss";
 
+/* Storybook specific styles */
+html {
+  font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+}
+
 @theme {
-  --color-primary: #1e40af;
-  --color-primary-light: #3b82f6;
-  --color-primary-dark: #1e3a8a;
-  --color-primary-accent: #2563eb;
+  --color-primary: #2d1b69;
+  --color-primary-light: #4c3a89;
+  --color-primary-dark: #1a0f3d;
+  --color-primary-accent: #7c5dfa;
 
   --color-content-primary: #1f2937;
   --color-content-secondary: #6b7280;
@@ -26,10 +37,10 @@
 
   --color-ui-border: #e5e7eb;
   --color-ui-hover: #f3f4f6;
-  --color-ui-focus: #2563eb;
+  --color-ui-focus: #7c5dfa;
   --color-ui-notification: #e8edf5;
 
-  --color-story-anonymous: #3b82f6;
+  --color-story-anonymous: #6366f1;
   --color-story-featured: #f59e0b;
   --color-story-trending: #ef4444;
   --color-story-new: #10b981;
@@ -51,28 +62,4 @@
     0 2px 4px -1px rgb(0 0 0 / 0.06);
 
   --font-family-jakarta: "Plus Jakarta Sans", system-ui, sans-serif;
-}
-
-body {
-  @apply bg-background text-content-primary font-jakarta;
-}
-
-* {
-  scroll-behavior: smooth;
-}
-
-::-webkit-scrollbar {
-  width: 8px;
-}
-
-::-webkit-scrollbar-track {
-  @apply bg-background;
-}
-
-::-webkit-scrollbar-thumb {
-  @apply bg-content-muted rounded;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  @apply bg-content-secondary;
 }

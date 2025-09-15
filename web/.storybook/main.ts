@@ -9,7 +9,6 @@ const config: StorybookConfig = {
     "@storybook/addon-onboarding",
     "@storybook/addon-a11y",
     "@storybook/addon-vitest",
-    "@storybook/addon-postcss",
   ],
   framework: {
     name: "@storybook/nextjs-vite",
@@ -26,8 +25,20 @@ const config: StorybookConfig = {
         "@/types": path.resolve(__dirname, "../src/types"),
         "@/hooks": path.resolve(__dirname, "../src/hooks"),
         "@/utils": path.resolve(__dirname, "../src/utils"),
+        // Alias do mocka App Routera w Storybooku
+        "next/navigation": path.resolve(
+          __dirname,
+          "./mocks/next-navigation.ts"
+        ),
       };
     }
+
+    if (!config.css) {
+      config.css = {};
+    }
+
+    config.css.postcss = path.resolve(__dirname, "../postcss.config.mjs");
+
     return config;
   },
 };

@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { StoryCard } from "./StoryCard";
 
 const meta = {
-  title: "Molecules/StoryCard",
+  title: "Molecules/Cards/StoryCard",
   component: StoryCard,
   parameters: {
     layout: "padded",
@@ -11,7 +11,7 @@ const meta = {
   argTypes: {
     category: {
       control: { type: "select" },
-      options: ["anonymous", "featured", "trending", "new"],
+      options: ["none", "anonymous", "featured", "trending", "new"],
     },
     isAnonymous: {
       control: "boolean",
@@ -103,5 +103,34 @@ export const LongExcerpt: Story = {
     timestamp: "2 godziny temu",
     category: "featured",
     isAnonymous: false,
+  },
+};
+
+export const WithoutBadge: Story = {
+  name: "Bez odznaki",
+  args: {
+    title: "Niespodziewane spotkanie",
+    excerpt:
+      "Historia o tym, jak przypadkowe spotkanie może zmienić całe życie.",
+    author: "Ktoś",
+    timestamp: "5 min temu",
+    category: "none",
+    isAnonymous: false,
+  },
+};
+
+export const WithImage: Story = {
+  name: "Z obrazkiem (Unsplash)",
+  args: {
+    title: "Niespodziewane spotkanie",
+    excerpt:
+      "Historia o tym, jak przypadkowe spotkanie może zmienić całe życie.",
+    author: "Ktoś",
+    timestamp: "5 min temu",
+    category: "none",
+    isAnonymous: false,
+    imageSrc:
+      "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=1200&auto=format&fit=crop",
+    imageAlt: "Scena z miasta",
   },
 };

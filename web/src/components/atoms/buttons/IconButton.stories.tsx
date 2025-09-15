@@ -3,7 +3,7 @@ import { BellIcon, UserIcon } from "@heroicons/react/24/outline";
 import { IconButton } from "./IconButton";
 
 const meta = {
-  title: "Atoms/IconButton",
+  title: "Atoms/Buttons/IconButton",
   component: IconButton,
   parameters: {
     layout: "centered",
