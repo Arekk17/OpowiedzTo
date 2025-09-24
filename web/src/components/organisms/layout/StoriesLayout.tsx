@@ -1,85 +1,29 @@
 import React from "react";
-import { SearchInput } from "../../atoms/inputs/SearchInput";
+import { Input } from "../../atoms/inputs/Input";
+import { SearchIcon } from "../../assets/icons/SearchIcon";
 import { StoryCard } from "../../molecules/cards/StoryCard";
+import type { StoryCardProps } from "../../molecules/cards/StoryCard";
+
+export type StoryListItem = { id: string | number } & StoryCardProps;
 
 interface StoriesLayoutProps {
   className?: string;
+  stories: StoryListItem[];
 }
 
 export const StoriesLayout: React.FC<StoriesLayoutProps> = ({
   className = "",
+  stories,
 }) => {
-  const stories = [
-    {
-      id: 1,
-      title: "Niespodziewane spotkanie",
-      excerpt:
-        "Historia o tym, jak przypadkowe spotkanie może zmienić całe życie.",
-      author: "Anonim",
-      timestamp: "2 godziny temu",
-      category: "anonymous" as const,
-      isAnonymous: true,
-      imageSrc:
-        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=300&fit=crop",
-      imageAlt: "Niespodziewane spotkanie",
-    },
-    {
-      id: 2,
-      title: "Sekretne marzenie",
-      excerpt: "Opowieść o ukrytych pragnieniach i odwadze, by je spełnić.",
-      author: "Anonim",
-      timestamp: "4 godziny temu",
-      category: "featured" as const,
-      isAnonymous: true,
-      imageSrc:
-        "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&h=300&fit=crop",
-      imageAlt: "Sekretne marzenie",
-    },
-    {
-      id: 3,
-      title: "Utracona szansa",
-      excerpt: "Refleksja nad momentami, które mogły potoczyć się inaczej.",
-      author: "Anonim",
-      timestamp: "6 godzin temu",
-      category: "trending" as const,
-      isAnonymous: true,
-    },
-    {
-      id: 4,
-      title: "Powrót do korzeni",
-      excerpt: "Historia o powrocie do miejsca, gdzie wszystko się zaczęło.",
-      author: "Anonim",
-      timestamp: "8 godzin temu",
-      category: "new" as const,
-      isAnonymous: true,
-      imageSrc:
-        "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop",
-      imageAlt: "Powrót do korzeni",
-    },
-    {
-      id: 5,
-      title: "Nowy początek",
-      excerpt:
-        "Opowieść o przezwyciężaniu przeciwności i rozpoczynaniu od nowa.",
-      author: "Anonim",
-      timestamp: "10 godzin temu",
-      category: "anonymous" as const,
-      isAnonymous: true,
-      imageSrc:
-        "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=400&h=300&fit=crop",
-      imageAlt: "Nowy początek",
-    },
-  ];
-
   return (
     <div
       className={`flex flex-col items-start w-full max-w-[725px] ${className}`}
     >
       <div className="w-full px-4 py-3">
-        <SearchInput
+        <Input
           placeholder="Szukaj historii..."
-          variant="default"
-          size="md"
+          fullWidth
+          leftIcon={<SearchIcon className="w-5 h-5" />}
         />
       </div>
 

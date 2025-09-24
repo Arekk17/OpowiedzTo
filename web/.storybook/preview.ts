@@ -1,4 +1,4 @@
-import type { Preview } from "@storybook/nextjs-vite";
+import type { Preview } from "@storybook/nextjs";
 import React from "react";
 import "./preview.css";
 import { QueryProvider } from "../src/providers/query-provider";
@@ -28,6 +28,14 @@ const preview: Preview = {
           value: "#1f2937",
         },
       ],
+    },
+
+    nextjs: {
+      appDirectory: true,
+      navigation: {
+        pathname: "/stories",
+        query: { page: "3" },
+      },
     },
   },
 

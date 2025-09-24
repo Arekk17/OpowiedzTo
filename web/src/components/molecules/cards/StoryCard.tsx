@@ -3,7 +3,7 @@ import Image from "next/image";
 import { LikeButton, LikeButtonContent } from "../../atoms/buttons/LikeButton";
 import { CommentButton } from "../../atoms/buttons/CommentButton";
 
-interface StoryCardProps {
+export interface StoryCardProps {
   title: string;
   excerpt: string;
   author: string;
@@ -13,6 +13,11 @@ interface StoryCardProps {
   imageSrc?: string;
   imageAlt?: string;
 }
+/**
+ *
+ * @param param0
+ * @returns
+ */
 
 export const StoryCard: React.FC<StoryCardProps> = ({
   title,

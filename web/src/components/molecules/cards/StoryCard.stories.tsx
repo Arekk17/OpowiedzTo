@@ -1,4 +1,5 @@
-import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import type { Meta, StoryObj } from "@storybook/nextjs";
+import React from "react";
 import { StoryCard } from "./StoryCard";
 
 const meta = {
@@ -132,5 +133,50 @@ export const WithImage: Story = {
     imageSrc:
       "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=1200&auto=format&fit=crop",
     imageAlt: "Scena z miasta",
+  },
+};
+
+export const Interactive: Story = {
+  render: () => {
+    const [clicked, setClicked] = React.useState(false);
+    const [likes, setLikes] = React.useState(42);
+    const [comments, setComments] = React.useState(8);
+
+    return (
+      <div className="space-y-4 w-full max-w-md">
+        <StoryCard
+          title={clicked ? "Kliknięta historia!" : "Kliknij mnie!"}
+          excerpt="Ta karta reaguje na kliknięcia i pokazuje interaktywne funkcje."
+          author="Interaktywny Bot"
+          timestamp="teraz"
+          category="featured"
+          isAnonymous={false}
+          onClick={() => {
+            setClicked(!clicked);
+            alert(clicked ? "Historia odkliknięta" : "Historia kliknięta!");
+          }}
+        />
+
+        <div className="flex gap-4 justify-center">
+          <button
+            onClick={() => setLikes((l) => l + 1)}
+            className="px-3 py-1 bg-red-100 text-red-700 rounded text-sm"
+          >
+            ❤️ +1 ({likes})
+          </button>
+          <button
+            onClick={() => setComments((c) => c + 1)}
+            className="px-3 py-1 bg-blue-100 text-blue-700 rounded text-sm"
+          >
+            💬 +1 ({comments})
+          </button>
+        </div>
+
+        <div className="text-center text-sm text-gray-600">
+          Status: {clicked ? "Aktywna" : "Nieaktywna"} | ❤️ {likes} | 💬{" "}
+          {comments}
+        </div>
+      </div>
+    );
   },
 };

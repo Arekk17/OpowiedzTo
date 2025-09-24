@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import type { Meta, StoryObj } from "@storybook/nextjs";
 import React from "react";
 import { CommentButton } from "./CommentButton";
 
@@ -16,4 +16,21 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: { count: 12 },
+};
+
+export const Interactive: Story = {
+  args: { count: 5 },
+  render: (args) => {
+    const [count, setCount] = React.useState(args.count || 5);
+    return (
+      <CommentButton
+        {...args}
+        count={count}
+        onClick={() => {
+          setCount((c) => c + 1);
+          console.log(`Komentarzy: ${count + 1}`);
+        }}
+      />
+    );
+  },
 };
