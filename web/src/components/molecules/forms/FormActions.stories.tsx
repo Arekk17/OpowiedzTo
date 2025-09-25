@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/nextjs";
-import React from "react";
 import { FormActions } from "./FormActions";
 
 const meta: Meta<typeof FormActions> = {

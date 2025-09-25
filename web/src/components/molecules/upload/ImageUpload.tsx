@@ -51,7 +51,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
       : undefined;
 
   return (
-    <div className={`flex flex-col gap-2 ${className}`}>
+    <div className={`flex flex-col gap-2 size-[288px] ${className}`}>
       <div
         onClick={openPicker}
         onDragOver={(e) => {

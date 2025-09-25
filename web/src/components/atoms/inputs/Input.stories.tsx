@@ -1,7 +1,8 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs";
 import React, { useState } from "react";
 import { Input } from "./Input";
 import { SearchIcon } from "../../assets/icons/SearchIcon";
+import { FieldError } from "react-hook-form";
 
 const meta: Meta<typeof Input> = {
   title: "Atoms/Inputs/Input",
@@ -71,8 +72,7 @@ export const WithError: Story = {
           placeholder="Email"
           showLabel
           label="Email"
-          // symulacja błędu z RHF: przekazujemy obiekt z message
-          error={{ type: "manual", message: "Niepoprawny email" } as any}
+          error={{ type: "manual", message: "Niepoprawny email" } as FieldError}
           fullWidth
         />
       </div>

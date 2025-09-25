@@ -86,6 +86,7 @@ export const TagSelector: React.FC<TagSelectorProps> = ({
             onChange={(e) => setQuery(e.target.value)}
             disabled={value.length >= max}
             fullWidth
+            size="sm"
             onKeyDown={(e) => {
               if (e.key === "Enter") {
                 e.preventDefault();

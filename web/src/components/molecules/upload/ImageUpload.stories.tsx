@@ -14,6 +14,6 @@ type Story = StoryObj<typeof ImageUpload>;
 export const Interactive: Story = {
   render: () => {
     const [file, setFile] = React.useState<File | string | undefined>();
-    return <ImageUpload file={file as any} onChange={setFile as any} />;
+    return <ImageUpload file={file} onChange={(f) => setFile(f)} />;
   },
 };

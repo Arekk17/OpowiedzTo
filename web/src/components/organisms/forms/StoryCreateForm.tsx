@@ -22,7 +22,7 @@ const schema = z.object({
 export type StoryCreateFormValues = z.infer<typeof schema>;
 
 export interface StoryCreateFormProps {
-  options: string[]; // dostępne tagi
+  options: string[];
   defaultValues?: Partial<StoryCreateFormValues>;
   onSubmit: (data: StoryCreateFormValues) => Promise<void> | void;
 }
@@ -105,21 +105,16 @@ export const StoryCreateForm: React.FC<StoryCreateFormProps> = ({
         )}
       </div>
 
-      <div className="w-full px-4 pt-2">
-        <ImageUpload
-          file={image}
-          onChange={(f) =>
-            setValue("image", f as any, { shouldValidate: true })
-          }
-        />
-      </div>
+      <ImageUpload
+        file={image}
+        onChange={(f) => setValue("image", f, { shouldValidate: true })}
+      />
 
       <FormActions
         className="mt-3 w-full"
         loading={isSubmitting}
         onPublish={() => handleSubmit(async (data) => onSubmit(data))()}
         onPreview={() => {
-          // Możesz tu otworzyć modal z podglądem – na razie log
           console.log("Podgląd", {
             title: watch("title"),
             content: watch("content"),
