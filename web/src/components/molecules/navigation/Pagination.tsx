@@ -27,8 +27,13 @@ export const Pagination: React.FC<PaginationProps> = ({
     if (disabled || page < 1 || page > totalPages || page === currentPage)
       return;
     const params = new URLSearchParams(searchParams);
-    params.set("page", page.toString());
-    router.push(`${pathname}?${params.toString()}`);
+    if (page === 1) {
+      params.delete("page");
+    } else {
+      params.set("page", page.toString());
+    }
+    const query = params.toString();
+    router.push(query ? `${pathname}?${query}` : pathname);
   };
   const isFirst = currentPage === 1;
   const isLast = currentPage === totalPages;

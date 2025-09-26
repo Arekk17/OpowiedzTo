@@ -6,20 +6,29 @@ interface LikeButtonProps {
   active?: boolean;
   onClick?: () => void;
   className?: string;
+  disabled?: boolean;
 }
 
 export const LikeButton: React.FC<
   React.PropsWithChildren<Omit<LikeButtonProps, "count">>
-> = ({ active = false, onClick, className = "", children }) => {
+> = ({
+  active = false,
+  onClick,
+  className = "",
+  children,
+  disabled = false,
+}) => {
   return (
     <button
       type="button"
-      onClick={onClick}
+      onClick={disabled ? undefined : onClick}
       className={`flex flex-row justify-center items-center h-8 px-2 py-1 gap-2 ${
         active ? "text-accent-error" : "text-content-secondary"
       } ${className}`}
       aria-pressed={active}
       aria-label={active ? "Polubione" : "Polub"}
+      disabled={disabled}
+      aria-disabled={disabled}
     >
       {children}
     </button>

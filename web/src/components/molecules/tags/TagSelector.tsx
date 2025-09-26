@@ -1,3 +1,4 @@
+"use client";
 import React from "react";
 import { Tag } from "../../atoms/tags/Tag";
 import { Input } from "../../atoms/inputs/Input";
@@ -56,7 +57,7 @@ export const TagSelector: React.FC<TagSelectorProps> = ({
 
   return (
     <div className={`flex flex-col gap-3 ${className}`}>
-      <div className="flex flex-row flex-wrap items-center gap-2">
+      <div className="flex flex-row flex-wrap items-center gap-2 max-h-40 overflow-auto pr-1">
         {value.map((t) => (
           <button
             key={t}
@@ -67,7 +68,7 @@ export const TagSelector: React.FC<TagSelectorProps> = ({
             title="Usuń tag"
           >
             <Tag label={t} className="pr-6 relative" />
-            <span className="absolute -right-1 -top-1 w-4 h-4 rounded-full bg-content-primary text-background-paper text-[10px] leading-4 text-center group-hover:scale-110 transition-transform">
+            <span className="absolute right-1 top-1 w-4 h-4 rounded-full bg-content-primary text-background-paper text-[10px] leading-4 text-center group-hover:scale-110 transition-transform">
               ×
             </span>
           </button>
@@ -75,48 +76,54 @@ export const TagSelector: React.FC<TagSelectorProps> = ({
       </div>
 
       <div className="flex flex-col gap-2">
-        <div className="flex items-center gap-3">
-          <Input
-            placeholder={
-              value.length >= max
-                ? `Limit ${max} tagów`
-                : "Dodaj tag i naciśnij Enter"
-            }
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            disabled={value.length >= max}
-            fullWidth
-            size="sm"
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                if (canAdd) addTag(query);
-              }
-            }}
-          />
-          <button
-            type="button"
-            onClick={() => addTag(query)}
-            disabled={!canAdd}
-            className={`h-10 px-4 rounded-full transition-colors border ${
-              canAdd
-                ? "bg-accent-primary border-accent-primary text-background-paper hover:brightness-95"
-                : "bg-transparent border-ui-border text-content-secondary cursor-not-allowed"
-            }`}
-          >
-            Dodaj
-          </button>
-        </div>
+        {allowCustom && (
+          <>
+            <div className="flex items-center gap-3">
+              <Input
+                placeholder={
+                  value.length >= max
+                    ? `Limit ${max} tagów`
+                    : "Dodaj tag i naciśnij Enter"
+                }
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                disabled={value.length >= max}
+                fullWidth
+                size="sm"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    if (canAdd) addTag(query);
+                  }
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => addTag(query)}
+                disabled={!canAdd}
+                className={`h-10 px-4 rounded-full transition-colors border ${
+                  canAdd
+                    ? "bg-accent-primary border-accent-primary text-background-paper hover:brightness-95"
+                    : "bg-transparent border-ui-border text-content-secondary cursor-not-allowed"
+                }`}
+              >
+                Dodaj
+              </button>
+            </div>
 
-        {canAdd && (
-          <div className="text-sm text-content-secondary">
-            Dodasz nowy tag:{" "}
-            <span className="font-medium text-content-primary">{query}</span>
-          </div>
+            {canAdd && (
+              <div className="text-sm text-content-secondary">
+                Dodasz nowy tag:{" "}
+                <span className="font-medium text-content-primary">
+                  {query}
+                </span>
+              </div>
+            )}
+          </>
         )}
 
         {filtered.length > 0 && (
-          <div className="flex flex-row flex-wrap items-center gap-2">
+          <div className="flex flex-row flex-wrap items-center gap-2 max-h-40 overflow-auto pr-1">
             {filtered.slice(0, 10).map((o) => (
               <button
                 key={o}

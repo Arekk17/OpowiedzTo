@@ -31,6 +31,7 @@ export const POSTS_ENDPOINTS = {
   update: (id: string) => `/posts/${id}`,
   delete: (id: string) => `/posts/${id}`,
   search: "/posts/search",
+  trendingTags: "/posts/trending",
 } as const;
 
 export const COMMENTS_ENDPOINTS = {

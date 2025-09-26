@@ -9,6 +9,7 @@ import { UpdatePostDto } from './dto/update-post.dto';
 import { User } from '../users/entities/user.entity';
 import { PostRepository } from './repositories/post.repository';
 import { PostWithDetailsDto } from './dto/post-with-details.dto';
+import { TrendingTagDto } from './dto/trending-tag.dto';
 
 @Injectable()
 export class PostsService {
@@ -129,5 +130,8 @@ export class PostsService {
     }
 
     await this.postRepository.remove(post);
+  }
+  async getTrendingTags(limit: number = 6): Promise<TrendingTagDto[]> {
+    return this.postRepository.getTrendingTags(limit);
   }
 }

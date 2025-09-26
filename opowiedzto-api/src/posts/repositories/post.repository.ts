@@ -2,6 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
 import { Post } from '../entities/post.entity';
 import { PostWithDetailsDto } from '../dto/post-with-details.dto';
+import { PostLike } from '../entities/post-like.entity';
+import { Comment } from '../entities/comment.entity';
+import { TrendingTagDto } from '../dto/trending-tag.dto';
 
 @Injectable()
 export class PostRepository extends Repository<Post> {
@@ -23,13 +26,13 @@ export class PostRepository extends Repository<Post> {
       .addSelect((subQuery) => {
         return subQuery
           .select('COUNT(c.id)')
-          .from('comment', 'c')
+          .from(Comment, 'c')
           .where('c.postId = post.id');
       }, 'commentsCount')
       .addSelect((subQuery) => {
         return subQuery
           .select('COUNT(pl.id)')
-          .from('post_like', 'pl')
+          .from(PostLike, 'pl')
           .where('pl.postId = post.id');
       }, 'likesCount')
       .orderBy('post.createdAt', 'DESC');
@@ -176,5 +179,24 @@ export class PostRepository extends Repository<Post> {
       where: { authorId },
       order: { createdAt: 'DESC' },
     });
+  }
+  async getTrendingTags(limit: number = 6): Promise<TrendingTagDto[]> {
+    const qb = this.dataSource
+      .createQueryBuilder()
+      .select('t.tag', 'tag')
+      .addSelect('COUNT(*)', 'count')
+      .from((sub) => {
+        return sub
+          .select("UNNEST(string_to_array(post.tags, ','))", 'tag')
+          .from(Post, 'post');
+      }, 't')
+      .groupBy('t.tag')
+      .orderBy('count', 'DESC')
+      .limit(limit);
+
+    const rows = await qb.getRawMany<{ tag: string; count: string }>();
+    return rows
+      .filter((r) => r.tag && r.tag.trim() !== '')
+      .map((r) => ({ tag: r.tag.trim(), count: parseInt(r.count, 10) }));
   }
 }

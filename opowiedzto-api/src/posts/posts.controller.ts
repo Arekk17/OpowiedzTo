@@ -29,6 +29,7 @@ import { PostWithDetailsDto } from './dto/post-with-details.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { GetUser } from '../auth/decorators/get-user.decorator';
 import { User } from '../users/entities/user.entity';
+import { TrendingTagDto } from './dto/trending-tag.dto';
 
 @ApiTags('posts')
 @Controller('posts')
@@ -71,6 +72,23 @@ export class PostsController {
       filters.limit,
       user?.id,
     );
+  }
+  @ApiOperation({ summary: 'Najpopularniejsze tagi' })
+  @ApiQuery({ name: 'limit', required: false, example: 6 })
+  @ApiResponse({
+    status: 200,
+    schema: {
+      type: 'array',
+      items: { $ref: '#/components/schemas/TrendingTagDto' },
+    },
+  })
+  @Get('trending')
+  trending(@Query('limit') limit?: number): Promise<TrendingTagDto[]> {
+    const safeLimit = Math.min(
+      Math.max(parseInt(String(limit || 6), 10) || 6, 1),
+      50,
+    );
+    return this.postsService.getTrendingTags(safeLimit);
   }
 
   @ApiOperation({ summary: 'Wyszukaj posty z paginacją' })

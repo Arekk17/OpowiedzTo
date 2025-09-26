@@ -1,7 +1,10 @@
+"use client";
 import React from "react";
 import Image from "next/image";
 import { LikeButton, LikeButtonContent } from "../../atoms/buttons/LikeButton";
 import { CommentButton } from "../../atoms/buttons/CommentButton";
+import { useLike } from "@/hooks/useLike";
+import { useAuth } from "@/hooks/useAuth";
 
 export interface StoryCardProps {
   title: string;
@@ -12,13 +15,8 @@ export interface StoryCardProps {
   isAnonymous?: boolean;
   imageSrc?: string;
   imageAlt?: string;
+  id: string;
 }
-/**
- *
- * @param param0
- * @returns
- */
-
 export const StoryCard: React.FC<StoryCardProps> = ({
   title,
   excerpt,
@@ -28,7 +26,10 @@ export const StoryCard: React.FC<StoryCardProps> = ({
   isAnonymous = true,
   imageSrc,
   imageAlt,
+  id,
 }) => {
+  const { liked, count, toggle, isPending } = useLike(id, false, 0);
+  const { isAuthenticated, isLoading } = useAuth();
   const getCategoryStyles = () => {
     switch (category) {
       case "none":
@@ -137,8 +138,12 @@ export const StoryCard: React.FC<StoryCardProps> = ({
 
             <div className="flex justify-start items-center w-full text-content-muted mt-2">
               <div className="flex flex-row flex-wrap items-center content-start gap-4">
-                <LikeButton active={false}>
-                  <LikeButtonContent count={24} active={false} />
+                <LikeButton
+                  active={liked}
+                  disabled={isPending || isLoading || !isAuthenticated}
+                  onClick={toggle}
+                >
+                  <LikeButtonContent count={count} active={liked} />
                 </LikeButton>
                 <CommentButton count={12} />
               </div>

@@ -48,69 +48,6 @@ export const StoriesLayout: React.FC<StoriesLayoutProps> = ({
           />
         ))}
       </div>
-
-      <div className="w-full flex justify-center items-center p-4">
-        <div className="flex flex-row gap-0">
-          <button className="flex flex-row justify-center items-center p-0 w-10 h-10 hover:bg-ui-hover rounded-lg transition-colors">
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 18 18"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M11.25 13.5L6.75 9L11.25 4.5"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
-
-          {[1, 2, 3, 4, 5, 6].map((page) => (
-            <button
-              key={page}
-              className={`
-                flex flex-row justify-center items-center p-0 w-10 h-10 rounded-lg transition-colors
-                ${
-                  page === 1
-                    ? "bg-ui-notification text-content-primary"
-                    : "hover:bg-ui-hover text-content-secondary"
-                }
-              `}
-            >
-              <span
-                className={`
-                  font-jakarta text-sm leading-[21px]
-                  ${page === 1 ? "font-bold" : "font-normal"}
-                `}
-              >
-                {page}
-              </span>
-            </button>
-          ))}
-
-          <button className="flex flex-row justify-center items-center p-0 w-10 h-10 hover:bg-ui-hover rounded-lg transition-colors">
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 18 18"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M6.75 4.5L11.25 9L6.75 13.5"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
-        </div>
-      </div>
     </div>
   );
 };

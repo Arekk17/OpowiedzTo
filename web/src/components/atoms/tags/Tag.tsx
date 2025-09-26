@@ -14,6 +14,7 @@ export const Tag: React.FC<TagProps> = ({ label, className = "" }) => {
         bg-ui-notification text-content-primary
         rounded-full
         font-jakarta font-medium text-[14px] leading-[21px]
+        whitespace-nowrap max-w-full truncate
         ${className}
       `}
     >

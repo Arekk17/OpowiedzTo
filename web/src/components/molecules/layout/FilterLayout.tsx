@@ -19,7 +19,7 @@ export const FilterLayout: React.FC<FilterLayoutProps> = ({
         className={`
           flex flex-row flex-wrap items-start content-start
           px-4 py-3 pl-3 gap-3
-          w-80 h-[159px]
+          w-80 min-h-[159px]
           ${className}
         `}
       >
@@ -50,7 +50,7 @@ export const FilterLayout: React.FC<FilterLayoutProps> = ({
       className={`
         flex flex-col items-start
         p-4 pb-2
-        w-80 h-[274px]
+        w-80 min-h-[274px]
         ${className}
       `}
     >

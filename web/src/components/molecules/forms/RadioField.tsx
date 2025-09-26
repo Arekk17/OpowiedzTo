@@ -1,3 +1,4 @@
+"use client";
 import React from "react";
 import { Radio } from "../../atoms/inputs/Radio";
 
@@ -25,12 +26,23 @@ export const RadioField: React.FC<RadioFieldProps> = ({
   return (
     <div
       className={`
-        flex flex-row items-center
+        flex flex-row items-center cursor-pointer select-none
         p-[15px] gap-4
         w-full max-w-[288px] h-[53px]
         border border-ui-border rounded-xl
         ${className}
       `}
+      role="radio"
+      aria-checked={checked}
+      tabIndex={disabled ? -1 : 0}
+      onClick={() => !disabled && onChange?.(true)}
+      onKeyDown={(e) => {
+        if (disabled) return;
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onChange?.(true);
+        }
+      }}
     >
       <Radio
         name={name}

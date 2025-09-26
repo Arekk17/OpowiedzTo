@@ -6,6 +6,7 @@ import {
   SearchPostsData,
   CreatePostFormData,
   UpdatePostFormData,
+  TrendingTags,
 } from "@/types/post";
 
 export interface PostsApiResponse {
@@ -59,6 +60,15 @@ export const getPost = async (id: string): Promise<Post> => {
   } catch (error) {
     throw new Error(
       error instanceof Error ? error.message : "Błąd pobierania postu"
+    );
+  }
+};
+export const getTrendingTags = async (): Promise<TrendingTags[]> => {
+  try {
+    return await apiClient.get<TrendingTags[]>(POSTS_ENDPOINTS.trendingTags);
+  } catch (error) {
+    throw new Error(
+      error instanceof Error ? error.message : "Błąd pobierania tagów"
     );
   }
 };

@@ -53,8 +53,14 @@ export const searchPostsSchema = z.object({
   limit: z.number().min(1).max(100).default(10),
 });
 
+export const trendingTagsSchema = z.object({
+  tag: z.string(),
+  count: z.number(),
+});
+
 export type Post = z.infer<typeof postSchema>;
 export type CreatePostFormData = z.infer<typeof createPostSchema>;
 export type UpdatePostFormData = z.infer<typeof updatePostSchema>;
 export type PostFiltersData = z.infer<typeof postFiltersSchema>;
 export type SearchPostsData = z.infer<typeof searchPostsSchema>;
+export type TrendingTags = z.infer<typeof trendingTagsSchema>;
