@@ -1,4 +1,4 @@
-import React, { forwardRef } from "react";
+import React, { forwardRef, useId } from "react";
 import { type FieldError } from "react-hook-form";
 import { clsx } from "clsx";
 
@@ -14,6 +14,8 @@ export interface InputProps
   fullWidth?: boolean;
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
+  rightIconClickable?: boolean;
+  onRightIconClick?: () => void;
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
@@ -34,11 +36,14 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       fullWidth = false,
       leftIcon,
       rightIcon,
+      rightIconClickable = false,
+      onRightIconClick,
       ...props
     },
     ref
   ) => {
-    const inputId = id || `input-${Math.random().toString(36).slice(2, 11)}`;
+    const reactId = useId();
+    const inputId = id || `input-${reactId}`;
 
     const sizeStyles = (() => {
       switch (size) {
@@ -68,6 +73,12 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 
     const hasLeft = Boolean(leftIcon);
     const hasRight = Boolean(rightIcon) || loading;
+
+    const handleRightIconClick = () => {
+      if (rightIconClickable && onRightIconClick && !loading) {
+        onRightIconClick();
+      }
+    };
 
     return (
       <div className={clsx("flex flex-col", containerClassName)}>
@@ -133,8 +144,12 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             <div
               className={clsx(
                 "flex items-center justify-center ml-2",
-                sizeStyles.iconBox
+                sizeStyles.iconBox,
+                rightIconClickable &&
+                  !loading &&
+                  "cursor-pointer hover:bg-gray-50 rounded transition-colors"
               )}
+              onClick={handleRightIconClick}
             >
               <div className={clsx("text-content-secondary", sizeStyles.icon)}>
                 {loading ? (

@@ -12,7 +12,7 @@ import {
   AuthApiResponse,
   CurrentUserResponse,
 } from "@/services/auth.service";
-import { LoginFormData, RegisterFormData } from "@/types/auth";
+import { LoginFormData, RegisterApiData } from "@/types/auth";
 
 const AUTH_KEYS = {
   user: ["auth", "user"] as const,
@@ -67,8 +67,8 @@ export function useAuth() {
   });
 
   const registerMutation = useMutation({
-    mutationFn: (data: RegisterFormData) => registerApi(data),
-    onSuccess: (data: AuthApiResponse, variables: RegisterFormData) => {
+    mutationFn: (data: RegisterApiData) => registerApi(data),
+    onSuccess: (data: AuthApiResponse, variables: RegisterApiData) => {
       queryClient.setQueryData(AUTH_KEYS.user, {
         id: data.userId,
         email: variables.email,
@@ -109,16 +109,16 @@ export function useAuth() {
 
   return {
     ...authState,
-    login: loginMutation.mutate,
-    register: registerMutation.mutate,
-    logout: logoutMutation.mutate,
+    signin: loginMutation.mutate,
+    signup: registerMutation.mutate,
+    signout: logoutMutation.mutate,
     refetchUser,
-    isLoggingIn: loginMutation.isPending,
-    isRegistering: registerMutation.isPending,
-    isLoggingOut: logoutMutation.isPending,
-    loginError: loginMutation.error,
-    registerError: registerMutation.error,
-    logoutError: logoutMutation.error,
+    isSigningIn: loginMutation.isPending,
+    isSigningUp: registerMutation.isPending,
+    isSigningOut: logoutMutation.isPending,
+    signinError: loginMutation.error,
+    signupError: registerMutation.error,
+    signoutError: logoutMutation.error,
     userError,
     isInitialized,
   };

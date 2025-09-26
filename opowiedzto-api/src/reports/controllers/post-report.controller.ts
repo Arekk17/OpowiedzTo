@@ -20,6 +20,7 @@ import { PostReport } from '../entities/post-report.entity';
 @ApiTags('post-reports')
 @Controller('posts')
 @UseGuards(JwtAuthGuard)
+@ApiBearerAuth()
 export class PostReportController {
   constructor(private readonly postReportService: PostReportService) {}
 

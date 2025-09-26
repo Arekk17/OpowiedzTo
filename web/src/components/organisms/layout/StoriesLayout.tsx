@@ -45,6 +45,9 @@ export const StoriesLayout: React.FC<StoriesLayoutProps> = ({
             isAnonymous={story.isAnonymous}
             imageSrc={story.imageSrc}
             imageAlt={story.imageAlt}
+            id={story.id}
+            likesCount={story.likesCount}
+            isLiked={story.isLiked}
           />
         ))}
       </div>

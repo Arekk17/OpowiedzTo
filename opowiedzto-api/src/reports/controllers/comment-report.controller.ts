@@ -20,6 +20,7 @@ import { CommentReport } from '../entities/comment-report.entity';
 @ApiTags('comment-reports')
 @Controller('comments')
 @UseGuards(JwtAuthGuard)
+@ApiBearerAuth()
 export class CommentReportController {
   constructor(private readonly commentReportService: CommentReportService) {}
 

@@ -66,12 +66,10 @@ export class SeedService implements OnApplicationBootstrap {
       'Baza danych została zainicjalizowana przykładowymi użytkownikami',
     );
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return createdUsers;
   }
 
   private async seedPosts() {
-    // Pobierz wszystkich użytkowników z bazy danych
     const users = await this.usersRepository.find();
 
     if (users.length === 0) {

@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
 import { Post } from '../entities/post.entity';
 import { PostWithDetailsDto } from '../dto/post-with-details.dto';
+import { AuthorDto } from '../dto/author.dto';
 import { PostLike } from '../entities/post-like.entity';
 import { Comment } from '../entities/comment.entity';
 import { TrendingTagDto } from '../dto/trending-tag.dto';
@@ -19,6 +20,9 @@ export class PostRepository extends Repository<Post> {
     tag?: string,
     authorId?: string,
   ): Promise<{ posts: PostWithDetailsDto[]; total: number }> {
+    console.log(
+      `PostRepository.findAllWithDetails: userId=${userId || 'null'}, page=${page}, limit=${limit}`,
+    );
     const skip = (page - 1) * limit;
 
     const queryBuilder = this.createQueryBuilder('post')
@@ -81,7 +85,22 @@ export class PostRepository extends Repository<Post> {
         };
 
         return {
-          ...post,
+          id: post.id,
+          title: post.title,
+          content: post.content,
+          tags: post.tags,
+          authorId: post.authorId,
+          author: {
+            id: post.author.id,
+            email: post.author.email,
+            nickname: post.author.nickname,
+            gender: post.author.gender,
+            createdAt: post.author.createdAt,
+            updatedAt: post.author.updatedAt,
+            avatar: post.author.avatar,
+          } as AuthorDto,
+          createdAt: post.createdAt,
+          updatedAt: post.updatedAt,
           commentsCount: parseInt(rawData.commentsCount || '0'),
           likesCount: parseInt(rawData.likesCount || '0'),
           isLiked: userLikedPostIds.has(post.id),
@@ -156,7 +175,22 @@ export class PostRepository extends Repository<Post> {
         };
 
         return {
-          ...post,
+          id: post.id,
+          title: post.title,
+          content: post.content,
+          tags: post.tags,
+          authorId: post.authorId,
+          author: {
+            id: post.author.id,
+            email: post.author.email,
+            nickname: post.author.nickname,
+            gender: post.author.gender,
+            createdAt: post.author.createdAt,
+            updatedAt: post.author.updatedAt,
+            avatar: post.author.avatar,
+          } as AuthorDto,
+          createdAt: post.createdAt,
+          updatedAt: post.updatedAt,
           commentsCount: parseInt(rawData.commentsCount || '0'),
           likesCount: parseInt(rawData.likesCount || '0'),
           isLiked: userLikedPostIds.has(post.id),

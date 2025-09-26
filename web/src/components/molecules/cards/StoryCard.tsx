@@ -11,11 +11,13 @@ export interface StoryCardProps {
   excerpt: string;
   author: string;
   timestamp: string;
-  category?: "anonymous" | "featured" | "trending" | "new" | "none";
+  category?: "none" | "featured" | "trending" | "new" | "anonymous";
   isAnonymous?: boolean;
   imageSrc?: string;
   imageAlt?: string;
   id: string;
+  likesCount?: number;
+  isLiked?: boolean;
 }
 export const StoryCard: React.FC<StoryCardProps> = ({
   title,
@@ -27,9 +29,14 @@ export const StoryCard: React.FC<StoryCardProps> = ({
   imageSrc,
   imageAlt,
   id,
+  likesCount = 0,
+  isLiked = false,
 }) => {
-  const { liked, count, toggle, isPending } = useLike(id, false, 0);
+  const { liked, count, toggle, isPending } = useLike(id, isLiked, likesCount);
   const { isAuthenticated, isLoading } = useAuth();
+
+  // Debug log
+  console.log(`StoryCard ${id}: isLiked=${isLiked}, likesCount=${likesCount}`);
   const getCategoryStyles = () => {
     switch (category) {
       case "none":

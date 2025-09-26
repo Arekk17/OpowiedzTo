@@ -23,7 +23,7 @@ const options: DataSourceOptions = {
   migrationsTableName: 'migrations',
   migrationsRun: process.env.NODE_ENV === 'production',
   synchronize: process.env.NODE_ENV === 'development',
-  logging: process.env.NODE_ENV === 'development',
+  logging: ['error'],
   ssl:
     process.env.NODE_ENV === 'production'
       ? {

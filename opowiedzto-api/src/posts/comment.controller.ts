@@ -8,7 +8,13 @@ import {
   UseGuards,
   ParseUUIDPipe,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiParam,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { CommentService } from './comment.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { GetUser } from '../auth/decorators/get-user.decorator';
@@ -23,6 +29,7 @@ export class CommentController {
 
   @Post('posts/:id/comments')
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Dodaj komentarz do posta' })
   @ApiParam({ name: 'id', description: 'ID posta' })
   @ApiResponse({
@@ -41,6 +48,8 @@ export class CommentController {
   }
 
   @Get('posts/:id/comments')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Pobierz komentarze do posta' })
   @ApiParam({ name: 'id', description: 'ID posta' })
   @ApiResponse({
@@ -56,6 +65,7 @@ export class CommentController {
 
   @Delete('comments/:id')
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Usuń komentarz' })
   @ApiParam({ name: 'id', description: 'ID komentarza' })
   @ApiResponse({ status: 200, description: 'Komentarz został usunięty' })

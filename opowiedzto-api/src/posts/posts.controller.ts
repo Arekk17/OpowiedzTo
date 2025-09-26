@@ -27,7 +27,9 @@ import { PostFiltersDto, SearchDto } from './dto/pagination.dto';
 import { Post as PostEntity } from './entities/post.entity';
 import { PostWithDetailsDto } from './dto/post-with-details.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { OptionalJwtAuthGuard } from '../auth/guards/optional-jwt-auth.guard';
 import { GetUser } from '../auth/decorators/get-user.decorator';
+import { GetOptionalUser } from '../auth/decorators/get-optional-user.decorator';
 import { User } from '../users/entities/user.entity';
 import { TrendingTagDto } from './dto/trending-tag.dto';
 
@@ -60,11 +62,16 @@ export class PostsController {
       },
     },
   })
+  @UseGuards(OptionalJwtAuthGuard)
   @Get()
-  findAll(
+  async findAll(
     @Query() filters: PostFiltersDto,
-    @GetUser() user?: User,
+    @GetOptionalUser() user?: User,
   ): Promise<{ data: PostWithDetailsDto[]; meta: any }> {
+    console.log(
+      `PostsController.findAll: user=${user?.id || 'null'}, filters=`,
+      filters,
+    );
     return this.postsService.findAll(
       filters.tag,
       filters.authorId,
@@ -131,10 +138,11 @@ export class PostsController {
       },
     },
   })
+  @UseGuards(OptionalJwtAuthGuard)
   @Get('search')
   search(
     @Query() searchDto: SearchDto,
-    @GetUser() user?: User,
+    @GetOptionalUser() user?: User,
   ): Promise<{ data: PostWithDetailsDto[]; meta: any }> {
     if (!searchDto.q || searchDto.q.trim() === '') {
       return Promise.resolve({

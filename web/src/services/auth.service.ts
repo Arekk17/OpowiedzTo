@@ -1,6 +1,6 @@
 import { apiClient } from "@/lib/api/client";
 import { AUTH_ENDPOINTS } from "@/lib/config/api";
-import { LoginFormData, RegisterFormData } from "@/types/auth";
+import { LoginFormData, RegisterApiData } from "@/types/auth";
 
 export interface AuthApiResponse {
   accessToken: string;
@@ -28,7 +28,7 @@ export const login = async (data: LoginFormData): Promise<AuthApiResponse> => {
 };
 
 export const register = async (
-  data: RegisterFormData
+  data: RegisterApiData
 ): Promise<AuthApiResponse> => {
   try {
     const resp = await apiClient.post<AuthApiResponse>(

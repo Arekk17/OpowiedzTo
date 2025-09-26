@@ -49,10 +49,6 @@ export class Post {
 
   @ApiProperty({ example: 0 })
   @Column({ default: 0 })
-  likes: number;
-
-  @ApiProperty({ example: 0 })
-  @Column({ default: 0 })
   commentsCount: number;
 
   @OneToMany(() => Comment, (comment) => comment.post)

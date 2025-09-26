@@ -9,7 +9,13 @@ import {
   HttpStatus,
   ParseUUIDPipe,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiParam,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { PostLikeService } from './post-like.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { GetUser } from '../auth/decorators/get-user.decorator';
@@ -18,10 +24,13 @@ import { User } from '../users/entities/user.entity';
 @ApiTags('post-likes')
 @Controller('posts')
 @UseGuards(JwtAuthGuard)
+@ApiBearerAuth()
 export class PostLikeController {
   constructor(private readonly postLikeService: PostLikeService) {}
 
   @Post(':id/like')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Polub post' })
   @ApiParam({ name: 'id', description: 'ID posta' })
   @ApiResponse({ status: 201, description: 'Post został polubiony' })
@@ -36,6 +45,8 @@ export class PostLikeController {
   }
 
   @Delete(':id/unlike')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Usuń polubienie posta' })
   @ApiParam({ name: 'id', description: 'ID posta' })

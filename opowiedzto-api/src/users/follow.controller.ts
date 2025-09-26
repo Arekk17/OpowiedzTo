@@ -18,6 +18,7 @@ import { User } from './entities/user.entity';
 @ApiTags('follows')
 @Controller('users')
 @UseGuards(JwtAuthGuard)
+@ApiBearerAuth()
 export class FollowController {
   constructor(private readonly followService: FollowService) {}
 

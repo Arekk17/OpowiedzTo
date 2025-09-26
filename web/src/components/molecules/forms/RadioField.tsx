@@ -24,25 +24,16 @@ export const RadioField: React.FC<RadioFieldProps> = ({
   className = "",
 }) => {
   return (
-    <div
+    <label
       className={`
         flex flex-row items-center cursor-pointer select-none
         p-[15px] gap-4
         w-full max-w-[288px] h-[53px]
         border border-ui-border rounded-xl
+        ${disabled ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}
         ${className}
       `}
-      role="radio"
-      aria-checked={checked}
-      tabIndex={disabled ? -1 : 0}
-      onClick={() => !disabled && onChange?.(true)}
-      onKeyDown={(e) => {
-        if (disabled) return;
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          onChange?.(true);
-        }
-      }}
+      role="group"
     >
       <Radio
         name={name}
@@ -51,10 +42,11 @@ export const RadioField: React.FC<RadioFieldProps> = ({
         defaultChecked={defaultChecked}
         disabled={disabled}
         onChange={onChange}
+        asLabelWrapper={false}
       />
       <span className="flex-1 text-sm font-jakarta font-medium text-content-primary leading-[21px]">
         {label}
       </span>
-    </div>
+    </label>
   );
 };

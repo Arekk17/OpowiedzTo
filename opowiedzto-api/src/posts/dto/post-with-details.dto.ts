@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { User } from '../../users/entities/user.entity';
+import { AuthorDto } from './author.dto';
 
 export class PostWithDetailsDto {
   @ApiProperty()
@@ -17,8 +17,8 @@ export class PostWithDetailsDto {
   @ApiProperty()
   authorId: string;
 
-  @ApiProperty({ type: () => User })
-  author: User;
+  @ApiProperty({ type: () => AuthorDto })
+  author: AuthorDto;
 
   @ApiProperty()
   commentsCount: number;

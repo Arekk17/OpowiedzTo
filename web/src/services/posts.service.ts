@@ -1,4 +1,4 @@
-import { apiClient } from "@/lib/api/client";
+import { apiClient, createServerApi } from "@/lib/api/client";
 import { POSTS_ENDPOINTS } from "@/lib/config/api";
 import {
   Post,
@@ -50,6 +50,34 @@ export const getPosts = async (
   } catch (error) {
     throw new Error(
       error instanceof Error ? error.message : "Błąd pobierania postów"
+    );
+  }
+};
+
+// Server-only variant: pass cookie header so backend can compute isLiked/likesCount for current user
+export const getPostsWithCookie = async (
+  filters: PostFiltersData,
+  cookieHeader: string
+): Promise<PostsApiResponse> => {
+  try {
+    const params = buildQueryParams(filters);
+    console.log(
+      `getPostsWithCookie: cookieHeader=${cookieHeader.substring(0, 50)}...`
+    );
+    const serverApi = createServerApi(cookieHeader);
+    const result = await serverApi.get<PostsApiResponse>(
+      `${POSTS_ENDPOINTS.list}?${params.toString()}`
+    );
+    console.log(`getPostsWithCookie: got ${result.data.length} posts`);
+    if (result.data.length > 0) {
+      console.log(
+        `First post: isLiked=${result.data[0].isLiked}, likesCount=${result.data[0].likesCount}`
+      );
+    }
+    return result;
+  } catch (error) {
+    throw new Error(
+      error instanceof Error ? error.message : "Błąd pobierania postów (server)"
     );
   }
 };

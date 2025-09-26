@@ -32,6 +32,7 @@ export class UsersController {
 
   @Get(':id')
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Pobierz użytkownika po ID' })
   @ApiResponse({
     status: 200,
@@ -45,6 +46,7 @@ export class UsersController {
 
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Aktualizuj dane użytkownika' })
   @ApiResponse({
     status: 200,
@@ -64,6 +66,7 @@ export class UsersController {
   }
   @Post('file')
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiResponse({
     status: 200,
     description: 'Avatar został dodany',

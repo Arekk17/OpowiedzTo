@@ -31,6 +31,7 @@ export interface LoginForm {
 export interface RegisterForm {
   email: string;
   password: string;
+  confirmPassword: string;
   nickname?: string;
   gender?: Gender;
 }
@@ -49,31 +50,42 @@ export const loginSchema = z.object({
     .min(8, "Hasło musi mieć minimum 8 znaków"),
 });
 
-export const registerSchema = z.object({
-  email: z
-    .string()
-    .trim()
-    .min(1, "Email jest wymagany")
-    .refine((val) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val), {
-      message: "Nieprawidłowy format email",
-    }),
-  password: z
-    .string()
-    .min(8, "Hasło musi mieć minimum 8 znaków")
-    .regex(
-      /((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/,
-      "Hasło musi zawierać małe i wielkie litery, cyfry lub znaki specjalne"
-    ),
-  nickname: z
-    .string()
-    .trim()
-    .regex(
-      /^[a-zA-Z0-9_-]{3,20}$/,
-      "Nickname może zawierać tylko litery, cyfry, podkreślenia i myślniki (3-20 znaków)"
-    )
-    .optional(),
-  gender: z.enum([Gender.MALE, Gender.FEMALE, Gender.OTHER]).optional(),
-});
+export const registerSchema = z
+  .object({
+    email: z
+      .string()
+      .trim()
+      .min(1, "Email jest wymagany")
+      .refine((val) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val), {
+        message: "Nieprawidłowy format email",
+      }),
+    password: z
+      .string()
+      .min(8, "Hasło musi mieć minimum 8 znaków")
+      .regex(
+        /((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/,
+        "Hasło musi zawierać małe i wielkie litery, cyfry lub znaki specjalne"
+      ),
+    confirmPassword: z
+      .string()
+      .min(1, "Hasło jest wymagane")
+      .min(8, "Hasło musi mieć minimum 8 znaków"),
+    nickname: z
+      .string()
+      .trim()
+      .regex(
+        /^[a-zA-Z0-9_-]{3,20}$/,
+        "Nickname może zawierać tylko litery, cyfry, podkreślenia i myślniki (3-20 znaków)"
+      )
+      .optional(),
+    gender: z.enum([Gender.MALE, Gender.FEMALE, Gender.OTHER]).optional(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Hasła nie są identyczne",
+    path: ["confirmPassword"],
+  });
 
 export type LoginFormData = z.infer<typeof loginSchema>;
 export type RegisterFormData = z.infer<typeof registerSchema>;
+
+export type RegisterApiData = Omit<RegisterFormData, "confirmPassword">;

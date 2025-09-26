@@ -6,9 +6,10 @@ import {
 } from "@/components/organisms/layout/StoriesLayout";
 import { TrendingSidebar } from "@/components/organisms/layout/TrendingSidebar";
 import { SortOptions } from "@/components/molecules/forms/SortOptions";
-import { getPosts, getTrendingTags } from "@/services/posts.service";
+import { getPostsWithCookie, getTrendingTags } from "@/services/posts.service";
 import Link from "next/link";
 import { Pagination } from "@/components/molecules/navigation/Pagination";
+import { cookies } from "next/headers";
 
 export default async function Home({
   searchParams,
@@ -16,14 +17,16 @@ export default async function Home({
   searchParams: { [key: string]: string | string[] | undefined };
 }) {
   const tags: string[] = ["Miłość", "Zdrada", "Przygoda", "Dramat", "Komedia"];
-  const page = Number(searchParams?.page ?? 1) || 1;
-  const tag =
-    typeof searchParams?.tag === "string" ? searchParams.tag : undefined;
-  const sort =
-    typeof searchParams?.sort === "string" ? searchParams.sort : undefined;
+  const params = await searchParams;
+  const page = Number(params?.page ?? 1) || 1;
+  const tag = typeof params?.tag === "string" ? params.tag : undefined;
+  const sort = typeof params?.sort === "string" ? params.sort : undefined;
+
+  const cookieStore = await cookies();
+  const cookieHeader = cookieStore.toString();
 
   const [postsRes, trendingTags] = await Promise.all([
-    getPosts({ page, limit: 10, tag }),
+    getPostsWithCookie({ page, limit: 10, tag }, cookieHeader),
     getTrendingTags(),
   ]);
 
@@ -35,6 +38,8 @@ export default async function Home({
     timestamp: p.createdAt,
     category: "none",
     isAnonymous: false,
+    likesCount: p.likesCount,
+    isLiked: p.isLiked,
   }));
 
   const baseQuery = (
