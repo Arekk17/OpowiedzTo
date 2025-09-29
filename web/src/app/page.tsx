@@ -22,11 +22,24 @@ export default async function Home({
   const tag = typeof params?.tag === "string" ? params.tag : undefined;
   const sort = typeof params?.sort === "string" ? params.sort : undefined;
 
+  const validSort =
+    sort && ["newest", "popular", "most_commented"].includes(sort)
+      ? (sort as "newest" | "popular" | "most_commented")
+      : "newest"; // domyślnie newest
+
   const cookieStore = await cookies();
   const cookieHeader = cookieStore.toString();
 
   const [postsRes, trendingTags] = await Promise.all([
-    getPostsWithCookie({ page, limit: 10, tag }, cookieHeader),
+    getPostsWithCookie(
+      {
+        page,
+        limit: 10,
+        tag,
+        sortBy: validSort, // Użyj validSort zamiast sort
+      },
+      cookieHeader
+    ),
     getTrendingTags(),
   ]);
 

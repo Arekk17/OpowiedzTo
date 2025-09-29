@@ -10,6 +10,7 @@ import { User } from '../users/entities/user.entity';
 import { PostRepository } from './repositories/post.repository';
 import { PostWithDetailsDto } from './dto/post-with-details.dto';
 import { TrendingTagDto } from './dto/trending-tag.dto';
+import { SortOption } from './enum/sort-option.enum';
 
 @Injectable()
 export class PostsService {
@@ -21,6 +22,7 @@ export class PostsService {
     page: number = 1,
     limit: number = 10,
     userId?: string,
+    sortBy?: SortOption,
   ): Promise<{ data: PostWithDetailsDto[]; meta: any }> {
     const result = await this.postRepository.findAllWithDetails(
       page,
@@ -28,6 +30,7 @@ export class PostsService {
       userId,
       tag,
       authorId,
+      sortBy,
     );
 
     const totalPages = Math.ceil(result.total / limit);

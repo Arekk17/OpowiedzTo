@@ -41,7 +41,12 @@ export class CommentService {
       content: createCommentDto.content,
     });
 
-    return this.commentRepository.save(comment);
+    const savedComment = await this.commentRepository.save(comment);
+
+    // Aktualizuj licznik komentarzy
+    await this.postRepository.increment({ id: postId }, 'commentsCount', 1);
+
+    return savedComment;
   }
 
   async getComments(postId: string): Promise<Comment[]> {
@@ -66,6 +71,13 @@ export class CommentService {
     }
 
     await this.commentRepository.remove(comment);
+
+    // Aktualizuj licznik komentarzy
+    await this.postRepository.decrement(
+      { id: comment.postId },
+      'commentsCount',
+      1,
+    );
   }
 
   async getCommentCount(postId: string): Promise<number> {

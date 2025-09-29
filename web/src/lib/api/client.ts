@@ -1,9 +1,13 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
-import { API_CONFIG } from "../config/api";
+import { API_CONFIG, AUTH_ENDPOINTS } from "../config/api";
+import { emit } from "../auth/events";
 
 export const createAxiosInstance = (opts?: {
   cookie?: string;
 }): AxiosInstance => {
+  let isRefreshing = false;
+  let refreshePromise: Promise<string> | null = null;
+
   const instance = axios.create({
     baseURL: API_CONFIG.baseURL,
     timeout: API_CONFIG.timeout,
@@ -23,8 +27,46 @@ export const createAxiosInstance = (opts?: {
 
   instance.interceptors.response.use(
     (response) => response,
-    (error) => {
-      return Promise.reject(error);
+    async (error) => {
+      const originalRequest = error.config as AxiosRequestConfig & {
+        _retry?: boolean;
+      };
+
+      if (
+        !error.response ||
+        error.response.status !== 401 ||
+        originalRequest._retry
+      ) {
+        return Promise.reject(error);
+      }
+      originalRequest._retry = true;
+
+      if (isRefreshing && refreshePromise) {
+        try {
+          await refreshePromise;
+          return instance.request(originalRequest);
+        } catch (error) {
+          if (typeof window !== "undefined")
+            window.location.assign("/auth/login");
+          return Promise.reject(error);
+        }
+      }
+      isRefreshing = true;
+      refreshePromise = instance.post(AUTH_ENDPOINTS.refreshToken, undefined, {
+        withCredentials: true,
+      });
+      try {
+        await refreshePromise;
+        emit("token:refreshed");
+        return instance.request(originalRequest);
+      } catch (error) {
+        if (typeof window !== "undefined")
+          window.location.assign("/auth/login");
+        return Promise.reject(error);
+      } finally {
+        isRefreshing = false;
+        refreshePromise = null;
+      }
     }
   );
 

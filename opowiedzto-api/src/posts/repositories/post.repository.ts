@@ -3,9 +3,8 @@ import { DataSource, Repository } from 'typeorm';
 import { Post } from '../entities/post.entity';
 import { PostWithDetailsDto } from '../dto/post-with-details.dto';
 import { AuthorDto } from '../dto/author.dto';
-import { PostLike } from '../entities/post-like.entity';
-import { Comment } from '../entities/comment.entity';
 import { TrendingTagDto } from '../dto/trending-tag.dto';
+import { SortOption } from '../enum/sort-option.enum';
 
 @Injectable()
 export class PostRepository extends Repository<Post> {
@@ -19,28 +18,19 @@ export class PostRepository extends Repository<Post> {
     userId?: string,
     tag?: string,
     authorId?: string,
+    sortBy?: SortOption,
   ): Promise<{ posts: PostWithDetailsDto[]; total: number }> {
     console.log(
-      `PostRepository.findAllWithDetails: userId=${userId || 'null'}, page=${page}, limit=${limit}`,
+      `PostRepository.findAllWithDetails: userId=${userId || 'null'}, page=${page}, limit=${limit}, sortBy=${sortBy}`,
     );
     const skip = (page - 1) * limit;
 
-    const queryBuilder = this.createQueryBuilder('post')
-      .leftJoinAndSelect('post.author', 'author')
-      .addSelect((subQuery) => {
-        return subQuery
-          .select('COUNT(c.id)')
-          .from(Comment, 'c')
-          .where('c.postId = post.id');
-      }, 'commentsCount')
-      .addSelect((subQuery) => {
-        return subQuery
-          .select('COUNT(pl.id)')
-          .from(PostLike, 'pl')
-          .where('pl.postId = post.id');
-      }, 'likesCount')
-      .orderBy('post.createdAt', 'DESC');
+    const queryBuilder = this.createQueryBuilder('post').leftJoinAndSelect(
+      'post.author',
+      'author',
+    );
 
+    // Filtry
     if (tag) {
       queryBuilder.andWhere('post.tags LIKE :tag', { tag: `%${tag}%` });
     }
@@ -49,25 +39,38 @@ export class PostRepository extends Repository<Post> {
       queryBuilder.andWhere('post.authorId = :authorId', { authorId });
     }
 
+    // Sortowanie - używaj kolumn z encji
+    switch (sortBy) {
+      case SortOption.NEWEST:
+        queryBuilder.orderBy('post.createdAt', 'DESC');
+        break;
+      case SortOption.POPULAR:
+        queryBuilder.orderBy('post.likesCount', 'DESC');
+        break;
+      case SortOption.MOST_COMMENTED:
+        queryBuilder.orderBy('post.commentsCount', 'DESC');
+        break;
+      default:
+        queryBuilder.orderBy('post.createdAt', 'DESC');
+        break;
+    }
+
     const total = await queryBuilder.getCount();
 
-    const rawResult = await queryBuilder
-      .skip(skip)
-      .take(limit)
-      .getRawAndEntities();
+    const posts = await queryBuilder.skip(skip).take(limit).getMany();
 
-    if (rawResult.entities.length === 0) {
+    if (posts.length === 0) {
       return { posts: [], total };
     }
 
-    const postIds = rawResult.entities.map((post) => post.id);
+    const postIds = posts.map((post) => post.id);
 
     let userLikedPostIds = new Set<string>();
     if (userId) {
       const userLikes = await this.dataSource
         .createQueryBuilder()
         .select('pl.postId', 'postId')
-        .from('post_like', 'pl')
+        .from('post_likes', 'pl')
         .where('pl.postId IN (:...postIds)', { postIds })
         .andWhere('pl.userId = :userId', { userId })
         .getRawMany();
@@ -77,36 +80,27 @@ export class PostRepository extends Repository<Post> {
       );
     }
 
-    const postsWithDetails: PostWithDetailsDto[] = rawResult.entities.map(
-      (post, index) => {
-        const rawData = rawResult.raw[index] as {
-          commentsCount: string;
-          likesCount: string;
-        };
-
-        return {
-          id: post.id,
-          title: post.title,
-          content: post.content,
-          tags: post.tags,
-          authorId: post.authorId,
-          author: {
-            id: post.author.id,
-            email: post.author.email,
-            nickname: post.author.nickname,
-            gender: post.author.gender,
-            createdAt: post.author.createdAt,
-            updatedAt: post.author.updatedAt,
-            avatar: post.author.avatar,
-          } as AuthorDto,
-          createdAt: post.createdAt,
-          updatedAt: post.updatedAt,
-          commentsCount: parseInt(rawData.commentsCount || '0'),
-          likesCount: parseInt(rawData.likesCount || '0'),
-          isLiked: userLikedPostIds.has(post.id),
-        };
-      },
-    );
+    const postsWithDetails: PostWithDetailsDto[] = posts.map((post) => ({
+      id: post.id,
+      title: post.title,
+      content: post.content,
+      tags: post.tags,
+      authorId: post.authorId,
+      author: {
+        id: post.author.id,
+        email: post.author.email,
+        nickname: post.author.nickname,
+        gender: post.author.gender,
+        createdAt: post.author.createdAt,
+        updatedAt: post.author.updatedAt,
+        avatar: post.author.avatar,
+      } as AuthorDto,
+      createdAt: post.createdAt,
+      updatedAt: post.updatedAt,
+      commentsCount: post.commentsCount, // Użyj z encji
+      likesCount: post.likesCount, // Użyj z encji
+      isLiked: userLikedPostIds.has(post.id),
+    }));
 
     return { posts: postsWithDetails, total };
   }

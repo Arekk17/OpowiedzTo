@@ -36,7 +36,12 @@ export class PostLikeService {
       postId,
     });
 
-    return this.postLikeRepository.save(like);
+    const savedLike = await this.postLikeRepository.save(like);
+
+    // Aktualizuj licznik polubień
+    await this.postRepository.increment({ id: postId }, 'likesCount', 1);
+
+    return savedLike;
   }
 
   async unlikePost(userId: string, postId: string): Promise<void> {
@@ -50,6 +55,9 @@ export class PostLikeService {
     }
 
     await this.postLikeRepository.remove(like);
+
+    // Aktualizuj licznik polubień
+    await this.postRepository.decrement({ id: postId }, 'likesCount', 1);
   }
 
   async getLikes(postId: string): Promise<User[]> {

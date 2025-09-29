@@ -35,6 +35,10 @@ const buildQueryParams = (filters: PostFiltersData): URLSearchParams => {
     params.set("tag", filters.tag);
   }
 
+  if (filters.sortBy) {
+    params.set("sortBy", filters.sortBy);
+  }
+
   return params;
 };
 

@@ -3,6 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Post } from '../posts/entities/post.entity';
 import { User } from '../users/entities/user.entity';
+import { Comment } from '../posts/entities/comment.entity';
+import { PostLike } from '../posts/entities/post-like.entity';
 
 @Injectable()
 export class SeedService implements OnApplicationBootstrap {
@@ -11,6 +13,10 @@ export class SeedService implements OnApplicationBootstrap {
     private postsRepository: Repository<Post>,
     @InjectRepository(User)
     private usersRepository: Repository<User>,
+    @InjectRepository(Comment)
+    private commentsRepository: Repository<Comment>,
+    @InjectRepository(PostLike)
+    private postLikesRepository: Repository<PostLike>,
   ) {}
 
   async onApplicationBootstrap() {
@@ -23,39 +29,28 @@ export class SeedService implements OnApplicationBootstrap {
 
     if (postsCount === 0) {
       await this.seedPosts();
+      await this.seedLikes();
+      await this.seedComments();
     }
   }
 
-  private async seedUsers() {
-    const usersData = [
-      {
-        email: 'user1@example.com',
-        password: 'password123',
-        nickname: 'AnonimowyAutor1',
-      },
-      {
-        email: 'user2@example.com',
-        password: 'password123',
-        nickname: 'AnonimowyAutor2',
-      },
-      {
-        email: 'user3@example.com',
-        password: 'password123',
-        nickname: 'AnonimowyAutor3',
-      },
-      {
-        email: 'user4@example.com',
-        password: 'password123',
-        nickname: 'AnonimowyAutor4',
-      },
-      {
-        email: 'user5@example.com',
-        password: 'password123',
-        nickname: 'AnonimowyAutor5',
-      },
-    ];
+  private async seedUsers(): Promise<User[]> {
+    const usersData: Array<{
+      email: string;
+      password: string;
+      nickname: string;
+    }> = [];
 
-    const createdUsers = [];
+    // Tworzymy 20 użytkowników
+    for (let i = 1; i <= 20; i++) {
+      usersData.push({
+        email: `user${i}@example.com`,
+        password: 'password123',
+        nickname: `AnonimowyAutor${i}`,
+      });
+    }
+
+    const createdUsers: User[] = [];
     for (const userData of usersData) {
       const user = this.usersRepository.create(userData);
       const savedUser = await this.usersRepository.save(user);
@@ -63,80 +58,219 @@ export class SeedService implements OnApplicationBootstrap {
     }
 
     console.log(
-      'Baza danych została zainicjalizowana przykładowymi użytkownikami',
+      `Baza danych została zainicjalizowana ${createdUsers.length} przykładowymi użytkownikami`,
     );
 
     return createdUsers;
   }
 
-  private async seedPosts() {
+  private async seedPosts(): Promise<Post[]> {
     const users = await this.usersRepository.find();
 
     if (users.length === 0) {
       console.log(
         'Brak użytkowników w bazie danych. Najpierw uruchom seedUsers().',
       );
-      return;
+      return [];
     }
 
-    const seedData = [
+    const postTemplates = [
       {
-        authorId: users[0].id,
         title: 'Przypadkowe spotkanie',
         content:
           'Nigdy nie zapomnę, jak przypadkiem poznałem swojego najlepszego przyjaciela, gdy zgubiłem się w obcym mieście.',
-        createdAt: new Date('2025-05-20T14:12:00Z'),
         tags: ['friendship', 'life', 'unexpected'],
-        likes: 125,
-        commentsCount: 8,
       },
       {
-        authorId: users[1]?.id || users[0].id,
         title: 'Powrót z przeszłości',
         content:
           'Po latach milczenia napisała do mnie osoba, której bardzo brakowało mi w życiu.',
-        createdAt: new Date('2025-05-19T09:47:00Z'),
         tags: ['life', 'nostalgia', 'relationships'],
-        likes: 87,
-        commentsCount: 5,
       },
       {
-        authorId: users[2]?.id || users[0].id,
         title: 'Dobro wraca',
         content:
           "Zgubiłem portfel, ale ktoś go zwrócił z karteczką: 'Dobro wraca'.",
-        createdAt: new Date('2025-05-18T18:30:00Z'),
         tags: ['kindness', 'everyday', 'hope'],
-        likes: 200,
-        commentsCount: 14,
       },
       {
-        authorId: users[3]?.id || users[0].id,
         title: 'Wystarczająco dobry',
         content:
           'Zrozumiałem, że nie muszę być idealny, żeby być wystarczający.',
-        createdAt: new Date('2025-05-17T21:05:00Z'),
         tags: ['mental_health', 'reflection', 'selflove'],
-        likes: 173,
-        commentsCount: 12,
       },
       {
-        authorId: users[4]?.id || users[0].id,
         title: 'Ktoś, komu zależy',
         content:
           'Pierwszy raz od lat poczułem, że naprawdę komuś na mnie zależy.',
-        createdAt: new Date('2025-05-16T16:50:00Z'),
         tags: ['emotions', 'support', 'healing'],
-        likes: 149,
-        commentsCount: 9,
+      },
+      {
+        title: 'Nowy początek',
+        content:
+          'Dziś postanowiłem zmienić swoje życie. Małe kroki, ale w dobrym kierunku.',
+        tags: ['change', 'motivation', 'future'],
+      },
+      {
+        title: 'Rodzinna historia',
+        content:
+          'Babcia opowiedziała mi historię, która zmieniła moje spojrzenie na życie.',
+        tags: ['family', 'wisdom', 'tradition'],
+      },
+      {
+        title: 'Przeprosiny',
+        content:
+          'Po latach znalazłem odwagę, żeby przeprosić osobę, którą skrzywdziłem.',
+        tags: ['forgiveness', 'courage', 'relationships'],
+      },
+      {
+        title: 'Pierwszy dzień',
+        content:
+          'Dziś był mój pierwszy dzień w nowej pracy. Wszystko poszło lepiej niż myślałem.',
+        tags: ['work', 'new_experience', 'success'],
+      },
+      {
+        title: 'Stare zdjęcie',
+        content:
+          'Znalazłem stare zdjęcie i przypomniałem sobie, jak piękne było dzieciństwo.',
+        tags: ['memories', 'childhood', 'nostalgia'],
       },
     ];
 
-    for (const postData of seedData) {
-      const post = this.postsRepository.create(postData);
-      await this.postsRepository.save(post);
+    const createdPosts: Post[] = [];
+
+    // Tworzymy 40 postów
+    for (let i = 0; i < 40; i++) {
+      const template = postTemplates[i % postTemplates.length];
+      const randomUser = users[Math.floor(Math.random() * users.length)];
+
+      // Losowa data z ostatnich 30 dni
+      const randomDate = new Date();
+      randomDate.setDate(randomDate.getDate() - Math.floor(Math.random() * 30));
+      randomDate.setHours(Math.floor(Math.random() * 24));
+      randomDate.setMinutes(Math.floor(Math.random() * 60));
+
+      const post = this.postsRepository.create({
+        authorId: randomUser.id,
+        title: `${template.title} ${i + 1}`,
+        content: template.content,
+        tags: template.tags,
+        createdAt: randomDate,
+        likesCount: 0, // Będzie aktualizowane przez seedLikes
+        commentsCount: 0,
+      });
+
+      const savedPost = await this.postsRepository.save(post);
+      createdPosts.push(savedPost);
     }
 
-    console.log('Baza danych została zainicjalizowana przykładowymi postami');
+    console.log(
+      `Baza danych została zainicjalizowana ${createdPosts.length} przykładowymi postami`,
+    );
+    return createdPosts;
+  }
+
+  private async seedLikes() {
+    const users = await this.usersRepository.find();
+    const posts = await this.postsRepository.find();
+
+    if (users.length === 0 || posts.length === 0) {
+      console.log('Brak użytkowników lub postów w bazie danych.');
+      return;
+    }
+
+    let totalLikes = 0;
+
+    // Każdy post może mieć od 0 do 50 polubień
+    for (const post of posts) {
+      const likesCount = Math.floor(Math.random() * 51); // 0-50 polubień
+
+      // Losowi użytkownicy, którzy polubili ten post
+      const shuffledUsers = [...users].sort(() => 0.5 - Math.random());
+      const usersWhoLiked = shuffledUsers.slice(0, likesCount);
+
+      for (const user of usersWhoLiked) {
+        // Sprawdź czy użytkownik już polubił ten post
+        const existingLike = await this.postLikesRepository.findOne({
+          where: { userId: user.id, postId: post.id },
+        });
+
+        if (!existingLike) {
+          const like = this.postLikesRepository.create({
+            userId: user.id,
+            postId: post.id,
+          });
+          await this.postLikesRepository.save(like);
+          totalLikes++;
+        }
+      }
+
+      // Aktualizuj licznik polubień w poście
+      await this.postsRepository.update(post.id, { likesCount });
+    }
+
+    console.log(`Utworzono ${totalLikes} polubień`);
+  }
+
+  private async seedComments() {
+    const users = await this.usersRepository.find();
+    const posts = await this.postsRepository.find();
+
+    if (users.length === 0 || posts.length === 0) {
+      console.log('Brak użytkowników lub postów w bazie danych.');
+      return;
+    }
+
+    const commentTemplates = [
+      'Świetny post! Dzięki za podzielenie się.',
+      'To bardzo inspirujące. Dziękuję!',
+      'Mam podobne doświadczenia. Trzymaj się!',
+      'Pięknie napisane. Wzruszyło mnie to.',
+      'Dzięki za te słowa. Bardzo mi pomogły.',
+      'Czuję to samo. Nie jesteś sam.',
+      'Wspaniała historia! Życzę wszystkiego najlepszego.',
+      'To prawda. Czasami małe rzeczy znaczą najwięcej.',
+      'Dziękuję za podzielenie się tym doświadczeniem.',
+      'Bardzo mądre słowa. Zapamiętam to.',
+      'Masz rację. Dobro zawsze wraca.',
+      'To piękne. Dzięki za inspirację.',
+      'Czuję się tak samo. Trzymajmy się razem.',
+      'Świetna historia! Życzę powodzenia.',
+      'Dzięki za te słowa. Bardzo mi pomogły.',
+    ];
+
+    let totalComments = 0;
+
+    // Każdy post może mieć od 0 do 15 komentarzy
+    for (const post of posts) {
+      const commentsCount = Math.floor(Math.random() * 16); // 0-15 komentarzy
+
+      for (let i = 0; i < commentsCount; i++) {
+        const randomUser = users[Math.floor(Math.random() * users.length)];
+        const randomComment =
+          commentTemplates[Math.floor(Math.random() * commentTemplates.length)];
+
+        // Losowa data komentarza (po dacie posta)
+        const commentDate = new Date(post.createdAt);
+        commentDate.setDate(
+          commentDate.getDate() + Math.floor(Math.random() * 7),
+        ); // Do 7 dni po poście
+
+        const comment = this.commentsRepository.create({
+          postId: post.id,
+          authorId: randomUser.id,
+          content: randomComment,
+          createdAt: commentDate,
+        });
+
+        await this.commentsRepository.save(comment);
+        totalComments++;
+      }
+
+      // Aktualizuj licznik komentarzy w poście
+      await this.postsRepository.update(post.id, { commentsCount });
+    }
+
+    console.log(`Utworzono ${totalComments} komentarzy`);
   }
 }

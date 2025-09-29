@@ -78,6 +78,7 @@ export class PostsController {
       filters.page,
       filters.limit,
       user?.id,
+      filters.sortBy,
     );
   }
   @ApiOperation({ summary: 'Najpopularniejsze tagi' })

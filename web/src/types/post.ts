@@ -45,6 +45,7 @@ export const postFiltersSchema = z.object({
   limit: z.number().min(1).max(100).default(10),
   authorId: z.string().uuid().optional(),
   tag: z.string().optional(),
+  sortBy: z.enum(["newest", "popular", "most_commented"]).optional(),
 });
 
 export const searchPostsSchema = z.object({

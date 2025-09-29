@@ -8,10 +8,14 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { OptionalJwtAuthGuard } from './guards/optional-jwt-auth.guard';
 import { UsersModule } from '../users/users.module';
+import { RefreshTokenStrategy } from './strategies/refresh-token.strategy';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { RefreshToken } from './entities/refresh-token.entity';
 
 @Module({
   imports: [
     UsersModule,
+    TypeOrmModule.forFeature([RefreshToken]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       secret:
@@ -25,13 +29,25 @@ import { UsersModule } from '../users/users.module';
           return 'dev_secret_only_for_development';
         })(),
       signOptions: {
-        expiresIn: process.env.JWT_EXPIRATION_TIME || '24h',
+        expiresIn: process.env.JWT_EXPIRATION_TIME || '15m',
       },
     }),
     ConfigModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, JwtAuthGuard, OptionalJwtAuthGuard],
-  exports: [JwtStrategy, PassportModule, JwtAuthGuard, OptionalJwtAuthGuard],
+  providers: [
+    AuthService,
+    JwtStrategy,
+    JwtAuthGuard,
+    OptionalJwtAuthGuard,
+    RefreshTokenStrategy,
+  ],
+  exports: [
+    JwtStrategy,
+    PassportModule,
+    JwtAuthGuard,
+    OptionalJwtAuthGuard,
+    RefreshTokenStrategy,
+  ],
 })
 export class AuthModule {}

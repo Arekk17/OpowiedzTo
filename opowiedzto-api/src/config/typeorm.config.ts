@@ -8,6 +8,7 @@ import { Comment } from '../posts/entities/comment.entity';
 import { PostLike } from '../posts/entities/post-like.entity';
 import { PostReport } from '../reports/entities/post-report.entity';
 import { CommentReport } from '../reports/entities/comment-report.entity';
+import { RefreshToken } from '../auth/entities/refresh-token.entity';
 
 config();
 
@@ -18,7 +19,16 @@ const options: DataSourceOptions = {
   username: process.env.DATABASE_USERNAME || 'postgres',
   password: process.env.DATABASE_PASSWORD || 'postgres',
   database: process.env.DATABASE_NAME || 'opowiedzto',
-  entities: [User, Post, Follow, Comment, PostLike, PostReport, CommentReport],
+  entities: [
+    User,
+    Post,
+    Follow,
+    Comment,
+    PostLike,
+    PostReport,
+    CommentReport,
+    RefreshToken,
+  ],
   migrations: [join(__dirname, '..', 'migrations', '*.{ts,js}')],
   migrationsTableName: 'migrations',
   migrationsRun: process.env.NODE_ENV === 'production',

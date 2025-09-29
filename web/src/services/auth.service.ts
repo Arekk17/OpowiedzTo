@@ -1,6 +1,7 @@
 import { apiClient } from "@/lib/api/client";
 import { AUTH_ENDPOINTS } from "@/lib/config/api";
 import { LoginFormData, RegisterApiData } from "@/types/auth";
+import { emit } from "@/lib/auth/events";
 
 export interface AuthApiResponse {
   accessToken: string;
@@ -21,6 +22,7 @@ export const login = async (data: LoginFormData): Promise<AuthApiResponse> => {
       AUTH_ENDPOINTS.login,
       data
     );
+    emit("auth:login");
     return resp;
   } catch (error) {
     throw new Error(error instanceof Error ? error.message : "Błąd logowania");
@@ -35,6 +37,7 @@ export const register = async (
       AUTH_ENDPOINTS.register,
       data
     );
+    emit("auth:register");
     return resp;
   } catch (error) {
     throw new Error(
@@ -48,6 +51,7 @@ export const logout = async (): Promise<{ message: string }> => {
     const resp = await apiClient.post<{ message: string }>(
       AUTH_ENDPOINTS.logout
     );
+    emit("auth:logout");
     return resp;
   } catch (error) {
     throw new Error(
@@ -72,6 +76,15 @@ export const generateNickname = async (): Promise<{ nickname: string }> => {
   } catch (error) {
     throw new Error(
       error instanceof Error ? error.message : "Błąd generowania nicku"
+    );
+  }
+};
+export const refreshToken = async (): Promise<AuthApiResponse> => {
+  try {
+    return apiClient.post<AuthApiResponse>(AUTH_ENDPOINTS.refreshToken);
+  } catch (error) {
+    throw new Error(
+      error instanceof Error ? error.message : "Błąd odświeżenia tokenu"
     );
   }
 };

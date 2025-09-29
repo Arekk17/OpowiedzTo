@@ -23,6 +23,7 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { GetUser } from './decorators/get-user.decorator';
 import { User } from '../users/entities/user.entity';
 import { GenerateNicknameResponseDto } from './dto/generate-nickname.dto';
+import { RefreshTokenAuthGuard } from './guards/refresh-token-auth.guard';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -45,6 +46,24 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ): Promise<AuthResponseDto> {
     return this.authService.register(registerDto, res);
+  }
+  @Post('refresh-token')
+  @UseGuards(RefreshTokenAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Odświeżenie tokenu' })
+  @ApiResponse({
+    status: 200,
+    description: 'Token został odświeżony pomyślnie',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Brak autoryzacji',
+  })
+  async refreshToken(
+    @GetUser() user: User,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<AuthResponseDto> {
+    return this.authService.refreshTokens(user, res);
   }
 
   @ApiOperation({ summary: 'Logowanie użytkownika' })
@@ -98,5 +117,19 @@ export class AuthController {
   async generateNickname(): Promise<GenerateNicknameResponseDto> {
     const nickname = await this.authService.generateNickname();
     return { nickname };
+  }
+  @Post('logout')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Wyloguj użytkownika' })
+  @ApiResponse({
+    status: 200,
+    description: 'Użytkownik został wylogowany',
+  })
+  async logout(
+    @GetUser() user: User,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<{ message: string }> {
+    return this.authService.logout(user, res);
   }
 }

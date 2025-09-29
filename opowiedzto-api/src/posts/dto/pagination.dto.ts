@@ -1,6 +1,7 @@
-import { IsOptional, IsInt, Min, Max } from 'class-validator';
+import { IsOptional, IsInt, Min, Max, IsEnum } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiPropertyOptional } from '@nestjs/swagger';
+import { SortOption } from '../enum/sort-option.enum';
 
 export class PaginationDto {
   @ApiPropertyOptional({
@@ -46,4 +47,13 @@ export class PostFiltersDto extends PaginationDto {
   })
   @IsOptional()
   authorId?: string;
+
+  @ApiPropertyOptional({
+    enum: SortOption,
+    example: SortOption.NEWEST,
+    description: 'Opcje sortowania',
+  })
+  @IsOptional()
+  @IsEnum(SortOption)
+  sortBy?: SortOption = SortOption.NEWEST;
 }

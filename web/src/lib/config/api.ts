@@ -12,6 +12,7 @@ export const AUTH_ENDPOINTS = {
   logout: "/auth/logout",
   me: "/auth/me",
   generateNickname: "/auth/generate-nickname",
+  refreshToken: "/auth/refresh-token",
 } as const;
 
 export const USERS_ENDPOINTS = {
