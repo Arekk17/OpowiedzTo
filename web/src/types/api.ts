@@ -1,11 +1,9 @@
 import { z } from "zod";
 
-export interface ApiResponse<T> {
-  data: T;
-  message?: string;
-  success: boolean;
-}
-
+export type ApiResponse<TData, TMeta = unknown> = {
+  data: TData;
+  meta: TMeta;
+};
 export interface ApiError {
   message: string;
   statusCode: number;
@@ -39,6 +37,17 @@ export interface SortParams {
   sortBy?: string;
   sortOrder?: "asc" | "desc";
 }
+
+export type CursorMeta = { nextCursor: string | null };
+
+export type PagedMeta = {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+  hasNextPage?: boolean;
+  hasPreviousPage?: boolean;
+};
 
 export const paginationSchema = z.object({
   page: z.number().min(1).default(1),

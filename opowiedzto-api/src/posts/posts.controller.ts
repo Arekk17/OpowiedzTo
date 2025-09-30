@@ -32,6 +32,7 @@ import { GetUser } from '../auth/decorators/get-user.decorator';
 import { GetOptionalUser } from '../auth/decorators/get-optional-user.decorator';
 import { User } from '../users/entities/user.entity';
 import { TrendingTagDto } from './dto/trending-tag.dto';
+import { decodeCursor } from './dto/cursor.dto';
 
 @ApiTags('posts')
 @Controller('posts')
@@ -66,19 +67,17 @@ export class PostsController {
   @Get()
   async findAll(
     @Query() filters: PostFiltersDto,
+    @Query('cursor') cursor?: string,
     @GetOptionalUser() user?: User,
-  ): Promise<{ data: PostWithDetailsDto[]; meta: any }> {
-    console.log(
-      `PostsController.findAll: user=${user?.id || 'null'}, filters=`,
-      filters,
-    );
-    return this.postsService.findAll(
+  ): Promise<{ data: PostWithDetailsDto[]; nextCursor: string | null }> {
+    const decoded = decodeCursor(cursor);
+    return this.postsService.findAllCursor(
       filters.tag,
       filters.authorId,
-      filters.page,
       filters.limit,
       user?.id,
       filters.sortBy,
+      decoded,
     );
   }
   @ApiOperation({ summary: 'Najpopularniejsze tagi' })

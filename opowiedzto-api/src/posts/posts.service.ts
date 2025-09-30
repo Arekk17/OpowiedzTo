@@ -11,7 +11,8 @@ import { PostRepository } from './repositories/post.repository';
 import { PostWithDetailsDto } from './dto/post-with-details.dto';
 import { TrendingTagDto } from './dto/trending-tag.dto';
 import { SortOption } from './enum/sort-option.enum';
-
+import { FeedCursor } from './dto/cursor.dto';
+import { encodeCursor } from './dto/cursor.dto';
 @Injectable()
 export class PostsService {
   constructor(private readonly postRepository: PostRepository) {}
@@ -46,6 +47,46 @@ export class PostsService {
         hasPreviousPage: page > 1,
       },
     };
+  }
+
+  async findAllCursor(
+    tag: string | undefined,
+    authorId: string | undefined,
+    limit: number = 10,
+    userId?: string,
+    sortBy?: SortOption,
+    cursor?: { createdAt: string; id: string } | null,
+  ): Promise<{ data: PostWithDetailsDto[]; nextCursor: string | null }> {
+    const take = Math.min(Math.max(Number(limit) || 10, 1), 50);
+    const { posts } = await this.postRepository.findAllWithDetailsCursor(
+      take + 1,
+      userId,
+      tag,
+      authorId,
+      sortBy,
+      cursor || null,
+    );
+
+    const hasMore = posts.length > take;
+    const sliced = hasMore ? posts.slice(0, take) : posts;
+
+    const last: PostWithDetailsDto | undefined = sliced[sliced.length - 1];
+    if (!last) return { data: sliced, nextCursor: null };
+
+    const createdAtISO =
+      last.createdAt instanceof Date
+        ? last.createdAt.toISOString()
+        : new Date(String(last.createdAt)).toISOString();
+
+    const payload: FeedCursor = {
+      createdAt: createdAtISO,
+      id: String(last.id),
+      likesCount: Number(last.likesCount ?? 0),
+      commentsCount: Number(last.commentsCount ?? 0),
+    };
+
+    const nextCursor = encodeCursor(payload);
+    return { data: sliced, nextCursor };
   }
 
   async findOne(id: string): Promise<Post> {

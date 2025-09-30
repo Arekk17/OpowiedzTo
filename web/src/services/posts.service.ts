@@ -1,5 +1,7 @@
+import { buildCursorParams, buildQueryParams } from "@/helpers/buildParams";
 import { apiClient, createServerApi } from "@/lib/api/client";
 import { POSTS_ENDPOINTS } from "@/lib/config/api";
+import type { PaginatedResponse, ApiResponse, CursorMeta } from "@/types/api";
 import {
   Post,
   PostFiltersData,
@@ -9,46 +11,46 @@ import {
   TrendingTags,
 } from "@/types/post";
 
-export interface PostsApiResponse {
-  data: Post[];
-  meta: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-    hasNextPage: boolean;
-    hasPreviousPage: boolean;
-  };
-}
+export type PostsCursorResponse = ApiResponse<Post[], CursorMeta>;
+type CursorFilters = Omit<PostFiltersData, "page"> & { cursor?: string };
 
-const buildQueryParams = (filters: PostFiltersData): URLSearchParams => {
-  const params = new URLSearchParams();
+const adaptCursorResponse = (
+  res: PostsCursorResponse | { data: Post[]; nextCursor: string | null }
+): PostsCursorResponse => {
+  if ((res as PostsCursorResponse).meta) return res as PostsCursorResponse;
+  const flat = res as { data: Post[]; nextCursor: string | null };
+  return { data: flat.data, meta: { nextCursor: flat.nextCursor } };
+};
 
-  params.set("page", (filters.page || 1).toString());
-  params.set("limit", (filters.limit || 10).toString());
+export const getPostsCursor = async (
+  filters: CursorFilters
+): Promise<PostsCursorResponse> => {
+  const params = buildCursorParams(filters);
+  const res = await apiClient.get<
+    PostsCursorResponse | { data: Post[]; nextCursor: string | null }
+  >(`${POSTS_ENDPOINTS.list}?${params.toString()}`);
+  return adaptCursorResponse(res);
+};
 
-  if (filters.authorId?.trim()) {
-    params.set("authorId", filters.authorId);
-  }
-
-  if (filters.tag?.trim()) {
-    params.set("tag", filters.tag);
-  }
-
-  if (filters.sortBy) {
-    params.set("sortBy", filters.sortBy);
-  }
-
-  return params;
+export const getPostsCursorWithCookie = async (
+  filters: CursorFilters,
+  cookieHeader: string
+): Promise<PostsCursorResponse> => {
+  const params = buildCursorParams(filters);
+  const serverApi = createServerApi(cookieHeader);
+  const res = await serverApi.get<
+    PostsCursorResponse | { data: Post[]; nextCursor: string | null }
+  >(`${POSTS_ENDPOINTS.list}?${params.toString()}`);
+  return adaptCursorResponse(res);
 };
 
 export const getPosts = async (
   filters: PostFiltersData
-): Promise<PostsApiResponse> => {
+): Promise<PaginatedResponse<Post>> => {
   try {
     const params = buildQueryParams(filters);
 
-    return await apiClient.get<PostsApiResponse>(
+    return await apiClient.get<PaginatedResponse<Post>>(
       `${POSTS_ENDPOINTS.list}?${params.toString()}`
     );
   } catch (error) {
@@ -58,18 +60,17 @@ export const getPosts = async (
   }
 };
 
-// Server-only variant: pass cookie header so backend can compute isLiked/likesCount for current user
 export const getPostsWithCookie = async (
   filters: PostFiltersData,
   cookieHeader: string
-): Promise<PostsApiResponse> => {
+): Promise<PaginatedResponse<Post>> => {
   try {
     const params = buildQueryParams(filters);
     console.log(
       `getPostsWithCookie: cookieHeader=${cookieHeader.substring(0, 50)}...`
     );
     const serverApi = createServerApi(cookieHeader);
-    const result = await serverApi.get<PostsApiResponse>(
+    const result = await serverApi.get<PaginatedResponse<Post>>(
       `${POSTS_ENDPOINTS.list}?${params.toString()}`
     );
     console.log(`getPostsWithCookie: got ${result.data.length} posts`);
@@ -105,8 +106,8 @@ export const getTrendingTags = async (): Promise<TrendingTags[]> => {
   }
 };
 
-export interface SearchPostsApiResponse extends PostsApiResponse {
-  meta: PostsApiResponse["meta"] & {
+export interface SearchPostsApiResponse extends PaginatedResponse<Post> {
+  meta: PaginatedResponse<Post>["meta"] & {
     searchTerm: string;
   };
 }

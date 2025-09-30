@@ -2,8 +2,8 @@
 import React from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { RadioField } from "./RadioField";
+import { updateSearchParams } from "@/helpers/buildParams";
 
-// Mapowanie wartości frontend -> backend
 export type SortValue = "newest" | "popular" | "most_commented";
 
 const SORT_LABELS: Record<SortValue, string> = {
@@ -21,9 +21,7 @@ export const SortOptions: React.FC = () => {
     (searchParams.get("sort") as SortValue | null) ?? "newest";
 
   const setSort = (value: SortValue) => {
-    const sp = new URLSearchParams(searchParams.toString());
-    sp.set("sort", value);
-    sp.set("page", "1"); // Reset do pierwszej strony przy zmianie sortowania
+    const sp = updateSearchParams(searchParams, { sort: value });
     router.push(`${pathname}?${sp.toString()}`);
   };
 

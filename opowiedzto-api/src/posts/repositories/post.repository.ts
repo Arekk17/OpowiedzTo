@@ -5,6 +5,7 @@ import { PostWithDetailsDto } from '../dto/post-with-details.dto';
 import { AuthorDto } from '../dto/author.dto';
 import { TrendingTagDto } from '../dto/trending-tag.dto';
 import { SortOption } from '../enum/sort-option.enum';
+import { FeedCursor } from '../dto/cursor.dto';
 
 @Injectable()
 export class PostRepository extends Repository<Post> {
@@ -97,12 +98,115 @@ export class PostRepository extends Repository<Post> {
       } as AuthorDto,
       createdAt: post.createdAt,
       updatedAt: post.updatedAt,
-      commentsCount: post.commentsCount, // Użyj z encji
-      likesCount: post.likesCount, // Użyj z encji
+      commentsCount: post.commentsCount,
+      likesCount: post.likesCount,
       isLiked: userLikedPostIds.has(post.id),
     }));
 
     return { posts: postsWithDetails, total };
+  }
+
+  async findAllWithDetailsCursor(
+    limit: number = 10,
+    userId?: string,
+    tag?: string,
+    authorId?: string,
+    sortBy?: SortOption,
+    cursor?: FeedCursor | null,
+  ): Promise<{ posts: PostWithDetailsDto[] }> {
+    const qb = this.createQueryBuilder('post').leftJoinAndSelect(
+      'post.author',
+      'author',
+    );
+
+    if (tag) qb.andWhere('post.tags LIKE :tag', { tag: `%${tag}%` });
+    if (authorId) qb.andWhere('post.authorId = :authorId', { authorId });
+
+    // Sort + keyset predicate
+    switch (sortBy) {
+      case SortOption.POPULAR:
+        qb.orderBy('post.likesCount', 'DESC')
+          .addOrderBy('post.createdAt', 'DESC')
+          .addOrderBy('post.id', 'DESC');
+        if (cursor) {
+          qb.andWhere(
+            '(post.likesCount < :lc) OR (post.likesCount = :lc AND (post.createdAt < :cAt OR (post.createdAt = :cAt AND post.id < :cId)))',
+            {
+              lc: cursor.likesCount ?? 0,
+              cAt: new Date(cursor.createdAt),
+              cId: cursor.id,
+            },
+          );
+        }
+        break;
+      case SortOption.MOST_COMMENTED:
+        qb.orderBy('post.commentsCount', 'DESC')
+          .addOrderBy('post.createdAt', 'DESC')
+          .addOrderBy('post.id', 'DESC');
+        if (cursor) {
+          qb.andWhere(
+            '(post.commentsCount < :cc) OR (post.commentsCount = :cc AND (post.createdAt < :cAt OR (post.createdAt = :cAt AND post.id < :cId)))',
+            {
+              cc: cursor.commentsCount ?? 0,
+              cAt: new Date(cursor.createdAt),
+              cId: cursor.id,
+            },
+          );
+        }
+        break;
+      default: // NEWEST
+        qb.orderBy('post.createdAt', 'DESC').addOrderBy('post.id', 'DESC');
+        if (cursor) {
+          qb.andWhere(
+            '(post.createdAt < :cAt OR (post.createdAt = :cAt AND post.id < :cId))',
+            { cAt: new Date(cursor.createdAt), cId: cursor.id },
+          );
+        }
+        break;
+    }
+
+    qb.limit(limit);
+
+    const entities = await qb.getMany();
+
+    const postIds = entities.map((p) => p.id);
+    let userLikedPostIds = new Set<string>();
+    if (userId && postIds.length) {
+      const userLikes = await this.dataSource
+        .createQueryBuilder()
+        .select('pl.postId', 'postId')
+        .from('post_likes', 'pl')
+        .where('pl.postId IN (:...postIds)', { postIds })
+        .andWhere('pl.userId = :userId', { userId })
+        .getRawMany();
+      userLikedPostIds = new Set(
+        userLikes.map((x: { postId: string }) => x.postId),
+      );
+    }
+
+    const posts: PostWithDetailsDto[] = entities.map((post) => ({
+      id: post.id,
+      title: post.title,
+      content: post.content,
+      tags: post.tags,
+      authorId: post.authorId,
+      author: {
+        id: post.author.id,
+        email: post.author.email,
+        nickname: post.author.nickname,
+        gender: post.author.gender,
+        createdAt: post.author.createdAt,
+        updatedAt: post.author.updatedAt,
+        avatar: post.author.avatar,
+      },
+      createdAt: post.createdAt,
+      updatedAt: post.updatedAt,
+      commentsCount: post.commentsCount,
+      likesCount: post.likesCount,
+      isLiked: userLikedPostIds.has(post.id),
+    }));
+
+    return { posts };
   }
 
   async searchWithDetails(

@@ -55,5 +55,5 @@ export class PostFiltersDto extends PaginationDto {
   })
   @IsOptional()
   @IsEnum(SortOption)
-  sortBy?: SortOption = SortOption.NEWEST;
+  sortBy?: SortOption;
 }
