@@ -16,7 +16,6 @@ export class PostLikeService {
   ) {}
 
   async likePost(userId: string, postId: string): Promise<PostLike> {
-    console.log('likePost', userId, postId);
     const post = await this.postRepository.findOne({ where: { id: postId } });
     if (!post) {
       throw new NotFoundException('Post nie istnieje');
