@@ -7,11 +7,14 @@ import {
   JoinColumn,
   OneToMany,
   UpdateDateColumn,
+  ManyToMany,
+  JoinTable,
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { Comment } from './comment.entity';
 import { PostLike } from './post-like.entity';
 import { ApiProperty } from '@nestjs/swagger';
+import { Tag } from 'src/tags/entities/tag.entity';
 
 @Entity('posts')
 export class Post {
@@ -44,8 +47,13 @@ export class Post {
   updatedAt: Date;
 
   @ApiProperty({ example: ['tag1', 'tag2'] })
-  @Column('simple-array')
-  tags: string[];
+  @ManyToMany(() => Tag, (tag) => tag.posts, { cascade: false })
+  @JoinTable({
+    name: 'post_tags',
+    joinColumn: { name: 'postId', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'tagId', referencedColumnName: 'id' },
+  })
+  tags: Tag[];
 
   @ApiProperty({ example: 0 })
   @Column({ default: 0 })

@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNumber, IsString } from 'class-validator';
 
-export class TrendingTagDto {
+export class TagDto {
   @ApiProperty({ example: 'tag1' })
   @IsString()
   tag: string;

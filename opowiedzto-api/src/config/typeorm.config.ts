@@ -9,6 +9,7 @@ import { PostLike } from '../posts/entities/post-like.entity';
 import { PostReport } from '../reports/entities/post-report.entity';
 import { CommentReport } from '../reports/entities/comment-report.entity';
 import { RefreshToken } from '../auth/entities/refresh-token.entity';
+import { Tag } from '../tags/entities/tag.entity';
 
 config();
 
@@ -28,6 +29,7 @@ const options: DataSourceOptions = {
     PostReport,
     CommentReport,
     RefreshToken,
+    Tag,
   ],
   migrations: [join(__dirname, '..', 'migrations', '*.{ts,js}')],
   migrationsTableName: 'migrations',

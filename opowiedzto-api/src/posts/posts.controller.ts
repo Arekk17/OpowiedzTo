@@ -23,7 +23,7 @@ import {
 import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
-import { PostFiltersDto, SearchDto } from './dto/pagination.dto';
+import { PostFiltersDto } from './dto/pagination.dto';
 import { Post as PostEntity } from './entities/post.entity';
 import { PostWithDetailsDto } from './dto/post-with-details.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -31,7 +31,6 @@ import { OptionalJwtAuthGuard } from '../auth/guards/optional-jwt-auth.guard';
 import { GetUser } from '../auth/decorators/get-user.decorator';
 import { GetOptionalUser } from '../auth/decorators/get-optional-user.decorator';
 import { User } from '../users/entities/user.entity';
-import { TrendingTagDto } from './dto/trending-tag.dto';
 import { decodeCursor } from './dto/cursor.dto';
 
 @ApiTags('posts')
@@ -63,6 +62,13 @@ export class PostsController {
       },
     },
   })
+  @ApiQuery({
+    name: 'cursor',
+    required: false,
+    description: 'Kursor do paginacji (opcjonalny)',
+    example:
+      'eyJjcmVhdGVkQXQiOiIyMDI0LTAxLTAxVDEyOjAwOjAwLjAwMFoiLCJpZCI6IjEyMyIsImxpa2VzQ291bnQiOjAsImNvbW1lbnRzQ291bnQiOjB9',
+  })
   @UseGuards(OptionalJwtAuthGuard)
   @Get()
   async findAll(
@@ -80,7 +86,7 @@ export class PostsController {
       decoded,
     );
   }
-  @ApiOperation({ summary: 'Najpopularniejsze tagi' })
+  @ApiOperation({ summary: 'Pojedynczy post' })
   @ApiQuery({ name: 'limit', required: false, example: 6 })
   @ApiResponse({
     status: 200,
@@ -89,83 +95,6 @@ export class PostsController {
       items: { $ref: '#/components/schemas/TrendingTagDto' },
     },
   })
-  @Get('trending')
-  trending(@Query('limit') limit?: number): Promise<TrendingTagDto[]> {
-    const safeLimit = Math.min(
-      Math.max(parseInt(String(limit || 6), 10) || 6, 1),
-      50,
-    );
-    return this.postsService.getTrendingTags(safeLimit);
-  }
-
-  @ApiOperation({ summary: 'Wyszukaj posty z paginacją' })
-  @ApiQuery({
-    name: 'q',
-    required: true,
-    example: 'życie',
-  })
-  @ApiQuery({
-    name: 'page',
-    required: false,
-    example: 1,
-  })
-  @ApiQuery({
-    name: 'limit',
-    required: false,
-    example: 10,
-  })
-  @ApiResponse({
-    status: 200,
-    schema: {
-      type: 'object',
-      properties: {
-        data: {
-          type: 'array',
-          items: { $ref: '#/components/schemas/PostWithDetailsDto' },
-        },
-        meta: {
-          type: 'object',
-          properties: {
-            page: { type: 'number', example: 1 },
-            limit: { type: 'number', example: 10 },
-            total: { type: 'number', example: 25 },
-            totalPages: { type: 'number', example: 3 },
-            hasNextPage: { type: 'boolean', example: true },
-            hasPreviousPage: { type: 'boolean', example: false },
-            searchTerm: { type: 'string', example: 'życie' },
-          },
-        },
-      },
-    },
-  })
-  @UseGuards(OptionalJwtAuthGuard)
-  @Get('search')
-  search(
-    @Query() searchDto: SearchDto,
-    @GetOptionalUser() user?: User,
-  ): Promise<{ data: PostWithDetailsDto[]; meta: any }> {
-    if (!searchDto.q || searchDto.q.trim() === '') {
-      return Promise.resolve({
-        data: [],
-        meta: {
-          page: searchDto.page || 1,
-          limit: searchDto.limit || 10,
-          total: 0,
-          totalPages: 0,
-          hasNextPage: false,
-          hasPreviousPage: false,
-          searchTerm: '',
-        },
-      });
-    }
-    return this.postsService.search(
-      searchDto.q.trim(),
-      searchDto.page,
-      searchDto.limit,
-      user?.id,
-    );
-  }
-
   @ApiOperation({
     summary: 'Pobierz post po ID (tylko zalogowani użytkownicy)',
   })

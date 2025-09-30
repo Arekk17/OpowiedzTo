@@ -9,13 +9,16 @@ import { UpdatePostDto } from './dto/update-post.dto';
 import { User } from '../users/entities/user.entity';
 import { PostRepository } from './repositories/post.repository';
 import { PostWithDetailsDto } from './dto/post-with-details.dto';
-import { TrendingTagDto } from './dto/trending-tag.dto';
 import { SortOption } from './enum/sort-option.enum';
 import { FeedCursor } from './dto/cursor.dto';
 import { encodeCursor } from './dto/cursor.dto';
+import { TagsService } from 'src/tags/tags.service';
 @Injectable()
 export class PostsService {
-  constructor(private readonly postRepository: PostRepository) {}
+  constructor(
+    private readonly postRepository: PostRepository,
+    private readonly tagsService: TagsService,
+  ) {}
 
   async findAll(
     tag?: string,
@@ -25,6 +28,24 @@ export class PostsService {
     userId?: string,
     sortBy?: SortOption,
   ): Promise<{ data: PostWithDetailsDto[]; meta: any }> {
+    if (tag) {
+      const tagEntity = await this.tagsService.findOneBySlug(tag);
+      if (!tagEntity) {
+        return {
+          data: [],
+          meta: {
+            page,
+            limit,
+            total: 0,
+            totalPages: 0,
+            hasNextPage: false,
+            hasPreviousPage: false,
+          },
+        };
+      }
+      tag = tagEntity.slug;
+    }
+
     const result = await this.postRepository.findAllWithDetails(
       page,
       limit,
@@ -131,11 +152,23 @@ export class PostsService {
   }
 
   async create(createPostDto: CreatePostDto, user: User): Promise<Post> {
+    const slugs = (createPostDto.tags || [])
+      .map((s) => s.trim().toLowerCase())
+      .filter(Boolean);
+
+    await this.tagsService.upsertManyBySlugs(slugs);
+    const tags = await this.tagsService.findBySlugs(slugs);
+
     const post = this.postRepository.create({
-      ...createPostDto,
+      title: createPostDto.title,
+      content: createPostDto.content,
       authorId: user.id,
+      tags: tags,
     });
-    return this.postRepository.save(post);
+
+    const saved = await this.postRepository.save(post);
+    if (slugs.length) await this.tagsService.incrementPostCount(slugs, 1);
+    return saved;
   }
 
   async update(
@@ -158,7 +191,24 @@ export class PostsService {
     }
 
     if (updatePostDto.tags) {
-      post.tags = updatePostDto.tags;
+      const prevSlugs = new Set((post.tags || []).map((t) => t.slug));
+      const nextSlugs = new Set(
+        updatePostDto.tags.map((s) => s.trim().toLowerCase()).filter(Boolean),
+      );
+      const added = Array.from(nextSlugs).filter((s) => !prevSlugs.has(s));
+      const removed = Array.from(prevSlugs).filter((s) => !nextSlugs.has(s));
+
+      await this.tagsService.upsertManyBySlugs(Array.from(nextSlugs));
+      const nextTags = await this.tagsService.findBySlugs(
+        Array.from(nextSlugs),
+      );
+      post.tags = nextTags;
+
+      const saved = await this.postRepository.save(post);
+      if (added.length) await this.tagsService.incrementPostCount(added, 1);
+      if (removed.length)
+        await this.tagsService.incrementPostCount(removed, -1);
+      return saved;
     }
 
     return this.postRepository.save(post);
@@ -173,9 +223,8 @@ export class PostsService {
       );
     }
 
+    const slugs = (post.tags || []).map((t) => t.slug);
     await this.postRepository.remove(post);
-  }
-  async getTrendingTags(limit: number = 6): Promise<TrendingTagDto[]> {
-    return this.postRepository.getTrendingTags(limit);
+    if (slugs.length) await this.tagsService.incrementPostCount(slugs, -1);
   }
 }

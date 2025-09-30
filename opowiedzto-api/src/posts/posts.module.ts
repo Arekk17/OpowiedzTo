@@ -12,9 +12,10 @@ import { PostLikeController } from './post-like.controller';
 import { CommentController } from './comment.controller';
 import { PostLikeRepository } from './repositories/post-like.repository';
 import { CommentRepository } from './repositories/comment.repository';
+import { TagsModule } from 'src/tags/tags.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Post, PostLike, Comment])],
+  imports: [TypeOrmModule.forFeature([Post, PostLike, Comment]), TagsModule],
   controllers: [PostsController, PostLikeController, CommentController],
   providers: [
     PostsService,

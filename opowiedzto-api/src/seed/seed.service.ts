@@ -5,6 +5,7 @@ import { Post } from '../posts/entities/post.entity';
 import { User } from '../users/entities/user.entity';
 import { Comment } from '../posts/entities/comment.entity';
 import { PostLike } from '../posts/entities/post-like.entity';
+import { TagsService } from '../tags/tags.service';
 
 @Injectable()
 export class SeedService implements OnApplicationBootstrap {
@@ -17,6 +18,7 @@ export class SeedService implements OnApplicationBootstrap {
     private commentsRepository: Repository<Comment>,
     @InjectRepository(PostLike)
     private postLikesRepository: Repository<PostLike>,
+    private readonly tagsService: TagsService,
   ) {}
 
   async onApplicationBootstrap() {
@@ -79,61 +81,61 @@ export class SeedService implements OnApplicationBootstrap {
         title: 'Przypadkowe spotkanie',
         content:
           'Nigdy nie zapomnę, jak przypadkiem poznałem swojego najlepszego przyjaciela, gdy zgubiłem się w obcym mieście.',
-        tags: ['friendship', 'life', 'unexpected'],
+        tags: ['przyjaźń', 'życie', 'przypadek'],
       },
       {
         title: 'Powrót z przeszłości',
         content:
           'Po latach milczenia napisała do mnie osoba, której bardzo brakowało mi w życiu.',
-        tags: ['life', 'nostalgia', 'relationships'],
+        tags: ['życie', 'nostalgia', 'relacje'],
       },
       {
         title: 'Dobro wraca',
         content:
           "Zgubiłem portfel, ale ktoś go zwrócił z karteczką: 'Dobro wraca'.",
-        tags: ['kindness', 'everyday', 'hope'],
+        tags: ['życzliwość', 'codzienność', 'nadzieja'],
       },
       {
         title: 'Wystarczająco dobry',
         content:
           'Zrozumiałem, że nie muszę być idealny, żeby być wystarczający.',
-        tags: ['mental_health', 'reflection', 'selflove'],
+        tags: ['psychika', 'refleksja', 'miłość-do-siebie'],
       },
       {
         title: 'Ktoś, komu zależy',
         content:
           'Pierwszy raz od lat poczułem, że naprawdę komuś na mnie zależy.',
-        tags: ['emotions', 'support', 'healing'],
+        tags: ['emocje', 'wsparcie', 'uzdrawianie'],
       },
       {
         title: 'Nowy początek',
         content:
           'Dziś postanowiłem zmienić swoje życie. Małe kroki, ale w dobrym kierunku.',
-        tags: ['change', 'motivation', 'future'],
+        tags: ['zmiana', 'motywacja', 'przyszłość'],
       },
       {
         title: 'Rodzinna historia',
         content:
           'Babcia opowiedziała mi historię, która zmieniła moje spojrzenie na życie.',
-        tags: ['family', 'wisdom', 'tradition'],
+        tags: ['rodzina', 'mądrość', 'tradycja'],
       },
       {
         title: 'Przeprosiny',
         content:
           'Po latach znalazłem odwagę, żeby przeprosić osobę, którą skrzywdziłem.',
-        tags: ['forgiveness', 'courage', 'relationships'],
+        tags: ['przebaczenie', 'odwaga', 'relacje'],
       },
       {
         title: 'Pierwszy dzień',
         content:
           'Dziś był mój pierwszy dzień w nowej pracy. Wszystko poszło lepiej niż myślałem.',
-        tags: ['work', 'new_experience', 'success'],
+        tags: ['praca', 'nowe-doświadczenie', 'sukces'],
       },
       {
         title: 'Stare zdjęcie',
         content:
           'Znalazłem stare zdjęcie i przypomniałem sobie, jak piękne było dzieciństwo.',
-        tags: ['memories', 'childhood', 'nostalgia'],
+        tags: ['wspomnienia', 'dzieciństwo', 'nostalgia'],
       },
     ];
 
@@ -150,11 +152,16 @@ export class SeedService implements OnApplicationBootstrap {
       randomDate.setHours(Math.floor(Math.random() * 24));
       randomDate.setMinutes(Math.floor(Math.random() * 60));
 
+      // Tworzymy/znajdujemy tagi
+      const tagSlugs = template.tags.map((tag) => tag.toLowerCase().trim());
+      await this.tagsService.upsertManyBySlugs(tagSlugs);
+      const tags = await this.tagsService.findBySlugs(tagSlugs);
+
       const post = this.postsRepository.create({
         authorId: randomUser.id,
         title: `${template.title} ${i + 1}`,
         content: template.content,
-        tags: template.tags,
+        tags: tags,
         createdAt: randomDate,
         likesCount: 0, // Będzie aktualizowane przez seedLikes
         commentsCount: 0,
@@ -162,6 +169,11 @@ export class SeedService implements OnApplicationBootstrap {
 
       const savedPost = await this.postsRepository.save(post);
       createdPosts.push(savedPost);
+
+      // Aktualizuj licznik postów dla tagów
+      if (tagSlugs.length > 0) {
+        await this.tagsService.incrementPostCount(tagSlugs, 1);
+      }
     }
 
     console.log(
@@ -170,6 +182,7 @@ export class SeedService implements OnApplicationBootstrap {
     return createdPosts;
   }
 
+  // ... reszta metod pozostaje bez zmian
   private async seedLikes() {
     const users = await this.usersRepository.find();
     const posts = await this.postsRepository.find();

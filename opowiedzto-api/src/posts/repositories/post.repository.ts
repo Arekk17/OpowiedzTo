@@ -3,7 +3,6 @@ import { DataSource, Repository } from 'typeorm';
 import { Post } from '../entities/post.entity';
 import { PostWithDetailsDto } from '../dto/post-with-details.dto';
 import { AuthorDto } from '../dto/author.dto';
-import { TrendingTagDto } from '../dto/trending-tag.dto';
 import { SortOption } from '../enum/sort-option.enum';
 import { FeedCursor } from '../dto/cursor.dto';
 
@@ -21,26 +20,20 @@ export class PostRepository extends Repository<Post> {
     authorId?: string,
     sortBy?: SortOption,
   ): Promise<{ posts: PostWithDetailsDto[]; total: number }> {
-    console.log(
-      `PostRepository.findAllWithDetails: userId=${userId || 'null'}, page=${page}, limit=${limit}, sortBy=${sortBy}`,
-    );
     const skip = (page - 1) * limit;
 
-    const queryBuilder = this.createQueryBuilder('post').leftJoinAndSelect(
-      'post.author',
-      'author',
-    );
+    const queryBuilder = this.createQueryBuilder('post')
+      .leftJoinAndSelect('post.author', 'author')
+      .leftJoinAndSelect('post.tags', 't');
 
-    // Filtry
     if (tag) {
-      queryBuilder.andWhere('post.tags LIKE :tag', { tag: `%${tag}%` });
+      queryBuilder.andWhere('t.slug = :slug', { slug: tag });
     }
 
     if (authorId) {
       queryBuilder.andWhere('post.authorId = :authorId', { authorId });
     }
 
-    // Sortowanie - używaj kolumn z encji
     switch (sortBy) {
       case SortOption.NEWEST:
         queryBuilder.orderBy('post.createdAt', 'DESC');
@@ -85,11 +78,10 @@ export class PostRepository extends Repository<Post> {
       id: post.id,
       title: post.title,
       content: post.content,
-      tags: post.tags,
+      tags: (post.tags || []).map((tg) => tg.slug),
       authorId: post.authorId,
       author: {
         id: post.author.id,
-        email: post.author.email,
         nickname: post.author.nickname,
         gender: post.author.gender,
         createdAt: post.author.createdAt,
@@ -114,22 +106,22 @@ export class PostRepository extends Repository<Post> {
     sortBy?: SortOption,
     cursor?: FeedCursor | null,
   ): Promise<{ posts: PostWithDetailsDto[] }> {
-    const qb = this.createQueryBuilder('post').leftJoinAndSelect(
-      'post.author',
-      'author',
-    );
+    const queryBuilder = this.createQueryBuilder('post')
+      .leftJoinAndSelect('post.author', 'author')
+      .leftJoinAndSelect('post.tags', 't');
 
-    if (tag) qb.andWhere('post.tags LIKE :tag', { tag: `%${tag}%` });
-    if (authorId) qb.andWhere('post.authorId = :authorId', { authorId });
+    if (tag) queryBuilder.andWhere('t.slug = :slug', { slug: tag });
+    if (authorId)
+      queryBuilder.andWhere('post.authorId = :authorId', { authorId });
 
-    // Sort + keyset predicate
     switch (sortBy) {
       case SortOption.POPULAR:
-        qb.orderBy('post.likesCount', 'DESC')
+        queryBuilder
+          .orderBy('post.likesCount', 'DESC')
           .addOrderBy('post.createdAt', 'DESC')
           .addOrderBy('post.id', 'DESC');
         if (cursor) {
-          qb.andWhere(
+          queryBuilder.andWhere(
             '(post.likesCount < :lc) OR (post.likesCount = :lc AND (post.createdAt < :cAt OR (post.createdAt = :cAt AND post.id < :cId)))',
             {
               lc: cursor.likesCount ?? 0,
@@ -140,11 +132,12 @@ export class PostRepository extends Repository<Post> {
         }
         break;
       case SortOption.MOST_COMMENTED:
-        qb.orderBy('post.commentsCount', 'DESC')
+        queryBuilder
+          .orderBy('post.commentsCount', 'DESC')
           .addOrderBy('post.createdAt', 'DESC')
           .addOrderBy('post.id', 'DESC');
         if (cursor) {
-          qb.andWhere(
+          queryBuilder.andWhere(
             '(post.commentsCount < :cc) OR (post.commentsCount = :cc AND (post.createdAt < :cAt OR (post.createdAt = :cAt AND post.id < :cId)))',
             {
               cc: cursor.commentsCount ?? 0,
@@ -155,9 +148,11 @@ export class PostRepository extends Repository<Post> {
         }
         break;
       default: // NEWEST
-        qb.orderBy('post.createdAt', 'DESC').addOrderBy('post.id', 'DESC');
+        queryBuilder
+          .orderBy('post.createdAt', 'DESC')
+          .addOrderBy('post.id', 'DESC');
         if (cursor) {
-          qb.andWhere(
+          queryBuilder.andWhere(
             '(post.createdAt < :cAt OR (post.createdAt = :cAt AND post.id < :cId))',
             { cAt: new Date(cursor.createdAt), cId: cursor.id },
           );
@@ -165,9 +160,9 @@ export class PostRepository extends Repository<Post> {
         break;
     }
 
-    qb.limit(limit);
+    queryBuilder.limit(limit);
 
-    const entities = await qb.getMany();
+    const entities = await queryBuilder.getMany();
 
     const postIds = entities.map((p) => p.id);
     let userLikedPostIds = new Set<string>();
@@ -188,7 +183,7 @@ export class PostRepository extends Repository<Post> {
       id: post.id,
       title: post.title,
       content: post.content,
-      tags: post.tags,
+      tags: (post.tags || []).map((tg) => tg.slug),
       authorId: post.authorId,
       author: {
         id: post.author.id,
@@ -219,20 +214,21 @@ export class PostRepository extends Repository<Post> {
 
     const queryBuilder = this.createQueryBuilder('post')
       .leftJoinAndSelect('post.author', 'author')
+      .leftJoin('post.tags', 't')
       .addSelect((subQuery) => {
         return subQuery
           .select('COUNT(c.id)')
-          .from('comment', 'c')
+          .from('comments', 'c')
           .where('c.postId = post.id');
       }, 'commentsCount')
       .addSelect((subQuery) => {
         return subQuery
           .select('COUNT(pl.id)')
-          .from('post_like', 'pl')
+          .from('post_likes', 'pl')
           .where('pl.postId = post.id');
       }, 'likesCount')
       .where(
-        'post.title ILIKE :searchTerm OR post.content ILIKE :searchTerm OR post.tags::text ILIKE :searchTerm',
+        'post.title ILIKE :searchTerm OR post.content ILIKE :searchTerm OR t.slug ILIKE :searchTerm',
         { searchTerm: `%${searchTerm}%` },
       )
       .orderBy('post.createdAt', 'DESC');
@@ -255,7 +251,7 @@ export class PostRepository extends Repository<Post> {
       const userLikes = await this.dataSource
         .createQueryBuilder()
         .select('pl.postId', 'postId')
-        .from('post_like', 'pl')
+        .from('post_likes', 'pl')
         .where('pl.postId IN (:...postIds)', { postIds })
         .andWhere('pl.userId = :userId', { userId })
         .getRawMany();
@@ -276,7 +272,7 @@ export class PostRepository extends Repository<Post> {
           id: post.id,
           title: post.title,
           content: post.content,
-          tags: post.tags,
+          tags: (post.tags || []).map((tg) => tg.slug),
           authorId: post.authorId,
           author: {
             id: post.author.id,
@@ -302,7 +298,7 @@ export class PostRepository extends Repository<Post> {
   async findWithAuthor(id: string): Promise<Post | null> {
     return this.findOne({
       where: { id },
-      relations: ['author'],
+      relations: ['author', 'tags'],
     });
   }
 
@@ -311,24 +307,5 @@ export class PostRepository extends Repository<Post> {
       where: { authorId },
       order: { createdAt: 'DESC' },
     });
-  }
-  async getTrendingTags(limit: number = 6): Promise<TrendingTagDto[]> {
-    const qb = this.dataSource
-      .createQueryBuilder()
-      .select('t.tag', 'tag')
-      .addSelect('COUNT(*)', 'count')
-      .from((sub) => {
-        return sub
-          .select("UNNEST(string_to_array(post.tags, ','))", 'tag')
-          .from(Post, 'post');
-      }, 't')
-      .groupBy('t.tag')
-      .orderBy('count', 'DESC')
-      .limit(limit);
-
-    const rows = await qb.getRawMany<{ tag: string; count: string }>();
-    return rows
-      .filter((r) => r.tag && r.tag.trim() !== '')
-      .map((r) => ({ tag: r.tag.trim(), count: parseInt(r.count, 10) }));
   }
 }
