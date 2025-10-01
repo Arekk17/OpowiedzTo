@@ -7,13 +7,19 @@ export class TagsListQueryDto {
   search?: string;
 
   @IsOptional()
-  @Transform(({ value }) => Number(value))
+  @Transform(({ value }) => {
+    if (value === undefined || value === '') return 1;
+    return Number(value);
+  })
   @IsInt()
   @Min(1)
   page?: number;
 
   @IsOptional()
-  @Transform(({ value }) => Number(value))
+  @Transform(({ value }) => {
+    if (value === undefined || value === '') return 20;
+    return Number(value);
+  })
   @IsInt()
   @Min(1)
   @Max(100)

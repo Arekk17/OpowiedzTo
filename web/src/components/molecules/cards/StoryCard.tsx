@@ -5,12 +5,14 @@ import { LikeButton, LikeButtonContent } from "../../atoms/buttons/LikeButton";
 import { CommentButton } from "../../atoms/buttons/CommentButton";
 import { useLike } from "@/hooks/useLike";
 import { useAuth } from "@/hooks/useAuth";
+import Link from "next/link";
+import { getPostUrl } from "@/helpers/generateSlug";
 
 export interface StoryCardProps {
   title: string;
   excerpt: string;
   author: string;
-  timestamp: string;
+  createdAt: string;
   category?: "none" | "featured" | "trending" | "new" | "anonymous";
   isAnonymous?: boolean;
   imageSrc?: string;
@@ -18,12 +20,13 @@ export interface StoryCardProps {
   id: string;
   likesCount?: number;
   isLiked?: boolean;
+  tags?: string[];
 }
 export const StoryCard: React.FC<StoryCardProps> = ({
   title,
   excerpt,
   author,
-  timestamp,
+  createdAt,
   category = "anonymous",
   isAnonymous = true,
   imageSrc,
@@ -31,12 +34,11 @@ export const StoryCard: React.FC<StoryCardProps> = ({
   id,
   likesCount = 0,
   isLiked = false,
+  tags,
 }) => {
   const { liked, count, toggle, isPending } = useLike(id, isLiked, likesCount);
   const { isAuthenticated, isLoading } = useAuth();
 
-  // Debug log
-  console.log(`StoryCard ${id}: isLiked=${isLiked}, likesCount=${likesCount}`);
   const getCategoryStyles = () => {
     switch (category) {
       case "none":
@@ -51,6 +53,7 @@ export const StoryCard: React.FC<StoryCardProps> = ({
         return "border-l-story-anonymous bg-primary/5";
     }
   };
+  console.log(getPostUrl(id, title));
 
   return (
     <article
@@ -63,7 +66,7 @@ export const StoryCard: React.FC<StoryCardProps> = ({
       hover:shadow-story 
       transition-all duration-300
       border-l-4
-      w-full max-w-[725px]
+      w-full max-w-[900px]
       ${getCategoryStyles()}
     `}
     >
@@ -115,29 +118,52 @@ export const StoryCard: React.FC<StoryCardProps> = ({
                 {isAnonymous ? "Anonim" : author}
               </span>
               <span className="w-1 h-1 bg-current rounded-full"></span>
-              <time className="text-xs font-jakarta">{timestamp}</time>
+              <time className="text-xs font-jakarta">{createdAt}</time>
             </div>
-
-            <h3
-              className="
-              text-content-primary
-              font-jakarta font-bold text-[16px] leading-5 
-              whitespace-normal
-              hover:text-primary
-              transition-colors
-              cursor-pointer
-              w-full max-w-[428px] break-words
-            "
+            <Link
+              href={getPostUrl(id, title)}
+              onClick={() => {
+                console.log("Link clicked!", getPostUrl(id, title));
+              }}
             >
-              {title}
-            </h3>
+              <h3
+                className="
+    text-content-primary
+    font-jakarta font-bold text-[16px] leading-5 
+    whitespace-normal
+    hover:text-primary
+    transition-colors
+    w-full max-w-[428px] break-words
+  "
+              >
+                {title}
+              </h3>
+            </Link>
+
+            {tags && tags.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mt-2">
+                {tags.slice(0, 3).map((tag) => (
+                  <span
+                    key={tag}
+                    className="inline-flex items-center h-6 px-2.5 rounded-full bg-ui-notification text-content-secondary font-jakarta text-[12px] leading-[18px]"
+                  >
+                    #{tag}
+                  </span>
+                ))}
+                {tags.length > 3 && (
+                  <span className="inline-flex items-center h-6 px-2.5 text-content-muted font-jakarta text-[12px] leading-[18px]">
+                    +{tags.length - 3}
+                  </span>
+                )}
+              </div>
+            )}
 
             <p
               className="
               text-content-secondary
               font-jakarta text-[14px] leading-[21px]
               whitespace-normal
-              w-full max-w-[428px] break-words
+              w-full max-w-[628px] break-words
             "
             >
               {excerpt}

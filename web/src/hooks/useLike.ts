@@ -12,9 +12,6 @@ export const useLike = (
   const [count, setCount] = useState(initialCount);
 
   useEffect(() => {
-    console.log(
-      `useLike ${postId}: syncing state - initialLiked=${initialLiked}, initialCount=${initialCount}`
-    );
     setLiked(initialLiked);
     setCount(initialCount);
   }, [postId, initialLiked, initialCount]);
@@ -27,9 +24,6 @@ export const useLike = (
       return unlikePost(postId);
     },
     onMutate: ({ nextLiked }) => {
-      console.log(
-        `useLike ${postId}: optimistic update - nextLiked=${nextLiked}, currentLiked=${liked}, currentCount=${count}`
-      );
       setLiked(nextLiked);
       setCount((prev) => (nextLiked ? prev + 1 : prev - 1));
       return {
@@ -37,21 +31,13 @@ export const useLike = (
         prevCount: nextLiked ? count - 1 : count + 1,
       };
     },
-    onSuccess: (data, variables) => {
-      console.log(
-        `useLike ${postId}: success - nextLiked=${variables.nextLiked}`
-      );
-    },
+    onSuccess: () => {},
     onError: (error, variables, ctx) => {
       const axiosError = error as {
         response?: { status?: number; data?: { message?: string } };
       };
       const status = axiosError?.response?.status;
       const message = axiosError?.response?.data?.message || "";
-
-      console.log(
-        `Like error: status=${status}, message="${message}", nextLiked=${variables.nextLiked}`
-      );
 
       if (status === 400 && message.includes("polubiłeś")) {
         setLiked(true);

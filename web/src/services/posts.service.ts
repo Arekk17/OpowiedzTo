@@ -1,6 +1,6 @@
 import { buildCursorParams, buildQueryParams } from "@/helpers/buildParams";
 import { apiClient, createServerApi } from "@/lib/api/client";
-import { POSTS_ENDPOINTS } from "@/lib/config/api";
+import { POSTS_ENDPOINTS, TAGS_ENDPOINTS } from "@/lib/config/api";
 import type { PaginatedResponse, ApiResponse, CursorMeta } from "@/types/api";
 import {
   Post,
@@ -10,6 +10,7 @@ import {
   UpdatePostFormData,
   TrendingTags,
 } from "@/types/post";
+import { TagsResponse } from "@/types/tags";
 
 export type PostsCursorResponse = ApiResponse<Post[], CursorMeta>;
 type CursorFilters = Omit<PostFiltersData, "page"> & { cursor?: string };
@@ -98,7 +99,23 @@ export const getPost = async (id: string): Promise<Post> => {
 };
 export const getTrendingTags = async (): Promise<TrendingTags[]> => {
   try {
-    return await apiClient.get<TrendingTags[]>(POSTS_ENDPOINTS.trendingTags);
+    return await apiClient.get<TrendingTags[]>(TAGS_ENDPOINTS.trending);
+  } catch (error) {
+    throw new Error(
+      error instanceof Error ? error.message : "Błąd pobierania tagów"
+    );
+  }
+};
+
+export const getTags = async ({
+  limit,
+}: {
+  limit?: number;
+}): Promise<TagsResponse> => {
+  try {
+    return await apiClient.get<TagsResponse>(
+      `${TAGS_ENDPOINTS.list}?limit=${limit}`
+    );
   } catch (error) {
     throw new Error(
       error instanceof Error ? error.message : "Błąd pobierania tagów"

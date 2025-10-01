@@ -27,7 +27,9 @@ export class PostRepository extends Repository<Post> {
       .leftJoinAndSelect('post.tags', 't');
 
     if (tag) {
-      queryBuilder.andWhere('t.slug = :slug', { slug: tag });
+      queryBuilder
+        .innerJoin('post.tags', 'filterTag')
+        .andWhere('filterTag.slug = :slug', { slug: tag });
     }
 
     if (authorId) {
@@ -110,7 +112,11 @@ export class PostRepository extends Repository<Post> {
       .leftJoinAndSelect('post.author', 'author')
       .leftJoinAndSelect('post.tags', 't');
 
-    if (tag) queryBuilder.andWhere('t.slug = :slug', { slug: tag });
+    if (tag) {
+      queryBuilder
+        .innerJoin('post.tags', 'filterTag')
+        .andWhere('filterTag.slug = :slug', { slug: tag });
+    }
     if (authorId)
       queryBuilder.andWhere('post.authorId = :authorId', { authorId });
 

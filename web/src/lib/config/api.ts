@@ -35,6 +35,11 @@ export const POSTS_ENDPOINTS = {
   trendingTags: "/posts/trending",
 } as const;
 
+export const TAGS_ENDPOINTS = {
+  trending: "/tags/trending",
+  list: "/tags",
+} as const;
+
 export const COMMENTS_ENDPOINTS = {
   list: (postId: string) => `/posts/${postId}/comments`,
   create: (postId: string) => `/posts/${postId}/comments`,

@@ -5,17 +5,17 @@ import { SortOptions } from "@/components/molecules/forms/SortOptions";
 import {
   getTrendingTags,
   getPostsCursorWithCookie,
+  getTags,
 } from "@/services/posts.service";
-import Link from "next/link";
 import { cookies } from "next/headers";
 import { Feed } from "@/components/organisms/story/Feed";
+import TagChips from "@/components/molecules/tags/TagChips";
 
 export default async function Home({
   searchParams,
 }: {
   searchParams: { [key: string]: string | string[] | undefined };
 }) {
-  const tags: string[] = ["Miłość", "Zdrada", "Przygoda", "Dramat", "Komedia"];
   const params = await searchParams;
   const tag = typeof params?.tag === "string" ? params.tag : undefined;
   const sort = typeof params?.sort === "string" ? params.sort : undefined;
@@ -29,7 +29,7 @@ export default async function Home({
   const cookieStore = await cookies();
   const cookieHeader = cookieStore.toString();
 
-  const [initialPage, trendingTags] = await Promise.all([
+  const [initialPage, trendingTags, tags] = await Promise.all([
     getPostsCursorWithCookie(
       {
         limit: 10,
@@ -39,6 +39,7 @@ export default async function Home({
       cookieHeader
     ),
     getTrendingTags(),
+    getTags({ limit: 10 }),
   ]);
 
   const baseQuery = (next: Partial<{ tag?: string; sort?: string }>) => {
@@ -52,35 +53,19 @@ export default async function Home({
 
   return (
     <div className="min-h-screen bg-background-subtle">
-      <main className="flex justify-center items-start py-5 px-6 md:px-10">
-        <div className="flex w-full max-w-[1280px] gap-4">
-          <aside className="hidden md:flex flex-col w-80 shrink-0">
+      <main className="flex justify-center items-start py-5">
+        <div className="mx-auto flex w-full max-w-[1440px] gap-6 px-6 md:px-10">
+          <aside className="hidden md:flex flex-col md:w-64 lg:w-72 xl:w-80 shrink-0 sticky top-[84px] self-start">
             <FilterLayout
               title="Filtry"
               variant="row"
               className="bg-background-paper"
             >
-              <div className="flex flex-row flex-wrap gap-2">
-                {tags.map((t) => (
-                  <Link
-                    key={t}
-                    href={baseQuery({ tag: t })}
-                    className={`inline-flex items-center justify-center h-8 px-4 rounded-full bg-ui-notification text-content-primary font-jakarta text-[14px] leading-[21px] ${
-                      t === tag ? "ring-2 ring-accent-primary" : ""
-                    }`}
-                  >
-                    {t}
-                  </Link>
-                ))}
-                {tag && (
-                  <Link
-                    href={baseQuery({ tag: undefined })}
-                    className="inline-flex items-center justify-center h-8 px-4 rounded-full bg-ui-notification text-content-secondary font-jakarta text-[14px] leading-[21px]"
-                  >
-                    Wyczyść
-                  </Link>
-                )}
-              </div>
+              <TagChips
+                tags={tags.data}
+                activeTag={tag}
+                makeHref={(slug) => baseQuery({ tag: slug })}
+              />
             </FilterLayout>
 
             <FilterLayout
@@ -91,7 +76,7 @@ export default async function Home({
             </FilterLayout>
           </aside>
 
-          <section className="flex-1">
+          <section className="flex-1 min-w-0">
             <Feed
               tag={tag}
               sortBy={validSort}
@@ -101,6 +86,7 @@ export default async function Home({
           </section>
 
           <TrendingSidebar
+            className="sticky top-[84px] self-start"
             items={trendingTags.map((t) => ({ tag: t.tag, count: t.count }))}
           />
         </div>
