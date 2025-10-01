@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
-import { AxiosError } from "axios";
+import { useRouter, usePathname } from "next/navigation";
+import { ApiError } from "@/lib/api/client";
 import {
   login as loginApi,
   register as registerApi,
@@ -26,8 +26,10 @@ interface AuthState {
 
 export function useAuth() {
   const router = useRouter();
+  const pathname = usePathname();
   const queryClient = useQueryClient();
   const [isInitialized, setIsInitialized] = useState(false);
+  const isAuthPage = pathname?.startsWith("/auth/");
 
   const {
     data: user,
@@ -37,11 +39,11 @@ export function useAuth() {
   } = useQuery({
     queryKey: AUTH_KEYS.user,
     queryFn: getCurrentUser,
-    enabled: isInitialized,
+    enabled: isInitialized && !isAuthPage,
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
-    retry: (failureCount, error: AxiosError) => {
-      if (error?.response?.status === 401) {
+    retry: (failureCount, error: Error) => {
+      if (error instanceof ApiError && error.status === 401) {
         return false;
       }
       return failureCount < 2;
@@ -60,8 +62,7 @@ export function useAuth() {
       refetchUser();
       router.push("/profile");
     },
-    onError: (error: AxiosError) => {
-      console.error("Login error:", error);
+    onError: () => {
       queryClient.removeQueries({ queryKey: AUTH_KEYS.user });
     },
   });
@@ -78,8 +79,7 @@ export function useAuth() {
       refetchUser();
       router.push("/profile");
     },
-    onError: (error: AxiosError) => {
-      console.error("Register error:", error);
+    onError: () => {
       queryClient.removeQueries({ queryKey: AUTH_KEYS.user });
     },
   });
@@ -90,8 +90,7 @@ export function useAuth() {
       queryClient.clear();
       router.push("/auth/login");
     },
-    onError: (error: AxiosError) => {
-      console.error("Logout error:", error);
+    onError: () => {
       queryClient.clear();
       router.push("/auth/login");
     },

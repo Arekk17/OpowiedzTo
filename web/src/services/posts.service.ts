@@ -1,5 +1,5 @@
 import { buildCursorParams, buildQueryParams } from "@/helpers/buildParams";
-import { apiClient, createServerApi } from "@/lib/api/client";
+import { api } from "@/lib/api/client";
 import { POSTS_ENDPOINTS, TAGS_ENDPOINTS } from "@/lib/config/api";
 import type { PaginatedResponse, ApiResponse, CursorMeta } from "@/types/api";
 import {
@@ -23,104 +23,53 @@ const adaptCursorResponse = (
   return { data: flat.data, meta: { nextCursor: flat.nextCursor } };
 };
 
-export const getPostsCursor = async (
-  filters: CursorFilters
-): Promise<PostsCursorResponse> => {
-  const params = buildCursorParams(filters);
-  const res = await apiClient.get<
-    PostsCursorResponse | { data: Post[]; nextCursor: string | null }
-  >(`${POSTS_ENDPOINTS.list}?${params.toString()}`);
-  return adaptCursorResponse(res);
+type ApiOptions = {
+  cookieHeader?: string;
 };
 
-export const getPostsCursorWithCookie = async (
+export const getPostsCursor = async (
   filters: CursorFilters,
-  cookieHeader: string
+  options?: ApiOptions
 ): Promise<PostsCursorResponse> => {
   const params = buildCursorParams(filters);
-  const serverApi = createServerApi(cookieHeader);
-  const res = await serverApi.get<
+  const res = await api.get<
     PostsCursorResponse | { data: Post[]; nextCursor: string | null }
-  >(`${POSTS_ENDPOINTS.list}?${params.toString()}`);
+  >(`${POSTS_ENDPOINTS.list}?${params.toString()}`, options);
   return adaptCursorResponse(res);
 };
 
 export const getPosts = async (
-  filters: PostFiltersData
-): Promise<PaginatedResponse<Post>> => {
-  try {
-    const params = buildQueryParams(filters);
-
-    return await apiClient.get<PaginatedResponse<Post>>(
-      `${POSTS_ENDPOINTS.list}?${params.toString()}`
-    );
-  } catch (error) {
-    throw new Error(
-      error instanceof Error ? error.message : "Błąd pobierania postów"
-    );
-  }
-};
-
-export const getPostsWithCookie = async (
   filters: PostFiltersData,
-  cookieHeader: string
+  options?: ApiOptions
 ): Promise<PaginatedResponse<Post>> => {
-  try {
-    const params = buildQueryParams(filters);
-    console.log(
-      `getPostsWithCookie: cookieHeader=${cookieHeader.substring(0, 50)}...`
-    );
-    const serverApi = createServerApi(cookieHeader);
-    const result = await serverApi.get<PaginatedResponse<Post>>(
-      `${POSTS_ENDPOINTS.list}?${params.toString()}`
-    );
-    console.log(`getPostsWithCookie: got ${result.data.length} posts`);
-    if (result.data.length > 0) {
-      console.log(
-        `First post: isLiked=${result.data[0].isLiked}, likesCount=${result.data[0].likesCount}`
-      );
-    }
-    return result;
-  } catch (error) {
-    throw new Error(
-      error instanceof Error ? error.message : "Błąd pobierania postów (server)"
-    );
-  }
+  const params = buildQueryParams(filters);
+  return api.get<PaginatedResponse<Post>>(
+    `${POSTS_ENDPOINTS.list}?${params.toString()}`,
+    options
+  );
 };
 
-export const getPost = async (id: string): Promise<Post> => {
-  try {
-    return await apiClient.get<Post>(POSTS_ENDPOINTS.detail(id));
-  } catch (error) {
-    throw new Error(
-      error instanceof Error ? error.message : "Błąd pobierania postu"
-    );
-  }
-};
-export const getTrendingTags = async (): Promise<TrendingTags[]> => {
-  try {
-    return await apiClient.get<TrendingTags[]>(TAGS_ENDPOINTS.trending);
-  } catch (error) {
-    throw new Error(
-      error instanceof Error ? error.message : "Błąd pobierania tagów"
-    );
-  }
+export const getPost = async (
+  id: string,
+  options?: ApiOptions
+): Promise<Post> => {
+  return api.get<Post>(POSTS_ENDPOINTS.detail(id), options);
 };
 
-export const getTags = async ({
-  limit,
-}: {
-  limit?: number;
-}): Promise<TagsResponse> => {
-  try {
-    return await apiClient.get<TagsResponse>(
-      `${TAGS_ENDPOINTS.list}?limit=${limit}`
-    );
-  } catch (error) {
-    throw new Error(
-      error instanceof Error ? error.message : "Błąd pobierania tagów"
-    );
-  }
+export const getTrendingTags = async (
+  options?: ApiOptions
+): Promise<TrendingTags[]> => {
+  return api.get<TrendingTags[]>(TAGS_ENDPOINTS.trending, options);
+};
+
+export const getTags = async (
+  options?: ApiOptions & { limit?: number }
+): Promise<TagsResponse> => {
+  const { limit, ...apiOptions } = options || {};
+  return api.get<TagsResponse>(
+    `${TAGS_ENDPOINTS.list}?limit=${limit || 10}`,
+    apiOptions
+  );
 };
 
 export interface SearchPostsApiResponse extends PaginatedResponse<Post> {
@@ -130,53 +79,38 @@ export interface SearchPostsApiResponse extends PaginatedResponse<Post> {
 }
 
 export const searchPosts = async (
-  searchData: SearchPostsData
+  searchData: SearchPostsData,
+  options?: ApiOptions
 ): Promise<SearchPostsApiResponse> => {
-  try {
-    const params = new URLSearchParams();
-    params.set("q", searchData.q);
-    params.set("page", (searchData.page || 1).toString());
-    params.set("limit", (searchData.limit || 10).toString());
+  const params = new URLSearchParams();
+  params.set("q", searchData.q);
+  params.set("page", (searchData.page || 1).toString());
+  params.set("limit", (searchData.limit || 10).toString());
 
-    return await apiClient.get<SearchPostsApiResponse>(
-      `${POSTS_ENDPOINTS.search}?${params.toString()}`
-    );
-  } catch (error) {
-    throw new Error(
-      error instanceof Error ? error.message : "Błąd wyszukiwania postów"
-    );
-  }
+  return api.get<SearchPostsApiResponse>(
+    `${POSTS_ENDPOINTS.search}?${params.toString()}`,
+    options
+  );
 };
 
-export const createPost = async (data: CreatePostFormData): Promise<Post> => {
-  try {
-    return await apiClient.post<Post>(POSTS_ENDPOINTS.create, data);
-  } catch (error) {
-    throw new Error(
-      error instanceof Error ? error.message : "Błąd tworzenia postu"
-    );
-  }
+export const createPost = async (
+  data: CreatePostFormData,
+  options?: ApiOptions
+): Promise<Post> => {
+  return api.post<Post>(POSTS_ENDPOINTS.create, data, options);
 };
 
 export const updatePost = async (
   id: string,
-  data: UpdatePostFormData
+  data: UpdatePostFormData,
+  options?: ApiOptions
 ): Promise<Post> => {
-  try {
-    return await apiClient.patch<Post>(POSTS_ENDPOINTS.update(id), data);
-  } catch (error) {
-    throw new Error(
-      error instanceof Error ? error.message : "Błąd aktualizacji postu"
-    );
-  }
+  return api.patch<Post>(POSTS_ENDPOINTS.update(id), data, options);
 };
 
-export const deletePost = async (id: string): Promise<void> => {
-  try {
-    await apiClient.delete(POSTS_ENDPOINTS.delete(id));
-  } catch (error) {
-    throw new Error(
-      error instanceof Error ? error.message : "Błąd usuwania postu"
-    );
-  }
+export const deletePost = async (
+  id: string,
+  options?: ApiOptions
+): Promise<void> => {
+  return api.delete(POSTS_ENDPOINTS.delete(id), options);
 };

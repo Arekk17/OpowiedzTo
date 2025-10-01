@@ -27,7 +27,6 @@ export const StoryDetailHeader: React.FC<StoryDetailHeaderProps> = ({
     <div
       className={`flex flex-col items-start w-full max-w-[960px] ${className}`}
     >
-      {/* Image Section */}
       {imageSrc && (
         <div className="flex flex-col items-start p-3 px-4 w-full h-[242px]">
           <div className="w-full h-[218px] min-h-[218px] relative bg-background-subtle rounded-xl overflow-hidden">
@@ -41,21 +40,18 @@ export const StoryDetailHeader: React.FC<StoryDetailHeaderProps> = ({
         </div>
       )}
 
-      {/* Title Section */}
       <div className="flex flex-col items-start pt-5 px-4 pb-3 w-full">
         <h1 className="font-jakarta font-bold text-[28px] leading-[35px] text-content-primary w-full">
           {title}
         </h1>
       </div>
 
-      {/* Content Section */}
       <div className="flex flex-col items-start pt-1 px-4 pb-3 w-full">
         <p className="font-jakarta font-normal text-base leading-6 text-content-primary w-full">
           {content}
         </p>
       </div>
 
-      {/* Tags Section */}
       {tags.length > 0 && (
         <div className="flex flex-row flex-wrap items-start p-3 px-3 gap-3 w-full">
           {tags.map((tag, index) => (
@@ -64,7 +60,6 @@ export const StoryDetailHeader: React.FC<StoryDetailHeaderProps> = ({
         </div>
       )}
 
-      {/* Publication Info */}
       <div className="flex flex-col items-start pt-1 px-4 pb-3 w-full">
         <p className="font-jakarta font-normal text-sm leading-[21px] text-content-secondary w-full">
           Opublikowano {publishedDate} przez {author}

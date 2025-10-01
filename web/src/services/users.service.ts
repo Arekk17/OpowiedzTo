@@ -1,81 +1,39 @@
-import { apiClient } from "@/lib/api/client";
+import { api } from "@/lib/api/client";
 import { USERS_ENDPOINTS } from "@/lib/config/api";
 import { User } from "@/types/user";
 
 export const getUser = async (id: string): Promise<User> => {
-  try {
-    return await apiClient.get<User>(USERS_ENDPOINTS.profile(id));
-  } catch (error) {
-    throw new Error(
-      error instanceof Error ? error.message : "Błąd pobierania użytkownika"
-    );
-  }
+  return api.get<User>(USERS_ENDPOINTS.profile(id));
 };
 
 export const updateUser = async (
   id: string,
   data: Partial<User>
 ): Promise<User> => {
-  try {
-    return await apiClient.patch<User>(USERS_ENDPOINTS.updateProfile(id), data);
-  } catch (error) {
-    throw new Error(
-      error instanceof Error ? error.message : "Błąd aktualizacji użytkownika"
-    );
-  }
+  return api.patch<User>(USERS_ENDPOINTS.updateProfile(id), data);
 };
 
 export const uploadAvatar = async (
   file: File
 ): Promise<{ filename: string; path: string }> => {
-  try {
-    return await apiClient.uploadFile<{ filename: string; path: string }>(
-      USERS_ENDPOINTS.uploadAvatar,
-      file
-    );
-  } catch (error) {
-    throw new Error(
-      error instanceof Error ? error.message : "Błąd uploadu avataru"
-    );
-  }
+  return api.uploadFile<{ filename: string; path: string }>(
+    USERS_ENDPOINTS.uploadAvatar,
+    file
+  );
 };
 
 export const followUser = async (id: string): Promise<void> => {
-  try {
-    await apiClient.post(USERS_ENDPOINTS.follow(id));
-  } catch (error) {
-    throw new Error(
-      error instanceof Error ? error.message : "Błąd followowania użytkownika"
-    );
-  }
+  return api.post(USERS_ENDPOINTS.follow(id));
 };
 
 export const unfollowUser = async (id: string): Promise<void> => {
-  try {
-    await apiClient.delete(USERS_ENDPOINTS.unfollow(id));
-  } catch (error) {
-    throw new Error(
-      error instanceof Error ? error.message : "Błąd unfollowowania użytkownika"
-    );
-  }
+  return api.delete(USERS_ENDPOINTS.unfollow(id));
 };
 
 export const getFollowers = async (id: string): Promise<User[]> => {
-  try {
-    return await apiClient.get<User[]>(USERS_ENDPOINTS.followers(id));
-  } catch (error) {
-    throw new Error(
-      error instanceof Error ? error.message : "Błąd pobierania followersów"
-    );
-  }
+  return api.get<User[]>(USERS_ENDPOINTS.followers(id));
 };
 
 export const getFollowing = async (id: string): Promise<User[]> => {
-  try {
-    return await apiClient.get<User[]>(USERS_ENDPOINTS.following(id));
-  } catch (error) {
-    throw new Error(
-      error instanceof Error ? error.message : "Błąd pobierania following"
-    );
-  }
+  return api.get<User[]>(USERS_ENDPOINTS.following(id));
 };

@@ -4,7 +4,7 @@ import { TrendingSidebar } from "@/components/organisms/layout/TrendingSidebar";
 import { SortOptions } from "@/components/molecules/forms/SortOptions";
 import {
   getTrendingTags,
-  getPostsCursorWithCookie,
+  getPostsCursor,
   getTags,
 } from "@/services/posts.service";
 import { cookies } from "next/headers";
@@ -14,7 +14,7 @@ import TagChips from "@/components/molecules/tags/TagChips";
 export default async function Home({
   searchParams,
 }: {
-  searchParams: { [key: string]: string | string[] | undefined };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const params = await searchParams;
   const tag = typeof params?.tag === "string" ? params.tag : undefined;
@@ -30,16 +30,16 @@ export default async function Home({
   const cookieHeader = cookieStore.toString();
 
   const [initialPage, trendingTags, tags] = await Promise.all([
-    getPostsCursorWithCookie(
+    getPostsCursor(
       {
         limit: 10,
         tag,
         sortBy: validSort,
       },
-      cookieHeader
+      { cookieHeader }
     ),
-    getTrendingTags(),
-    getTags({ limit: 10 }),
+    getTrendingTags({ cookieHeader }),
+    getTags({ cookieHeader, limit: 10 }),
   ]);
 
   const baseQuery = (next: Partial<{ tag?: string; sort?: string }>) => {

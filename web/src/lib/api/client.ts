@@ -1,142 +1,146 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 import { API_CONFIG, AUTH_ENDPOINTS } from "../config/api";
-import { emit } from "../auth/events";
 
-export const createAxiosInstance = (opts?: {
-  cookie?: string;
-}): AxiosInstance => {
-  let isRefreshing = false;
-  let refreshePromise: Promise<string> | null = null;
+export class ApiError extends Error {
+  constructor(message: string, public status?: number) {
+    super(message);
+    this.name = "ApiError";
+  }
+}
 
-  const instance = axios.create({
-    baseURL: API_CONFIG.baseURL,
-    timeout: API_CONFIG.timeout,
-    headers: {
-      ...API_CONFIG.headers,
-      ...(opts?.cookie ? { cookie: opts.cookie } : {}),
-    },
-    withCredentials: true,
+let isRefreshing = false;
+let refreshPromise: Promise<void> | null = null;
+
+async function refreshToken(): Promise<void> {
+  if (isRefreshing && refreshPromise) return refreshPromise;
+
+  isRefreshing = true;
+  refreshPromise = (async () => {
+    try {
+      const res = await fetch(
+        `${API_CONFIG.baseURL}${AUTH_ENDPOINTS.refreshToken}`,
+        {
+          method: "POST",
+          credentials: "include",
+        }
+      );
+      if (!res.ok) throw new Error("Refresh failed");
+    } catch {
+      if (
+        typeof window !== "undefined" &&
+        !window.location.pathname.startsWith("/auth/")
+      ) {
+        window.location.assign("/auth/login");
+      }
+      throw new ApiError("Sesja wygasła", 401);
+    } finally {
+      isRefreshing = false;
+      refreshPromise = null;
+    }
+  })();
+
+  return refreshPromise;
+}
+
+type FetchOptions = RequestInit & {
+  cookieHeader?: string;
+};
+
+async function request<T>(
+  endpoint: string,
+  options: FetchOptions = {}
+): Promise<T> {
+  const { cookieHeader, ...fetchOptions } = options;
+
+  const headers: HeadersInit = {
+    ...API_CONFIG.headers,
+    ...(cookieHeader && { Cookie: cookieHeader }),
+    ...fetchOptions.headers,
+  };
+
+  const res = await fetch(`${API_CONFIG.baseURL}${endpoint}`, {
+    ...fetchOptions,
+    headers,
+    credentials: "include",
   });
 
-  instance.interceptors.request.use(
-    (config) => {
-      return config;
-    },
-    (error) => Promise.reject(error)
-  );
+  if (res.ok) {
+    const contentType = res.headers.get("content-type");
+    return contentType?.includes("application/json") ? res.json() : ({} as T);
+  }
 
-  instance.interceptors.response.use(
-    (response) => response,
-    async (error) => {
-      const originalRequest = error.config as AxiosRequestConfig & {
-        _retry?: boolean;
-      };
+  const errorData = await res.json().catch(() => ({}));
+  const message = errorData.message || errorData.error || "Wystąpił błąd";
 
-      if (
-        !error.response ||
-        error.response.status !== 401 ||
-        originalRequest._retry
-      ) {
-        return Promise.reject(error);
-      }
-      originalRequest._retry = true;
+  const shouldRetry =
+    res.status === 401 &&
+    !cookieHeader &&
+    typeof window !== "undefined" &&
+    !endpoint.includes("/auth/login") &&
+    !endpoint.includes("/auth/register") &&
+    !endpoint.includes("/auth/me");
 
-      if (isRefreshing && refreshePromise) {
-        try {
-          await refreshePromise;
-          return instance.request(originalRequest);
-        } catch (error) {
-          if (typeof window !== "undefined")
-            window.location.assign("/auth/login");
-          return Promise.reject(error);
-        }
-      }
-      isRefreshing = true;
-      refreshePromise = instance.post(AUTH_ENDPOINTS.refreshToken, undefined, {
-        withCredentials: true,
-      });
-      try {
-        await refreshePromise;
-        emit("token:refreshed");
-        return instance.request(originalRequest);
-      } catch (error) {
-        if (typeof window !== "undefined")
-          window.location.assign("/auth/login");
-        return Promise.reject(error);
-      } finally {
-        isRefreshing = false;
-        refreshePromise = null;
-      }
-    }
-  );
+  if (shouldRetry) {
+    await refreshToken();
+    return request<T>(endpoint, options);
+  }
 
-  return instance;
-};
+  throw new ApiError(message, res.status);
+}
 
-const axiosInstance = createAxiosInstance();
+export const api = {
+  get: <T>(endpoint: string, options?: FetchOptions): Promise<T> =>
+    request<T>(endpoint, { ...options, method: "GET" }),
 
-export const apiClient = {
-  async get<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
-    const res: AxiosResponse<T> = await axiosInstance.get(url, config);
-    return res.data;
-  },
-
-  async post<T>(
-    url: string,
+  post: <T>(
+    endpoint: string,
     data?: unknown,
-    config?: AxiosRequestConfig
-  ): Promise<T> {
-    const res: AxiosResponse<T> = await axiosInstance.post(url, data, config);
-    return res.data;
-  },
-
-  async put<T>(
-    url: string,
-    data?: unknown,
-    config?: AxiosRequestConfig
-  ): Promise<T> {
-    const res: AxiosResponse<T> = await axiosInstance.put(url, data, config);
-    return res.data;
-  },
-
-  async patch<T>(
-    url: string,
-    data?: unknown,
-    config?: AxiosRequestConfig
-  ): Promise<T> {
-    const res: AxiosResponse<T> = await axiosInstance.patch(url, data, config);
-    return res.data;
-  },
-
-  async delete<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
-    const res: AxiosResponse<T> = await axiosInstance.delete(url, config);
-    return res.data;
-  },
-
-  async uploadFile<T>(
-    url: string,
-    file: File,
-    config?: AxiosRequestConfig
-  ): Promise<T> {
-    const form = new FormData();
-    form.append("file", file);
-    const res: AxiosResponse<T> = await axiosInstance.post(url, form, {
-      ...config,
+    options?: FetchOptions
+  ): Promise<T> => {
+    const isFormData = data instanceof FormData;
+    return request<T>(endpoint, {
+      ...options,
+      method: "POST",
+      body: isFormData ? data : JSON.stringify(data),
+      headers: isFormData
+        ? options?.headers
+        : { "Content-Type": "application/json", ...options?.headers },
     });
-    return res.data;
   },
-};
 
-export const createServerApi = (cookieHeader: string) => {
-  const inst = createAxiosInstance({ cookie: cookieHeader });
-  return {
-    get: async <T>(url: string, cfg?: AxiosRequestConfig) =>
-      (await inst.get<T>(url, cfg)).data,
-    post: async <T>(url: string, data?: unknown, cfg?: AxiosRequestConfig) =>
-      (await inst.post<T>(url, data, cfg)).data,
-    patch: async <T>(url: string, data?: unknown, cfg?: AxiosRequestConfig) =>
-      (await inst.patch<T>(url, data, cfg)).data,
-    delete: async <T>(url: string, cfg?: AxiosRequestConfig) =>
-      (await inst.delete<T>(url, cfg)).data,
-  };
+  put: <T>(
+    endpoint: string,
+    data?: unknown,
+    options?: FetchOptions
+  ): Promise<T> =>
+    request<T>(endpoint, {
+      ...options,
+      method: "PUT",
+      body: JSON.stringify(data),
+      headers: { "Content-Type": "application/json", ...options?.headers },
+    }),
+
+  patch: <T>(
+    endpoint: string,
+    data?: unknown,
+    options?: FetchOptions
+  ): Promise<T> =>
+    request<T>(endpoint, {
+      ...options,
+      method: "PATCH",
+      body: JSON.stringify(data),
+      headers: { "Content-Type": "application/json", ...options?.headers },
+    }),
+
+  delete: <T>(endpoint: string, options?: FetchOptions): Promise<T> =>
+    request<T>(endpoint, { ...options, method: "DELETE" }),
+
+  uploadFile: <T>(
+    endpoint: string,
+    file: File,
+    options?: FetchOptions
+  ): Promise<T> => {
+    const formData = new FormData();
+    formData.append("file", file);
+    return api.post<T>(endpoint, formData, options);
+  },
 };

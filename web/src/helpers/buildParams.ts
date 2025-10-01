@@ -1,4 +1,4 @@
-import { PostFiltersData, SearchPostsData } from "@/types/post";
+import { PostFiltersData } from "@/types/post";
 
 export const buildQueryParams = (filters: PostFiltersData): URLSearchParams => {
   const params = new URLSearchParams();
@@ -6,16 +6,6 @@ export const buildQueryParams = (filters: PostFiltersData): URLSearchParams => {
   params.set("limit", (filters.limit || 10).toString());
   if (filters.authorId?.trim()) params.set("authorId", filters.authorId.trim());
   if (filters.tag?.trim()) params.set("tag", filters.tag.trim());
-  return params;
-};
-
-export const buildSearchParams = (
-  searchData: SearchPostsData
-): URLSearchParams => {
-  const params = new URLSearchParams();
-  params.set("q", searchData.q);
-  params.set("page", (searchData.page || 1).toString());
-  params.set("limit", (searchData.limit || 10).toString());
   return params;
 };
 

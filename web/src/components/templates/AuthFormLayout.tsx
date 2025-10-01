@@ -7,6 +7,7 @@ interface AuthFormLayoutProps {
   description?: React.ReactNode;
   submitLabel: string;
   loading?: boolean;
+  error?: string | null;
   onSubmit: React.FormEventHandler<HTMLFormElement>;
   children: React.ReactNode;
   secondaryLink?: { href: string; label: string };
@@ -18,6 +19,7 @@ export const AuthFormLayout: React.FC<AuthFormLayoutProps> = ({
   description,
   submitLabel,
   loading = false,
+  error,
   onSubmit,
   children,
   secondaryLink,
@@ -35,6 +37,12 @@ export const AuthFormLayout: React.FC<AuthFormLayoutProps> = ({
 
         <form onSubmit={onSubmit} className={className}>
           <div className="flex flex-col gap-4">{children}</div>
+
+          {error && (
+            <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
+              <p className="text-sm text-red-600">{error}</p>
+            </div>
+          )}
 
           {secondaryLink ? (
             <Link

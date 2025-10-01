@@ -10,7 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
 export default function RegisterPage() {
-  const { signup, isSigningUp } = useAuth();
+  const { signup, isSigningUp, signupError } = useAuth();
   const {
     register,
     setValue,
@@ -43,6 +43,11 @@ export default function RegisterPage() {
       loading={isSigningUp}
       onSubmit={handleSubmit(onSubmit)}
     >
+      {signupError && (
+        <div className="p-3 bg-red-50 border border-red-200 rounded-md">
+          <p className="text-sm text-red-600">{signupError.message}</p>
+        </div>
+      )}
       <Input
         label="Email"
         showLabel

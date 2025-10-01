@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form";
 import { AuthFormLayout } from "@/components/templates/AuthFormLayout";
 
 export default function LoginPage() {
-  const { signin, isSigningIn } = useAuth();
+  const { signin, isSigningIn, signinError } = useAuth();
 
   const {
     register,
@@ -33,6 +33,12 @@ export default function LoginPage() {
         label: "Zapomniałeś hasła?",
       }}
     >
+      {signinError && (
+        <div className="p-3 bg-red-50 border border-red-200 rounded-md">
+          <p className="text-sm text-red-600">{signinError.message}</p>
+        </div>
+      )}
+
       <Input
         label="Email"
         showLabel

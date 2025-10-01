@@ -82,7 +82,6 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
 
       {hasPreview && previewURL && (
         <div className="relative w-full max-w-[480px] h-[180px] rounded-xl overflow-hidden">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={previewURL}
             alt="Podgląd"

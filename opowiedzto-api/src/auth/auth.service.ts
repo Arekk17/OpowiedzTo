@@ -162,13 +162,13 @@ export class AuthService {
   }
 
   private setAuthCookie(res: Response, token: string): void {
-    const isProduction = process.env.NODE_ENV === 'production';
-    const crossSite = process.env.CROSS_SITE_COOKIES === 'true';
+    // const isProduction = process.env.NODE_ENV === 'production';
 
     res.cookie('accessToken', token, {
       httpOnly: true,
-      secure: isProduction ? true : false,
-      sameSite: crossSite ? 'none' : isProduction ? 'lax' : 'lax',
+      secure: false, // Na localhost zawsze false
+      sameSite: 'lax', // Dla localhost używaj 'lax'
+      // NIE ustawiaj domain dla localhost
       maxAge: 15 * 60 * 1000,
       path: '/',
     });
@@ -182,6 +182,7 @@ export class AuthService {
       httpOnly: true,
       secure: isProduction ? true : false,
       sameSite: crossSite ? 'none' : isProduction ? 'lax' : 'lax',
+      domain: isProduction ? undefined : 'localhost', // ← DODAJ TO
       maxAge: 7 * 24 * 60 * 60 * 1000,
       path: '/',
     });
@@ -195,6 +196,7 @@ export class AuthService {
       httpOnly: true,
       secure: isProduction ? true : false,
       sameSite: crossSite ? 'none' : isProduction ? 'lax' : 'lax',
+      domain: isProduction ? undefined : 'localhost', // ← DODAJ TO
       path: '/',
     });
   }
@@ -207,6 +209,7 @@ export class AuthService {
       httpOnly: true,
       secure: isProduction ? true : false,
       sameSite: crossSite ? 'none' : isProduction ? 'lax' : 'lax',
+      domain: isProduction ? undefined : 'localhost', // ← DODAJ TO
       path: '/',
     });
   }

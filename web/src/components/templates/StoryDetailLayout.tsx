@@ -36,16 +36,9 @@ export const StoryDetailLayout: React.FC<StoryDetailLayoutProps> = ({
       className={`flex flex-row justify-center items-start py-5 px-40 w-full min-h-screen ${className}`}
     >
       <div className="flex flex-col items-start w-full max-w-[960px]">
-        {/* Story Header */}
         <StoryDetailHeader {...story} />
-
-        {/* Stats */}
         <StoryStats {...stats} />
-
-        {/* Comments */}
         <CommentList {...comments} />
-
-        {/* Action Buttons */}
         <ActionButtons {...actions} />
       </div>
     </div>
