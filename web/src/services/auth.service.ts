@@ -1,4 +1,4 @@
-import { api } from "@/lib/api/client";
+import { apiRequest } from "@/lib/auth";
 import { AUTH_ENDPOINTS } from "@/lib/config/api";
 import { LoginFormData, RegisterApiData } from "@/types/auth";
 
@@ -6,6 +6,7 @@ export interface AuthApiResponse {
   accessToken: string;
   userId: string;
   nickname: string;
+  expiresAt: number;
 }
 
 export interface CurrentUserResponse {
@@ -13,30 +14,39 @@ export interface CurrentUserResponse {
   email: string;
   nickname: string;
   createdAt: string;
+  expiresAt?: number;
 }
 
 export const login = async (data: LoginFormData): Promise<AuthApiResponse> => {
-  return api.post<AuthApiResponse>(AUTH_ENDPOINTS.login, data);
+  return apiRequest<AuthApiResponse>(AUTH_ENDPOINTS.login, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
 };
 
 export const register = async (
   data: RegisterApiData
 ): Promise<AuthApiResponse> => {
-  return api.post<AuthApiResponse>(AUTH_ENDPOINTS.register, data);
+  return apiRequest<AuthApiResponse>(AUTH_ENDPOINTS.register, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
 };
 
 export const logout = async (): Promise<{ message: string }> => {
-  return api.post<{ message: string }>(AUTH_ENDPOINTS.logout);
+  return apiRequest<{ message: string }>(AUTH_ENDPOINTS.logout, {
+    method: "POST",
+  });
 };
 
 export const getCurrentUser = async (): Promise<CurrentUserResponse> => {
-  return api.get<CurrentUserResponse>(AUTH_ENDPOINTS.me);
+  return apiRequest<CurrentUserResponse>(AUTH_ENDPOINTS.me);
 };
 
 export const generateNickname = async (): Promise<{ nickname: string }> => {
-  return api.get<{ nickname: string }>(AUTH_ENDPOINTS.generateNickname);
+  return apiRequest<{ nickname: string }>(AUTH_ENDPOINTS.generateNickname);
 };
 
 export const refreshToken = async (): Promise<AuthApiResponse> => {
-  return api.post<AuthApiResponse>(AUTH_ENDPOINTS.refreshToken);
+  return apiRequest<AuthApiResponse>(AUTH_ENDPOINTS.refreshToken);
 };

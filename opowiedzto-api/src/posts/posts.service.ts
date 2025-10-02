@@ -2,21 +2,26 @@ import {
   Injectable,
   NotFoundException,
   ForbiddenException,
+  BadRequestException,
 } from '@nestjs/common';
 import { Post } from './entities/post.entity';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { User } from '../users/entities/user.entity';
-import { PostRepository } from './repositories/post.repository';
+import { PostsRepository } from './repositories/posts.repository';
 import { PostWithDetailsDto } from './dto/post-with-details.dto';
 import { SortOption } from './enum/sort-option.enum';
 import { FeedCursor } from './dto/cursor.dto';
 import { encodeCursor } from './dto/cursor.dto';
 import { TagsService } from 'src/tags/tags.service';
+import { Comment } from './entities/comment.entity';
+import { CreateCommentDto } from './dto/create-comment.dto';
+import { BANNED_WORDS } from '../common/constants/banned-words';
+import { PostLike } from './entities/post-like.entity';
 @Injectable()
 export class PostsService {
   constructor(
-    private readonly postRepository: PostRepository,
+    private readonly postsRepository: PostsRepository,
     private readonly tagsService: TagsService,
   ) {}
 
@@ -46,7 +51,7 @@ export class PostsService {
       tag = tagEntity.slug;
     }
 
-    const result = await this.postRepository.findAllWithDetails(
+    const result = await this.postsRepository.findAllWithDetailsPage(
       page,
       limit,
       userId,
@@ -79,7 +84,7 @@ export class PostsService {
     cursor?: { createdAt: string; id: string } | null,
   ): Promise<{ data: PostWithDetailsDto[]; nextCursor: string | null }> {
     const take = Math.min(Math.max(Number(limit) || 10, 1), 50);
-    const { posts } = await this.postRepository.findAllWithDetailsCursor(
+    const { posts } = await this.postsRepository.findAllWithDetailsCursor(
       take + 1,
       userId,
       tag,
@@ -111,7 +116,7 @@ export class PostsService {
   }
 
   async findOne(id: string): Promise<Post> {
-    const post = await this.postRepository.findWithAuthor(id);
+    const post = await this.postsRepository.findEntityById(id);
     if (!post) {
       throw new NotFoundException(`Post o ID ${id} nie został znaleziony`);
     }
@@ -119,7 +124,7 @@ export class PostsService {
   }
 
   async findByAuthor(authorId: string): Promise<Post[]> {
-    return this.postRepository.findByAuthor(authorId);
+    return this.postsRepository.findEntitiesByAuthor(authorId);
   }
 
   async search(
@@ -128,7 +133,7 @@ export class PostsService {
     limit: number = 10,
     userId?: string,
   ): Promise<{ data: PostWithDetailsDto[]; meta: any }> {
-    const result = await this.postRepository.searchWithDetails(
+    const result = await this.postsRepository.findAllWithDetailsSearch(
       searchTerm,
       page,
       limit,
@@ -159,16 +164,15 @@ export class PostsService {
     await this.tagsService.upsertManyBySlugs(slugs);
     const tags = await this.tagsService.findBySlugs(slugs);
 
-    const post = this.postRepository.create({
+    const post = await this.postsRepository.create({
       title: createPostDto.title,
       content: createPostDto.content,
       authorId: user.id,
       tags: tags,
     });
 
-    const saved = await this.postRepository.save(post);
     if (slugs.length) await this.tagsService.incrementPostCount(slugs, 1);
-    return saved;
+    return post;
   }
 
   async update(
@@ -176,7 +180,7 @@ export class PostsService {
     updatePostDto: UpdatePostDto,
     user: User,
   ): Promise<Post> {
-    const post = await this.findOne(id);
+    const post = await this.postsRepository.findEntityById(id);
 
     if (post.authorId !== user.id) {
       throw new ForbiddenException('Nie masz uprawnień do edycji tego posta');
@@ -203,19 +207,18 @@ export class PostsService {
         Array.from(nextSlugs),
       );
       post.tags = nextTags;
-
-      const saved = await this.postRepository.save(post);
+      const saved = await this.postsRepository.update(id, post);
       if (added.length) await this.tagsService.incrementPostCount(added, 1);
       if (removed.length)
         await this.tagsService.incrementPostCount(removed, -1);
       return saved;
     }
 
-    return this.postRepository.save(post);
+    return this.postsRepository.update(id, post);
   }
 
   async remove(id: string, userId: string): Promise<void> {
-    const post = await this.findOne(id);
+    const post = await this.postsRepository.findEntityById(id);
 
     if (post.authorId !== userId) {
       throw new ForbiddenException(
@@ -224,7 +227,96 @@ export class PostsService {
     }
 
     const slugs = (post.tags || []).map((t) => t.slug);
-    await this.postRepository.remove(post);
+    await this.postsRepository.delete(id);
     if (slugs.length) await this.tagsService.incrementPostCount(slugs, -1);
+  }
+
+  // Delegated comment operations (moved from CommentService)
+  async createComment(
+    postId: string,
+    authorId: string,
+    createCommentDto: CreateCommentDto,
+  ): Promise<Comment> {
+    const post = await this.postsRepository.findOneWithDetails(postId);
+    if (!post) {
+      throw new NotFoundException('Post nie istnieje');
+    }
+
+    const contentLower = createCommentDto.content.toLowerCase();
+    const containsBanned = BANNED_WORDS.some((word) =>
+      contentLower.includes(word),
+    );
+    if (containsBanned) {
+      throw new BadRequestException('Komentarz zawiera niedozwolone słowa');
+    }
+
+    return this.postsRepository.createComment({
+      postId,
+      authorId,
+      content: createCommentDto.content,
+    });
+  }
+
+  async getComments(postId: string): Promise<Comment[]> {
+    const post = await this.postsRepository.findOneWithDetails(postId);
+    if (!post) {
+      throw new NotFoundException('Post nie istnieje');
+    }
+    return this.postsRepository.findCommentsByPost(postId);
+  }
+
+  async deleteComment(commentId: string, userId: string): Promise<void> {
+    const comment = await this.postsRepository.findCommentWithAuthor(commentId);
+    if (!comment) {
+      throw new NotFoundException('Komentarz nie istnieje');
+    }
+    if (comment.authorId !== userId) {
+      throw new ForbiddenException(
+        'Nie masz uprawnień do usunięcia tego komentarza',
+      );
+    }
+    await this.postsRepository.deleteComment(commentId);
+  }
+
+  async getCommentCount(postId: string): Promise<number> {
+    return this.postsRepository.countComments(postId);
+  }
+
+  // Delegated like operations (moved from PostLikeService)
+  async likePost(userId: string, postId: string): Promise<PostLike> {
+    const post = await this.postsRepository.findOneWithDetails(postId);
+    if (!post) {
+      throw new NotFoundException('Post nie istnieje');
+    }
+
+    const existingLike = await this.postsRepository.findLikeByUserAndPost(
+      userId,
+      postId,
+    );
+    if (existingLike) {
+      throw new BadRequestException('Już polubiłeś ten post');
+    }
+
+    return this.postsRepository.createLike({ userId, postId });
+  }
+
+  async unlikePost(userId: string, postId: string): Promise<void> {
+    const like = await this.postsRepository.findLikeByUserAndPost(
+      userId,
+      postId,
+    );
+    if (!like) {
+      throw new NotFoundException('Nie polubiłeś tego posta');
+    }
+    await this.postsRepository.deleteLike(like.id);
+  }
+
+  async getLikes(postId: string): Promise<User[]> {
+    const likes = await this.postsRepository.findLikesWithUsers(postId);
+    return likes.map((like) => like.user);
+  }
+
+  async getLikeCount(postId: string): Promise<number> {
+    return this.postsRepository.countLikes(postId);
   }
 }

@@ -1,86 +1,29 @@
-import {
-  Injectable,
-  NotFoundException,
-  ForbiddenException,
-  BadRequestException,
-} from '@nestjs/common';
-import { CommentRepository } from './repositories/comment.repository';
-import { PostRepository } from './repositories/post.repository';
+import { Injectable } from '@nestjs/common';
 import { Comment } from './entities/comment.entity';
 import { CreateCommentDto } from './dto/create-comment.dto';
-import { BANNED_WORDS } from '../common/constants/banned-words';
+import { PostsService } from './posts.service';
 
 @Injectable()
 export class CommentService {
-  constructor(
-    private readonly commentRepository: CommentRepository,
-    private readonly postRepository: PostRepository,
-  ) {}
+  constructor(private readonly postsService: PostsService) {}
 
   async createComment(
     postId: string,
     authorId: string,
     createCommentDto: CreateCommentDto,
   ): Promise<Comment> {
-    const post = await this.postRepository.findOne({ where: { id: postId } });
-    if (!post) {
-      throw new NotFoundException('Post nie istnieje');
-    }
-
-    const contentLower = createCommentDto.content.toLowerCase();
-    const containsBanned = BANNED_WORDS.some((word) =>
-      contentLower.includes(word),
-    );
-    if (containsBanned) {
-      throw new BadRequestException('Komentarz zawiera niedozwolone słowa');
-    }
-
-    const comment = this.commentRepository.create({
-      postId,
-      authorId,
-      content: createCommentDto.content,
-    });
-
-    const savedComment = await this.commentRepository.save(comment);
-
-    // Aktualizuj licznik komentarzy
-    await this.postRepository.increment({ id: postId }, 'commentsCount', 1);
-
-    return savedComment;
+    return this.postsService.createComment(postId, authorId, createCommentDto);
   }
 
   async getComments(postId: string): Promise<Comment[]> {
-    const post = await this.postRepository.findOne({ where: { id: postId } });
-    if (!post) {
-      throw new NotFoundException('Post nie istnieje');
-    }
-
-    return this.commentRepository.findByPost(postId);
+    return this.postsService.getComments(postId);
   }
 
   async deleteComment(commentId: string, userId: string): Promise<void> {
-    const comment = await this.commentRepository.findWithAuthor(commentId);
-    if (!comment) {
-      throw new NotFoundException('Komentarz nie istnieje');
-    }
-
-    if (comment.authorId !== userId) {
-      throw new ForbiddenException(
-        'Nie masz uprawnień do usunięcia tego komentarza',
-      );
-    }
-
-    await this.commentRepository.remove(comment);
-
-    // Aktualizuj licznik komentarzy
-    await this.postRepository.decrement(
-      { id: comment.postId },
-      'commentsCount',
-      1,
-    );
+    return this.postsService.deleteComment(commentId, userId);
   }
 
   async getCommentCount(postId: string): Promise<number> {
-    return this.commentRepository.countComments(postId);
+    return this.postsService.getCommentCount(postId);
   }
 }

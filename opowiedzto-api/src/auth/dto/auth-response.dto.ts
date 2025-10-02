@@ -15,4 +15,16 @@ export class AuthResponseDto {
 
   @ApiProperty({ example: 'Anonymous1234' })
   nickname: string;
+
+  @ApiProperty({
+    description: 'Aktualny czas serwera (timestamp w milisekundach)',
+    example: 1759400436000,
+  })
+  serverTime: number;
+
+  @ApiProperty({
+    description: 'Czas wygaśnięcia access tokenu (timestamp w milisekundach)',
+    example: 1759400436000,
+  })
+  expiresAt: number;
 }

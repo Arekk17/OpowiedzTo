@@ -85,7 +85,35 @@ export const registerSchema = z
     path: ["confirmPassword"],
   });
 
-export type LoginFormData = z.infer<typeof loginSchema>;
-export type RegisterFormData = z.infer<typeof registerSchema>;
+export interface LoginFormData {
+  email: string;
+  password: string;
+}
 
-export type RegisterApiData = Omit<RegisterFormData, "confirmPassword">;
+export interface RegisterFormData {
+  email: string;
+  password: string;
+  confirmPassword: string;
+  nickname: string;
+}
+
+export interface RegisterApiData {
+  email: string;
+  password: string;
+  nickname: string;
+}
+
+export interface AuthApiResponse {
+  accessToken: string;
+  userId: string;
+  nickname: string;
+  expiresAt: number;
+}
+
+export interface CurrentUserResponse {
+  id: string;
+  email: string;
+  nickname: string;
+  createdAt: string;
+  expiresAt?: number;
+}

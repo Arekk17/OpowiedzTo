@@ -5,7 +5,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { PostReportRepository } from '../repositories/post-report.repository';
-import { PostRepository } from '../../posts/repositories/post.repository';
+import { PostsRepository } from '../../posts/repositories/posts.repository';
 import { PostReport } from '../entities/post-report.entity';
 import { CreateReportDto } from '../dto/create-report.dto';
 
@@ -13,7 +13,7 @@ import { CreateReportDto } from '../dto/create-report.dto';
 export class PostReportService {
   constructor(
     private readonly postReportRepository: PostReportRepository,
-    private readonly postRepository: PostRepository,
+    private readonly postRepository: PostsRepository,
   ) {}
 
   async createReport(
@@ -21,7 +21,7 @@ export class PostReportService {
     reporterId: string,
     createReportDto: CreateReportDto,
   ): Promise<PostReport> {
-    const post = await this.postRepository.findOne({ where: { id: postId } });
+    const post = await this.postRepository.findEntityById(postId);
     if (!post) {
       throw new NotFoundException('Post nie istnieje');
     }
@@ -49,7 +49,7 @@ export class PostReportService {
   }
 
   async getReportsForPost(postId: string): Promise<PostReport[]> {
-    const post = await this.postRepository.findOne({ where: { id: postId } });
+    const post = await this.postRepository.findEntityById(postId);
     if (!post) {
       throw new NotFoundException('Post nie istnieje');
     }

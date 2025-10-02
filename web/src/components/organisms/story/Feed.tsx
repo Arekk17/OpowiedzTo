@@ -32,6 +32,7 @@ export const Feed: React.FC<Props> = ({
     isFetchingNextPage,
     status,
     isLoading,
+    error,
   } = useInfiniteQuery({
     queryKey: ["posts", { tag, sortBy, pageSize }],
     queryFn: ({ pageParam }) =>
@@ -48,6 +49,18 @@ export const Feed: React.FC<Props> = ({
       : undefined,
     staleTime: 60_000,
     gcTime: 10 * 60_000,
+    retry: (failureCount, error) => {
+      // Nie retry dla błędów 401 na publicznych endpointach
+      if (
+        error &&
+        typeof error === "object" &&
+        "status" in error &&
+        error.status === 401
+      ) {
+        return false;
+      }
+      return failureCount < 2;
+    },
   });
 
   const items: StoryListItem[] = useMemo(
@@ -73,18 +86,87 @@ export const Feed: React.FC<Props> = ({
     return () => obs.disconnect();
   }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
-  if (isLoading && !initialPage) return <div className="p-4">Ładowanie…</div>;
-  if (status === "error") return <div className="p-4">Błąd ładowania</div>;
+  if (isLoading && !initialPage) {
+    return (
+      <div className="p-4 text-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+        <p>Ładowanie postów...</p>
+      </div>
+    );
+  }
+
+  if (status === "error") {
+    return (
+      <div className="p-4 text-center">
+        <div className="text-red-500 mb-4">
+          <svg
+            className="w-12 h-12 mx-auto mb-2"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+            />
+          </svg>
+        </div>
+        <h3 className="text-lg font-semibold mb-2">Błąd ładowania</h3>
+        <p className="text-muted-foreground mb-4">
+          Nie udało się załadować postów. Spróbuj ponownie.
+        </p>
+        <button
+          onClick={() => window.location.reload()}
+          className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+        >
+          Odśwież stronę
+        </button>
+      </div>
+    );
+  }
+
+  if (!items.length) {
+    return (
+      <div className="p-4 text-center">
+        <div className="text-muted-foreground mb-4">
+          <svg
+            className="w-12 h-12 mx-auto mb-2"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+            />
+          </svg>
+        </div>
+        <h3 className="text-lg font-semibold mb-2">Brak postów</h3>
+        <p className="text-muted-foreground">
+          {tag
+            ? `Nie znaleziono postów z tagiem "${tag}"`
+            : "Nie ma jeszcze żadnych postów"}
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div>
       <StoriesLayout stories={items} />
       <div ref={sentinelRef} className="h-10" />
       {isFetchingNextPage && (
-        <div className="p-4 text-content-secondary">Wczytywanie…</div>
+        <div className="p-4 text-center text-muted-foreground">
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto mb-2"></div>
+          Wczytywanie kolejnych postów...
+        </div>
       )}
-      {!hasNextPage && (
-        <div className="p-4 text-center text-content-secondary">
+      {!hasNextPage && items.length > 0 && (
+        <div className="p-4 text-center text-muted-foreground">
           To już wszystko
         </div>
       )}

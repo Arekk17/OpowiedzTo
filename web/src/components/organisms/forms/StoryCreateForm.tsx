@@ -114,14 +114,7 @@ export const StoryCreateForm: React.FC<StoryCreateFormProps> = ({
         className="mt-3 w-full"
         loading={isSubmitting}
         onPublish={() => handleSubmit(async (data) => onSubmit(data))()}
-        onPreview={() => {
-          console.log("Podgląd", {
-            title: watch("title"),
-            content: watch("content"),
-            tags: watch("tags"),
-            image: watch("image"),
-          });
-        }}
+        onPreview={() => {}}
       />
     </form>
   );

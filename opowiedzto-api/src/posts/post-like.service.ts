@@ -1,70 +1,25 @@
-import {
-  Injectable,
-  NotFoundException,
-  BadRequestException,
-} from '@nestjs/common';
-import { PostLikeRepository } from './repositories/post-like.repository';
-import { PostRepository } from './repositories/post.repository';
+import { Injectable } from '@nestjs/common';
 import { PostLike } from './entities/post-like.entity';
 import { User } from '../users/entities/user.entity';
+import { PostsService } from './posts.service';
 
 @Injectable()
 export class PostLikeService {
-  constructor(
-    private readonly postLikeRepository: PostLikeRepository,
-    private readonly postRepository: PostRepository,
-  ) {}
+  constructor(private readonly postsService: PostsService) {}
 
   async likePost(userId: string, postId: string): Promise<PostLike> {
-    const post = await this.postRepository.findOne({ where: { id: postId } });
-    if (!post) {
-      throw new NotFoundException('Post nie istnieje');
-    }
-
-    const existingLike = await this.postLikeRepository.findByUserAndPost(
-      userId,
-      postId,
-    );
-
-    if (existingLike) {
-      throw new BadRequestException('Już polubiłeś ten post');
-    }
-
-    const like = this.postLikeRepository.create({
-      userId,
-      postId,
-    });
-
-    const savedLike = await this.postLikeRepository.save(like);
-
-    // Aktualizuj licznik polubień
-    await this.postRepository.increment({ id: postId }, 'likesCount', 1);
-
-    return savedLike;
+    return this.postsService.likePost(userId, postId);
   }
 
   async unlikePost(userId: string, postId: string): Promise<void> {
-    const like = await this.postLikeRepository.findByUserAndPost(
-      userId,
-      postId,
-    );
-
-    if (!like) {
-      throw new NotFoundException('Nie polubiłeś tego posta');
-    }
-
-    await this.postLikeRepository.remove(like);
-
-    // Aktualizuj licznik polubień
-    await this.postRepository.decrement({ id: postId }, 'likesCount', 1);
+    return this.postsService.unlikePost(userId, postId);
   }
 
   async getLikes(postId: string): Promise<User[]> {
-    const likes = await this.postLikeRepository.findLikesWithUsers(postId);
-    return likes.map((like) => like.user);
+    return this.postsService.getLikes(postId);
   }
 
   async getLikeCount(postId: string): Promise<number> {
-    return this.postLikeRepository.countLikes(postId);
+    return this.postsService.getLikeCount(postId);
   }
 }

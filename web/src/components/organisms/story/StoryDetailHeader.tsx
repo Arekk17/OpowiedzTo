@@ -1,11 +1,13 @@
 import React from "react";
 import Image from "next/image";
 import { Tag } from "../../atoms/tags/Tag";
+import { TagType } from "@/types/tags";
+import { formatDateTime } from "@/helpers/mappers";
 
 export interface StoryDetailHeaderProps {
   title: string;
   content: string;
-  tags: string[];
+  tags: TagType[];
   publishedDate: string;
   author: string;
   imageSrc?: string;
@@ -55,14 +57,14 @@ export const StoryDetailHeader: React.FC<StoryDetailHeaderProps> = ({
       {tags.length > 0 && (
         <div className="flex flex-row flex-wrap items-start p-3 px-3 gap-3 w-full">
           {tags.map((tag, index) => (
-            <Tag key={index} label={tag} />
+            <Tag key={index} label={tag.name} />
           ))}
         </div>
       )}
 
       <div className="flex flex-col items-start pt-1 px-4 pb-3 w-full">
         <p className="font-jakarta font-normal text-sm leading-[21px] text-content-secondary w-full">
-          Opublikowano {publishedDate} przez {author}
+          Opublikowano {formatDateTime(publishedDate)} przez {author}
         </p>
       </div>
     </div>

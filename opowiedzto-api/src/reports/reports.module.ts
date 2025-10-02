@@ -8,8 +8,7 @@ import { PostReportController } from './controllers/post-report.controller';
 import { CommentReportController } from './controllers/comment-report.controller';
 import { PostReportRepository } from './repositories/post-report.repository';
 import { CommentReportRepository } from './repositories/comment-report.repository';
-import { PostRepository } from '../posts/repositories/post.repository';
-import { CommentRepository } from '../posts/repositories/comment.repository';
+import { PostsRepository } from '../posts/repositories/posts.repository';
 
 @Module({
   imports: [TypeOrmModule.forFeature([PostReport, CommentReport])],
@@ -19,8 +18,7 @@ import { CommentRepository } from '../posts/repositories/comment.repository';
     CommentReportService,
     PostReportRepository,
     CommentReportRepository,
-    PostRepository,
-    CommentRepository,
+    PostsRepository,
   ],
   exports: [PostReportService, CommentReportService],
 })

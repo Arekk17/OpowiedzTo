@@ -10,7 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
 export default function RegisterPage() {
-  const { signup, isSigningUp, signupError } = useAuth();
+  const { signup, isSigningUp } = useAuth();
   const {
     register,
     setValue,
@@ -22,7 +22,6 @@ export default function RegisterPage() {
   });
   const handleGenerateNickname = async () => {
     const nickname = await generateNickname();
-    console.log(nickname);
     setValue("nickname", nickname.nickname);
   };
 
@@ -30,8 +29,7 @@ export default function RegisterPage() {
     const apiData: RegisterApiData = {
       email: data.email,
       password: data.password,
-      nickname: data.nickname,
-      gender: data.gender,
+      nickname: data.nickname || "",
     };
     signup(apiData);
   };
@@ -43,11 +41,6 @@ export default function RegisterPage() {
       loading={isSigningUp}
       onSubmit={handleSubmit(onSubmit)}
     >
-      {signupError && (
-        <div className="p-3 bg-red-50 border border-red-200 rounded-md">
-          <p className="text-sm text-red-600">{signupError.message}</p>
-        </div>
-      )}
       <Input
         label="Email"
         showLabel

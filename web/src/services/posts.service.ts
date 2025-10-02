@@ -1,5 +1,5 @@
 import { buildCursorParams, buildQueryParams } from "@/helpers/buildParams";
-import { api } from "@/lib/api/client";
+import { apiRequest } from "@/lib/auth";
 import { POSTS_ENDPOINTS, TAGS_ENDPOINTS } from "@/lib/config/api";
 import type { PaginatedResponse, ApiResponse, CursorMeta } from "@/types/api";
 import {
@@ -32,9 +32,12 @@ export const getPostsCursor = async (
   options?: ApiOptions
 ): Promise<PostsCursorResponse> => {
   const params = buildCursorParams(filters);
-  const res = await api.get<
+  const res = await apiRequest<
     PostsCursorResponse | { data: Post[]; nextCursor: string | null }
-  >(`${POSTS_ENDPOINTS.list}?${params.toString()}`, options);
+  >(`${POSTS_ENDPOINTS.list}?${params.toString()}`, {
+    method: "GET",
+    ...options,
+  });
   return adaptCursorResponse(res);
 };
 
@@ -43,9 +46,12 @@ export const getPosts = async (
   options?: ApiOptions
 ): Promise<PaginatedResponse<Post>> => {
   const params = buildQueryParams(filters);
-  return api.get<PaginatedResponse<Post>>(
+  return apiRequest<PaginatedResponse<Post>>(
     `${POSTS_ENDPOINTS.list}?${params.toString()}`,
-    options
+    {
+      method: "GET",
+      ...options,
+    }
   );
 };
 
@@ -53,22 +59,31 @@ export const getPost = async (
   id: string,
   options?: ApiOptions
 ): Promise<Post> => {
-  return api.get<Post>(POSTS_ENDPOINTS.detail(id), options);
+  return apiRequest<Post>(POSTS_ENDPOINTS.detail(id), {
+    method: "GET",
+    ...options,
+  });
 };
 
 export const getTrendingTags = async (
   options?: ApiOptions
 ): Promise<TrendingTags[]> => {
-  return api.get<TrendingTags[]>(TAGS_ENDPOINTS.trending, options);
+  return apiRequest<TrendingTags[]>(TAGS_ENDPOINTS.trending, {
+    method: "GET",
+    ...options,
+  });
 };
 
 export const getTags = async (
   options?: ApiOptions & { limit?: number }
 ): Promise<TagsResponse> => {
   const { limit, ...apiOptions } = options || {};
-  return api.get<TagsResponse>(
+  return apiRequest<TagsResponse>(
     `${TAGS_ENDPOINTS.list}?limit=${limit || 10}`,
-    apiOptions
+    {
+      method: "GET",
+      ...apiOptions,
+    }
   );
 };
 
@@ -87,9 +102,12 @@ export const searchPosts = async (
   params.set("page", (searchData.page || 1).toString());
   params.set("limit", (searchData.limit || 10).toString());
 
-  return api.get<SearchPostsApiResponse>(
+  return apiRequest<SearchPostsApiResponse>(
     `${POSTS_ENDPOINTS.search}?${params.toString()}`,
-    options
+    {
+      method: "GET",
+      ...options,
+    }
   );
 };
 
@@ -97,7 +115,11 @@ export const createPost = async (
   data: CreatePostFormData,
   options?: ApiOptions
 ): Promise<Post> => {
-  return api.post<Post>(POSTS_ENDPOINTS.create, data, options);
+  return apiRequest<Post>(POSTS_ENDPOINTS.create, {
+    method: "POST",
+    body: JSON.stringify(data),
+    ...options,
+  });
 };
 
 export const updatePost = async (
@@ -105,12 +127,19 @@ export const updatePost = async (
   data: UpdatePostFormData,
   options?: ApiOptions
 ): Promise<Post> => {
-  return api.patch<Post>(POSTS_ENDPOINTS.update(id), data, options);
+  return apiRequest<Post>(POSTS_ENDPOINTS.update(id), {
+    method: "PATCH",
+    body: JSON.stringify(data),
+    ...options,
+  });
 };
 
 export const deletePost = async (
   id: string,
   options?: ApiOptions
 ): Promise<void> => {
-  return api.delete(POSTS_ENDPOINTS.delete(id), options);
+  return apiRequest(POSTS_ENDPOINTS.delete(id), {
+    method: "DELETE",
+    ...options,
+  });
 };

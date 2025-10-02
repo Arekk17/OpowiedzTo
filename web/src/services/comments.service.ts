@@ -1,18 +1,33 @@
-import { api } from "@/lib/api/client";
+import { apiRequest } from "@/lib/auth";
 import { COMMENTS_ENDPOINTS } from "@/lib/config/api";
 import { Comment, CreateCommentFormData } from "@/types/comment";
 
-export const getComments = async (postId: string): Promise<Comment[]> => {
-  return api.get<Comment[]>(COMMENTS_ENDPOINTS.list(postId));
+type ApiOptions = {
+  cookieHeader?: string;
+};
+
+export const getComments = async (
+  postId: string,
+  options?: ApiOptions
+): Promise<Comment[]> => {
+  return apiRequest<Comment[]>(COMMENTS_ENDPOINTS.list(postId), {
+    method: "GET",
+    ...options,
+  });
 };
 
 export const createComment = async (
   postId: string,
   data: CreateCommentFormData
 ): Promise<Comment> => {
-  return api.post<Comment>(COMMENTS_ENDPOINTS.create(postId), data);
+  return apiRequest<Comment>(COMMENTS_ENDPOINTS.create(postId), {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
 };
 
 export const deleteComment = async (id: string): Promise<void> => {
-  return api.delete(COMMENTS_ENDPOINTS.delete(id));
+  return apiRequest(COMMENTS_ENDPOINTS.delete(id), {
+    method: "DELETE",
+  });
 };

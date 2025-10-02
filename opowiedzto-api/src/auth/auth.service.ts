@@ -5,7 +5,7 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { Response } from 'express';
+import { Response, Request } from 'express';
 import { User } from '../users/entities/user.entity';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -28,6 +28,7 @@ export class AuthService {
   async register(
     registerDto: RegisterDto,
     res: Response,
+    req: Request,
   ): Promise<AuthResponseDto> {
     const { email, password, nickname, gender } = registerDto;
 
@@ -44,7 +45,11 @@ export class AuthService {
     );
 
     const token = this.generateToken(user);
-    const refreshToken = await this.generateRefreshToken(user);
+    const refreshToken = await this.generateRefreshToken(
+      user,
+      req.get('User-Agent'),
+      req.ip,
+    );
     this.setRefreshCookie(res, refreshToken);
 
     this.setAuthCookie(res, token.accessToken);
@@ -52,7 +57,11 @@ export class AuthService {
     return token;
   }
 
-  async login(loginDto: LoginDto, res: Response): Promise<AuthResponseDto> {
+  async login(
+    loginDto: LoginDto,
+    res: Response,
+    req: Request,
+  ): Promise<AuthResponseDto> {
     const { email, password } = loginDto;
 
     const user = await this.usersService.findByEmail(email);
@@ -66,7 +75,11 @@ export class AuthService {
     }
 
     const token = this.generateToken(user);
-    const refreshToken = await this.generateRefreshToken(user);
+    const refreshToken = await this.generateRefreshToken(
+      user,
+      req.get('User-Agent'),
+      req.ip,
+    );
     this.setRefreshCookie(res, refreshToken);
 
     this.setAuthCookie(res, token.accessToken);
@@ -154,21 +167,24 @@ export class AuthService {
       nickname: user.nickname,
     };
 
+    const accessToken = this.jwtService.sign(payload);
+    const expiresAt = Date.now() + 15 * 60 * 1000;
+    const serverTime = Date.now();
+
     return {
-      accessToken: this.jwtService.sign(payload),
+      accessToken,
       userId: user.id,
       nickname: user.nickname,
+      serverTime,
+      expiresAt,
     };
   }
 
   private setAuthCookie(res: Response, token: string): void {
-    // const isProduction = process.env.NODE_ENV === 'production';
-
     res.cookie('accessToken', token, {
       httpOnly: true,
-      secure: false, // Na localhost zawsze false
-      sameSite: 'lax', // Dla localhost używaj 'lax'
-      // NIE ustawiaj domain dla localhost
+      secure: false,
+      sameSite: 'lax',
       maxAge: 15 * 60 * 1000,
       path: '/',
     });
@@ -181,8 +197,7 @@ export class AuthService {
     res.cookie('refreshToken', token, {
       httpOnly: true,
       secure: isProduction ? true : false,
-      sameSite: crossSite ? 'none' : isProduction ? 'lax' : 'lax',
-      domain: isProduction ? undefined : 'localhost', // ← DODAJ TO
+      sameSite: crossSite ? 'none' : 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000,
       path: '/',
     });
@@ -196,7 +211,6 @@ export class AuthService {
       httpOnly: true,
       secure: isProduction ? true : false,
       sameSite: crossSite ? 'none' : isProduction ? 'lax' : 'lax',
-      domain: isProduction ? undefined : 'localhost', // ← DODAJ TO
       path: '/',
     });
   }
@@ -209,14 +223,21 @@ export class AuthService {
       httpOnly: true,
       secure: isProduction ? true : false,
       sameSite: crossSite ? 'none' : isProduction ? 'lax' : 'lax',
-      domain: isProduction ? undefined : 'localhost', // ← DODAJ TO
       path: '/',
     });
   }
 
-  async refreshTokens(user: User, res: Response): Promise<AuthResponseDto> {
+  async refreshTokens(
+    user: User,
+    res: Response,
+    req: Request,
+  ): Promise<AuthResponseDto> {
     const newAccessToken = this.generateToken(user);
-    const newRefreshToken = await this.generateRefreshToken(user);
+    const newRefreshToken = await this.generateRefreshToken(
+      user,
+      req.get('User-Agent'),
+      req.ip,
+    );
 
     this.setAuthCookie(res, newAccessToken.accessToken);
     this.setRefreshCookie(res, newRefreshToken);

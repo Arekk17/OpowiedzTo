@@ -3,127 +3,115 @@
 import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter, usePathname } from "next/navigation";
-import { ApiError } from "@/lib/api/client";
 import {
-  login as loginApi,
-  register as registerApi,
-  logout as logoutApi,
+  login,
+  register,
+  logout,
   getCurrentUser,
-  AuthApiResponse,
-  CurrentUserResponse,
 } from "@/services/auth.service";
-import { LoginFormData, RegisterApiData } from "@/types/auth";
-
-const AUTH_KEYS = {
-  user: ["auth", "user"] as const,
-};
-
-interface AuthState {
-  user: CurrentUserResponse | null;
-  isLoading: boolean;
-  isAuthenticated: boolean;
-}
 
 export function useAuth() {
   const router = useRouter();
   const pathname = usePathname();
   const queryClient = useQueryClient();
-  const [isInitialized, setIsInitialized] = useState(false);
+  const [tokenExpiresAt, setTokenExpiresAt] = useState<number | null>(null);
+
   const isAuthPage = pathname?.startsWith("/auth/");
 
   const {
     data: user,
-    isLoading: isLoadingUser,
-    error: userError,
-    refetch: refetchUser,
+    isLoading,
+    refetch,
   } = useQuery({
-    queryKey: AUTH_KEYS.user,
+    queryKey: ["auth", "user"],
     queryFn: getCurrentUser,
-    enabled: isInitialized && !isAuthPage,
+    enabled: !isAuthPage,
     staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
-    retry: (failureCount, error: Error) => {
-      if (error instanceof ApiError && error.status === 401) {
-        return false;
-      }
+    retry: (failureCount, error) => {
+      if ((error as { status?: number })?.status === 401) return false;
       return failureCount < 2;
     },
   });
 
+  useEffect(() => {
+    if (user && (user as { expiresAt?: number }).expiresAt) {
+      setTokenExpiresAt((user as { expiresAt: number }).expiresAt);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (!user || !tokenExpiresAt) return;
+
+    const checkAndRefresh = async () => {
+      const timeUntilExpiry = tokenExpiresAt - Date.now();
+      const fiveMinutes = 5 * 60 * 1000;
+
+      if (timeUntilExpiry < fiveMinutes) {
+        try {
+          await fetch("/api/auth/refresh", {
+            method: "POST",
+            credentials: "include",
+          });
+          refetch();
+        } catch {}
+      }
+    };
+
+    const interval = setInterval(checkAndRefresh, 2 * 60 * 1000);
+    checkAndRefresh();
+
+    return () => clearInterval(interval);
+  }, [user, tokenExpiresAt, refetch]);
+
   const loginMutation = useMutation({
-    mutationFn: (data: LoginFormData) => loginApi(data),
-    onSuccess: (data: AuthApiResponse) => {
-      queryClient.setQueryData(AUTH_KEYS.user, {
+    mutationFn: login,
+    onSuccess: (data) => {
+      queryClient.setQueryData(["auth", "user"], {
         id: data.userId,
         email: "",
         nickname: data.nickname,
         createdAt: new Date().toISOString(),
+        expiresAt: data.expiresAt,
       });
-      refetchUser();
-      router.push("/profile");
-    },
-    onError: () => {
-      queryClient.removeQueries({ queryKey: AUTH_KEYS.user });
+      setTokenExpiresAt(data.expiresAt);
+      router.push("/dashboard");
     },
   });
 
   const registerMutation = useMutation({
-    mutationFn: (data: RegisterApiData) => registerApi(data),
-    onSuccess: (data: AuthApiResponse, variables: RegisterApiData) => {
-      queryClient.setQueryData(AUTH_KEYS.user, {
+    mutationFn: register,
+    onSuccess: (data) => {
+      queryClient.setQueryData(["auth", "user"], {
         id: data.userId,
-        email: variables.email,
+        email: "",
         nickname: data.nickname,
         createdAt: new Date().toISOString(),
+        expiresAt: data.expiresAt,
       });
-      refetchUser();
-      router.push("/profile");
-    },
-    onError: () => {
-      queryClient.removeQueries({ queryKey: AUTH_KEYS.user });
+      setTokenExpiresAt(data.expiresAt);
+      router.push("/dashboard");
     },
   });
 
   const logoutMutation = useMutation({
-    mutationFn: logoutApi,
+    mutationFn: logout,
     onSuccess: () => {
       queryClient.clear();
-      router.push("/auth/login");
-    },
-    onError: () => {
-      queryClient.clear();
+      setTokenExpiresAt(null);
       router.push("/auth/login");
     },
   });
 
-  useEffect(() => {
-    setIsInitialized(true);
-  }, []);
-
-  const authState: AuthState = {
-    user: user || null,
-    isLoading: isLoadingUser && !isInitialized,
-    isAuthenticated: !!user,
-  };
-
   return {
-    ...authState,
+    user: user || null,
+    isLoading,
+    isAuthenticated: !!user,
     signin: loginMutation.mutate,
     signup: registerMutation.mutate,
     signout: logoutMutation.mutate,
-    refetchUser,
+    refetch,
     isSigningIn: loginMutation.isPending,
     isSigningUp: registerMutation.isPending,
     isSigningOut: logoutMutation.isPending,
-    signinError: loginMutation.error,
-    signupError: registerMutation.error,
-    signoutError: logoutMutation.error,
-    userError,
-    isInitialized,
   };
-}
-
-export function useUser() {
-  const { user, isLoading, isAuthenticated } = useAuth();
-  return { user, isLoading, isAuthenticated };
 }

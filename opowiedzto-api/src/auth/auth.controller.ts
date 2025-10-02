@@ -7,8 +7,9 @@ import {
   Get,
   UseGuards,
   Res,
+  Req,
 } from '@nestjs/common';
-import { Response } from 'express';
+import { Response, Request } from 'express';
 import {
   ApiTags,
   ApiOperation,
@@ -44,8 +45,9 @@ export class AuthController {
   async register(
     @Body() registerDto: RegisterDto,
     @Res({ passthrough: true }) res: Response,
+    @Req() req: Request,
   ): Promise<AuthResponseDto> {
-    return this.authService.register(registerDto, res);
+    return this.authService.register(registerDto, res, req);
   }
   @Post('refresh-token')
   @UseGuards(RefreshTokenAuthGuard)
@@ -62,8 +64,9 @@ export class AuthController {
   async refreshToken(
     @GetUser() user: User,
     @Res({ passthrough: true }) res: Response,
+    @Req() req: Request,
   ): Promise<AuthResponseDto> {
-    return this.authService.refreshTokens(user, res);
+    return this.authService.refreshTokens(user, res, req);
   }
 
   @ApiOperation({ summary: 'Logowanie użytkownika' })
@@ -81,8 +84,9 @@ export class AuthController {
   async login(
     @Body() loginDto: LoginDto,
     @Res({ passthrough: true }) res: Response,
+    @Req() req: Request,
   ): Promise<AuthResponseDto> {
-    return this.authService.login(loginDto, res);
+    return this.authService.login(loginDto, res, req);
   }
 
   @ApiOperation({ summary: 'Pobranie danych zalogowanego użytkownika' })

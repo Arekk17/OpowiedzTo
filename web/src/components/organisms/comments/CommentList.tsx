@@ -1,8 +1,9 @@
 import React from "react";
-import { Comment, type CommentProps } from "../../molecules/comments/Comment";
+import { Comment as CommentItem } from "../../molecules/comments/Comment";
+import type { Comment as CommentModel } from "@/types/comment";
 
 export interface CommentListProps {
-  comments: CommentProps[];
+  comments: CommentModel[];
   title?: string;
   className?: string;
 }
@@ -22,13 +23,15 @@ export const CommentList: React.FC<CommentListProps> = ({
 
       <div className="w-full">
         {comments.map((comment) => (
-          <Comment
+          <CommentItem
             key={comment.id}
-            id={comment.id}
             author={comment.author}
             content={comment.content}
-            timestamp={comment.timestamp}
-            avatarSrc={comment.avatarSrc}
+            createdAt={comment.createdAt.toString()}
+            updatedAt={comment.updatedAt.toString()}
+            id={comment.id}
+            postId={comment.postId}
+            className={className}
           />
         ))}
       </div>

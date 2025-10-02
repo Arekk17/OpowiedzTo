@@ -7,7 +7,6 @@ import { useLike } from "@/hooks/useLike";
 import { useAuth } from "@/hooks/useAuth";
 import Link from "next/link";
 import { getPostUrl } from "@/helpers/generateSlug";
-
 export interface StoryCardProps {
   title: string;
   excerpt: string;
@@ -38,7 +37,6 @@ export const StoryCard: React.FC<StoryCardProps> = ({
 }) => {
   const { liked, count, toggle, isPending } = useLike(id, isLiked, likesCount);
   const { isAuthenticated, isLoading } = useAuth();
-
   const getCategoryStyles = () => {
     switch (category) {
       case "none":
@@ -53,7 +51,6 @@ export const StoryCard: React.FC<StoryCardProps> = ({
         return "border-l-story-anonymous bg-primary/5";
     }
   };
-  console.log(getPostUrl(id, title));
 
   return (
     <article
@@ -120,12 +117,7 @@ export const StoryCard: React.FC<StoryCardProps> = ({
               <span className="w-1 h-1 bg-current rounded-full"></span>
               <time className="text-xs font-jakarta">{createdAt}</time>
             </div>
-            <Link
-              href={getPostUrl(id, title)}
-              onClick={() => {
-                console.log("Link clicked!", getPostUrl(id, title));
-              }}
-            >
+            <Link href={getPostUrl(id, title)} onClick={() => {}}>
               <h3
                 className="
     text-content-primary
@@ -142,9 +134,9 @@ export const StoryCard: React.FC<StoryCardProps> = ({
 
             {tags && tags.length > 0 && (
               <div className="flex flex-wrap gap-1.5 mt-2">
-                {tags.slice(0, 3).map((tag) => (
+                {tags.slice(0, 3).map((tag, index) => (
                   <span
-                    key={tag}
+                    key={index}
                     className="inline-flex items-center h-6 px-2.5 rounded-full bg-ui-notification text-content-secondary font-jakarta text-[12px] leading-[18px]"
                   >
                     #{tag}

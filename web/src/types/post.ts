@@ -11,13 +11,22 @@ export interface UpdatePostForm {
 }
 
 export const postSchema = z.object({
-  id: z.string().uuid(),
+  id: z.string(),
   title: z.string(),
   content: z.string(),
-  tags: z.array(z.string()),
-  authorId: z.string().uuid(),
+  tags: z.array(
+    z.object({
+      id: z.string(),
+      name: z.string(),
+      slug: z.string(),
+      postCount: z.number(),
+      createdAt: z.string(),
+      updatedAt: z.string(),
+    })
+  ),
+  authorId: z.string(),
   author: z.object({
-    id: z.string().uuid(),
+    id: z.string(),
     email: z.string(),
     nickname: z.string(),
     gender: z.string().optional(),
@@ -43,7 +52,7 @@ export const updatePostSchema = createPostSchema.partial();
 export const postFiltersSchema = z.object({
   page: z.number().min(1).default(1),
   limit: z.number().min(1).max(100).default(10),
-  authorId: z.string().uuid().optional(),
+  authorId: z.string().optional(),
   tag: z.string().optional(),
   sortBy: z.enum(["newest", "popular", "most_commented"]).optional(),
 });
