@@ -35,6 +35,5 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, document);
 
   await app.listen(process.env.PORT ?? 3001);
-  console.log(`Aplikacja działa na porcie ${process.env.PORT ?? 3001}`);
 }
 void bootstrap();

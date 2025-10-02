@@ -6,11 +6,7 @@ export function extractCookieValue(
 ): string | null {
   const cookies = request.headers.cookie;
 
-  // Debug: log all cookies
-  console.log(`[DEBUG] All cookies for ${cookieName}:`, cookies);
-
   if (!cookies) {
-    console.log(`[DEBUG] No cookies found for ${cookieName}`);
     return null;
   }
 
@@ -19,11 +15,9 @@ export function extractCookieValue(
   for (const cookie of cookieArray) {
     const [name, value] = cookie.trim().split('=');
     if (name === cookieName) {
-      console.log(`[DEBUG] Found ${cookieName}:`, value);
       return value;
     }
   }
 
-  console.log(`[DEBUG] Cookie ${cookieName} not found in:`, cookieArray);
   return null;
 }

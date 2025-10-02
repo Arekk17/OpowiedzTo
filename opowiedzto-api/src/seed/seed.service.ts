@@ -59,10 +59,6 @@ export class SeedService implements OnApplicationBootstrap {
       createdUsers.push(savedUser);
     }
 
-    console.log(
-      `Baza danych została zainicjalizowana ${createdUsers.length} przykładowymi użytkownikami`,
-    );
-
     return createdUsers;
   }
 
@@ -70,9 +66,6 @@ export class SeedService implements OnApplicationBootstrap {
     const users = await this.usersRepository.find();
 
     if (users.length === 0) {
-      console.log(
-        'Brak użytkowników w bazie danych. Najpierw uruchom seedUsers().',
-      );
       return [];
     }
 
@@ -176,9 +169,6 @@ export class SeedService implements OnApplicationBootstrap {
       }
     }
 
-    console.log(
-      `Baza danych została zainicjalizowana ${createdPosts.length} przykładowymi postami`,
-    );
     return createdPosts;
   }
 
@@ -188,7 +178,6 @@ export class SeedService implements OnApplicationBootstrap {
     const posts = await this.postsRepository.find();
 
     if (users.length === 0 || posts.length === 0) {
-      console.log('Brak użytkowników lub postów w bazie danych.');
       return;
     }
 
@@ -221,8 +210,6 @@ export class SeedService implements OnApplicationBootstrap {
       // Aktualizuj licznik polubień w poście
       await this.postsRepository.update(post.id, { likesCount });
     }
-
-    console.log(`Utworzono ${totalLikes} polubień`);
   }
 
   private async seedComments() {
@@ -230,7 +217,6 @@ export class SeedService implements OnApplicationBootstrap {
     const posts = await this.postsRepository.find();
 
     if (users.length === 0 || posts.length === 0) {
-      console.log('Brak użytkowników lub postów w bazie danych.');
       return;
     }
 
@@ -283,7 +269,5 @@ export class SeedService implements OnApplicationBootstrap {
       // Aktualizuj licznik komentarzy w poście
       await this.postsRepository.update(post.id, { commentsCount });
     }
-
-    console.log(`Utworzono ${totalComments} komentarzy`);
   }
 }
