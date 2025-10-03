@@ -1,12 +1,13 @@
 type ApiRequestOptions = RequestInit & {
   cookieHeader?: string;
+  skipRefreshOn401?: boolean;
 };
 
 export async function apiRequest<T>(
   endpoint: string,
   options: ApiRequestOptions = {}
 ): Promise<T> {
-  const { cookieHeader, ...fetchOptions } = options;
+  const { cookieHeader, skipRefreshOn401, ...fetchOptions } = options;
 
   const headers: HeadersInit = {
     "Content-Type": "application/json",
@@ -28,6 +29,9 @@ export async function apiRequest<T>(
   }
 
   if (response.status === 401) {
+    if (skipRefreshOn401) {
+      throw Object.assign(new Error("Unauthorized"), { status: 401 });
+    }
     if (typeof window !== "undefined") {
       try {
         await fetch("/api/auth/refresh", {
@@ -36,7 +40,7 @@ export async function apiRequest<T>(
         });
         return apiRequest<T>(endpoint, options);
       } catch {
-        throw new Error("Unauthorized");
+        throw Object.assign(new Error("Unauthorized"), { status: 401 });
       }
     } else if (cookieHeader) {
       try {

@@ -15,8 +15,21 @@ export function useAuth() {
   const pathname = usePathname();
   const queryClient = useQueryClient();
   const [tokenExpiresAt, setTokenExpiresAt] = useState<number | null>(null);
-
+  const [hasCheckedCookie, setHasCheckedCookie] = useState(false);
   const isAuthPage = pathname?.startsWith("/auth/");
+
+  useEffect(() => {
+    const checkCookie = async () => {
+      setHasCheckedCookie(document.cookie.includes("refreshToken"));
+    };
+    checkCookie();
+    document.addEventListener("visibilitychange", checkCookie);
+    window.addEventListener("focus", checkCookie);
+    return () => {
+      document.removeEventListener("visibilitychange", checkCookie);
+      window.removeEventListener("focus", checkCookie);
+    };
+  }, []);
 
   const {
     data: user,
@@ -25,7 +38,7 @@ export function useAuth() {
   } = useQuery({
     queryKey: ["auth", "user"],
     queryFn: getCurrentUser,
-    enabled: !isAuthPage,
+    enabled: !isAuthPage && hasCheckedCookie,
     staleTime: 5 * 60 * 1000,
     retry: (failureCount, error) => {
       if ((error as { status?: number })?.status === 401) return false;

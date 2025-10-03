@@ -40,7 +40,10 @@ export const logout = async (): Promise<{ message: string }> => {
 };
 
 export const getCurrentUser = async (): Promise<CurrentUserResponse> => {
-  return apiRequest<CurrentUserResponse>(AUTH_ENDPOINTS.me);
+  return apiRequest<CurrentUserResponse>(AUTH_ENDPOINTS.me, {
+    // ważne: na publicznych stronach nie próbuj odświeżać przy 401
+    skipRefreshOn401: true,
+  });
 };
 
 export const generateNickname = async (): Promise<{ nickname: string }> => {

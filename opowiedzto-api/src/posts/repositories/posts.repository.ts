@@ -95,6 +95,27 @@ export class PostsRepository {
           updatedAt: post.author.updatedAt,
           avatar: post.author.avatar,
         };
+        const lastCommentsRaw = await this.commentRepo.find({
+          where: { postId: post.id },
+          order: { createdAt: 'DESC' },
+          take: 3,
+          relations: ['author'],
+        });
+        const lastComments = lastCommentsRaw.map((comment) => ({
+          id: comment.id,
+          authorId: comment.authorId,
+          content: comment.content,
+          createdAt: comment.createdAt,
+          author: {
+            id: comment.author.id,
+            email: comment.author.email,
+            nickname: comment.author.nickname,
+            gender: comment.author.gender as unknown as string,
+            createdAt: comment.author.createdAt,
+            updatedAt: comment.author.updatedAt,
+            avatar: comment.author.avatar,
+          },
+        }));
 
         return {
           id: post.id,
@@ -108,6 +129,7 @@ export class PostsRepository {
           isLiked: isLikedByUser,
           createdAt: post.createdAt,
           updatedAt: post.updatedAt,
+          latestComments: lastComments,
         };
       }),
     );
@@ -191,12 +213,34 @@ export class PostsRepository {
           updatedAt: post.author.updatedAt,
           avatar: post.author.avatar,
         };
+        const lastCommentsRaw = await this.commentRepo.find({
+          where: { postId: post.id },
+          order: { createdAt: 'DESC' },
+          take: 3,
+          relations: ['author'],
+        });
+        const lastComments = lastCommentsRaw.map((comment) => ({
+          id: comment.id,
+          authorId: comment.authorId,
+          content: comment.content,
+          createdAt: comment.createdAt,
+          author: {
+            id: comment.author.id,
+            email: comment.author.email,
+            nickname: comment.author.nickname,
+            gender: comment.author.gender as unknown as string,
+            createdAt: comment.author.createdAt,
+            updatedAt: comment.author.updatedAt,
+            avatar: comment.author.avatar,
+          },
+        }));
         return {
           id: post.id,
           title: post.title,
           content: post.content,
           authorId: post.authorId,
           author,
+          latestComments: lastComments,
           tags: post.tags.map((tag) => tag.name),
           likesCount: likeCount,
           commentsCount: commentCount,
@@ -263,6 +307,27 @@ export class PostsRepository {
           updatedAt: post.author.updatedAt,
           avatar: post.author.avatar,
         };
+        const lastCommentsRaw = await this.commentRepo.find({
+          where: { postId: post.id },
+          order: { createdAt: 'DESC' },
+          take: 3,
+          relations: ['author'],
+        });
+        const lastComments = lastCommentsRaw.map((comment) => ({
+          id: comment.id,
+          authorId: comment.authorId,
+          content: comment.content,
+          createdAt: comment.createdAt,
+          author: {
+            id: comment.author.id,
+            email: comment.author.email,
+            nickname: comment.author.nickname,
+            gender: comment.author.gender as unknown as string,
+            createdAt: comment.author.createdAt,
+            updatedAt: comment.author.updatedAt,
+            avatar: comment.author.avatar,
+          },
+        }));
         return {
           id: post.id,
           title: post.title,
@@ -275,6 +340,7 @@ export class PostsRepository {
           isLiked: isLikedByUser,
           createdAt: post.createdAt,
           updatedAt: post.updatedAt,
+          latestComments: lastComments,
         };
       }),
     );
@@ -333,6 +399,27 @@ export class PostsRepository {
       avatar: post.author.avatar,
     };
 
+    const lastCommentsRaw = await this.commentRepo.find({
+      where: { postId: post.id },
+      order: { createdAt: 'DESC' },
+      take: 3,
+      relations: ['author'],
+    });
+    const lastComments = lastCommentsRaw.map((comment) => ({
+      id: comment.id,
+      authorId: comment.authorId,
+      content: comment.content,
+      createdAt: comment.createdAt,
+      author: {
+        id: comment.author.id,
+        email: comment.author.email,
+        nickname: comment.author.nickname,
+        gender: comment.author.gender as unknown as string,
+        createdAt: comment.author.createdAt,
+        updatedAt: comment.author.updatedAt,
+        avatar: comment.author.avatar,
+      },
+    }));
     return {
       id: post.id,
       title: post.title,
@@ -345,6 +432,7 @@ export class PostsRepository {
       isLiked: isLikedByUser,
       createdAt: post.createdAt,
       updatedAt: post.updatedAt,
+      latestComments: lastComments,
     };
   }
 

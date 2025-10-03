@@ -19,6 +19,9 @@ import {
   ApiParam,
   ApiQuery,
   ApiBearerAuth,
+  ApiOkResponse,
+  ApiExtraModels,
+  getSchemaPath,
 } from '@nestjs/swagger';
 import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
@@ -30,10 +33,13 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { OptionalJwtAuthGuard } from '../auth/guards/optional-jwt-auth.guard';
 import { GetUser } from '../auth/decorators/get-user.decorator';
 import { GetOptionalUser } from '../auth/decorators/get-optional-user.decorator';
+import { AuthorDto } from './dto/author.dto';
+import { CommentWithAuthorDto } from './dto/comment-with-author.dto';
 import { User } from '../users/entities/user.entity';
 import { decodeCursor } from './dto/cursor.dto';
 
 @ApiTags('posts')
+@ApiExtraModels(AuthorDto, CommentWithAuthorDto, PostWithDetailsDto)
 @Controller('posts')
 export class PostsController {
   constructor(private readonly postsService: PostsService) {}
@@ -41,24 +47,15 @@ export class PostsController {
   @ApiOperation({
     summary: 'Pobierz wszystkie posty z opcjonalną filtracją i paginacją',
   })
-  @ApiResponse({
-    status: 200,
+  @ApiOkResponse({
     schema: {
       type: 'object',
       properties: {
         data: {
           type: 'array',
-          items: { $ref: '#/components/schemas/PostWithDetailsDto' },
+          items: { $ref: getSchemaPath(PostWithDetailsDto) },
         },
-        meta: {
-          type: 'object',
-          properties: {
-            page: { type: 'number', example: 1 },
-            limit: { type: 'number', example: 10 },
-            total: { type: 'number', example: 100 },
-            totalPages: { type: 'number', example: 10 },
-          },
-        },
+        nextCursor: { type: 'string', nullable: true },
       },
     },
   })
@@ -86,15 +83,6 @@ export class PostsController {
       decoded,
     );
   }
-  @ApiOperation({ summary: 'Pojedynczy post' })
-  @ApiQuery({ name: 'limit', required: false, example: 6 })
-  @ApiResponse({
-    status: 200,
-    schema: {
-      type: 'array',
-      items: { $ref: '#/components/schemas/TrendingTagDto' },
-    },
-  })
   @ApiOperation({
     summary: 'Pobierz post po ID (tylko zalogowani użytkownicy)',
   })

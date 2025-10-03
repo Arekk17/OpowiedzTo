@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { AuthorDto } from './author.dto';
+import { CommentWithAuthorDto } from './comment-with-author.dto';
 
 export class PostWithDetailsDto {
   @ApiProperty()
@@ -34,4 +35,7 @@ export class PostWithDetailsDto {
 
   @ApiProperty()
   updatedAt: Date;
+
+  @ApiProperty({ type: () => [CommentWithAuthorDto] })
+  latestComments: CommentWithAuthorDto[];
 }
