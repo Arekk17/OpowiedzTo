@@ -48,6 +48,8 @@ export const StoriesLayout: React.FC<StoriesLayoutProps> = ({
           likesCount={story.likesCount}
           isLiked={story.isLiked}
           tags={story.tags}
+          commentsCount={story.commentsCount}
+          latestComments={story.latestComments}
         />
       ))}
     </div>

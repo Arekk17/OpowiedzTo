@@ -227,20 +227,10 @@ export class AuthService {
     });
   }
 
-  async refreshTokens(
-    user: User,
-    res: Response,
-    req: Request,
-  ): Promise<AuthResponseDto> {
+  refreshTokens(user: User, res: Response): AuthResponseDto {
     const newAccessToken = this.generateToken(user);
-    const newRefreshToken = await this.generateRefreshToken(
-      user,
-      req.get('User-Agent'),
-      req.ip,
-    );
 
     this.setAuthCookie(res, newAccessToken.accessToken);
-    this.setRefreshCookie(res, newRefreshToken);
 
     return newAccessToken;
   }

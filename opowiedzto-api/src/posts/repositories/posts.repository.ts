@@ -19,125 +19,6 @@ export class PostsRepository {
     this.likeRepo = this.dataSource.getRepository(PostLike);
   }
 
-  // Page mode
-  async findAllWithDetailsPage(
-    page: number = 1,
-    limit: number = 10,
-    userId?: string,
-    tag?: string,
-    authorId?: string,
-    sortBy?: SortOption,
-  ): Promise<{ posts: PostWithDetailsDto[]; total: number }> {
-    const queryBuilder = this.postRepo
-      .createQueryBuilder('post')
-      .leftJoinAndSelect('post.author', 'author')
-      .leftJoinAndSelect('post.tags', 't');
-
-    if (tag) {
-      queryBuilder
-        .innerJoin('post.tags', 'tag')
-        .andWhere('tag.slug = :tag', { tag });
-    }
-
-    if (authorId) {
-      queryBuilder.andWhere('post.authorId = :authorId', { authorId });
-    }
-
-    if (userId) {
-      queryBuilder
-        .leftJoin('post.postLikes', 'userLike', 'userLike.userId = :userId', {
-          userId,
-        })
-        .addSelect(
-          'CASE WHEN userLike.id IS NOT NULL THEN true ELSE false END',
-          'isLikedByUser',
-        );
-    }
-
-    const total = await queryBuilder.getCount();
-
-    if (sortBy === SortOption.NEWEST) {
-      queryBuilder.orderBy('post.createdAt', 'DESC');
-    } else if (sortBy === SortOption.POPULAR) {
-      // Popularność po liczbie polubień
-      queryBuilder.orderBy('post.likesCount', 'DESC');
-    } else if (sortBy === SortOption.MOST_COMMENTED) {
-      queryBuilder.orderBy('post.commentsCount', 'DESC');
-    } else {
-      queryBuilder.orderBy('post.createdAt', 'DESC');
-    }
-
-    const skip = (page - 1) * limit;
-    const posts = await queryBuilder.skip(skip).take(limit).getMany();
-
-    const postsWithDetails: PostWithDetailsDto[] = await Promise.all(
-      posts.map(async (post) => {
-        const likeCount = await this.likeRepo.count({
-          where: { postId: post.id },
-        });
-
-        const commentCount = await this.commentRepo.count({
-          where: { postId: post.id },
-        });
-
-        const isLikedByUser = userId
-          ? (await this.likeRepo.findOne({
-              where: { userId, postId: post.id },
-            })) !== null
-          : false;
-
-        const author: AuthorDto = {
-          id: post.author.id,
-          email: post.author.email,
-          nickname: post.author.nickname,
-          gender: post.author.gender as unknown as string,
-          createdAt: post.author.createdAt,
-          updatedAt: post.author.updatedAt,
-          avatar: post.author.avatar,
-        };
-        const lastCommentsRaw = await this.commentRepo.find({
-          where: { postId: post.id },
-          order: { createdAt: 'DESC' },
-          take: 3,
-          relations: ['author'],
-        });
-        const lastComments = lastCommentsRaw.map((comment) => ({
-          id: comment.id,
-          authorId: comment.authorId,
-          content: comment.content,
-          createdAt: comment.createdAt,
-          author: {
-            id: comment.author.id,
-            email: comment.author.email,
-            nickname: comment.author.nickname,
-            gender: comment.author.gender as unknown as string,
-            createdAt: comment.author.createdAt,
-            updatedAt: comment.author.updatedAt,
-            avatar: comment.author.avatar,
-          },
-        }));
-
-        return {
-          id: post.id,
-          title: post.title,
-          content: post.content,
-          authorId: post.authorId,
-          author,
-          tags: post.tags.map((tag) => tag.name),
-          likesCount: likeCount,
-          commentsCount: commentCount,
-          isLiked: isLikedByUser,
-          createdAt: post.createdAt,
-          updatedAt: post.updatedAt,
-          latestComments: lastComments,
-        };
-      }),
-    );
-
-    return { posts: postsWithDetails, total };
-  }
-
-  // Cursor mode
   async findAllWithDetailsCursor(
     limit: number = 10,
     userId?: string,
@@ -241,7 +122,7 @@ export class PostsRepository {
           authorId: post.authorId,
           author,
           latestComments: lastComments,
-          tags: post.tags.map((tag) => tag.name),
+          tags: post.tags,
           likesCount: likeCount,
           commentsCount: commentCount,
           isLiked: isLikedByUser,
@@ -254,7 +135,6 @@ export class PostsRepository {
     return { posts: postsWithDetails, total: postsWithDetails.length };
   }
 
-  // Search mode
   async findAllWithDetailsSearch(
     searchTerm: string,
     page: number = 1,
@@ -334,7 +214,7 @@ export class PostsRepository {
           content: post.content,
           authorId: post.authorId,
           author,
-          tags: post.tags.map((tag) => tag.name),
+          tags: post.tags,
           likesCount: likeCount,
           commentsCount: commentCount,
           isLiked: isLikedByUser,
@@ -399,55 +279,20 @@ export class PostsRepository {
       avatar: post.author.avatar,
     };
 
-    const lastCommentsRaw = await this.commentRepo.find({
-      where: { postId: post.id },
-      order: { createdAt: 'DESC' },
-      take: 3,
-      relations: ['author'],
-    });
-    const lastComments = lastCommentsRaw.map((comment) => ({
-      id: comment.id,
-      authorId: comment.authorId,
-      content: comment.content,
-      createdAt: comment.createdAt,
-      author: {
-        id: comment.author.id,
-        email: comment.author.email,
-        nickname: comment.author.nickname,
-        gender: comment.author.gender as unknown as string,
-        createdAt: comment.author.createdAt,
-        updatedAt: comment.author.updatedAt,
-        avatar: comment.author.avatar,
-      },
-    }));
     return {
       id: post.id,
       title: post.title,
       content: post.content,
       authorId: post.authorId,
       author,
-      tags: post.tags.map((tag) => tag.name),
+      tags: post.tags,
       likesCount: likeCount,
       commentsCount: commentCount,
       isLiked: isLikedByUser,
       createdAt: post.createdAt,
       updatedAt: post.updatedAt,
-      latestComments: lastComments,
+      latestComments: [],
     };
-  }
-
-  async findByAuthor(
-    authorId: string,
-    page: number = 1,
-    limit: number = 10,
-  ): Promise<{ posts: PostWithDetailsDto[]; total: number }> {
-    return this.findAllWithDetailsPage(
-      page,
-      limit,
-      undefined,
-      undefined,
-      authorId,
-    );
   }
 
   async findEntityById(id: string): Promise<Post | null> {
@@ -463,8 +308,6 @@ export class PostsRepository {
       relations: ['author', 'tags'],
     });
   }
-
-  // Encje pomocnicze
 
   async create(postData: Partial<Post>): Promise<Post> {
     const post = this.postRepo.create(postData);
@@ -483,7 +326,6 @@ export class PostsRepository {
     await this.postRepo.delete(id);
   }
 
-  // Comment methods
   async findCommentsByPost(postId: string): Promise<Comment[]> {
     return this.commentRepo.find({
       where: { postId },
@@ -525,7 +367,6 @@ export class PostsRepository {
     await this.commentRepo.delete(id);
   }
 
-  // PostLike methods
   async findLikeByUserAndPost(
     userId: string,
     postId: string,
@@ -555,9 +396,5 @@ export class PostsRepository {
 
   async deleteLike(id: string): Promise<void> {
     await this.likeRepo.delete(id);
-  }
-
-  async deleteLikeByUserAndPost(userId: string, postId: string): Promise<void> {
-    await this.likeRepo.delete({ userId, postId });
   }
 }

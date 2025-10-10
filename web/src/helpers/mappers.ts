@@ -18,4 +18,12 @@ export const mapPostToStoryItem = (p: Post): StoryListItem => ({
   likesCount: p.likesCount,
   isLiked: p.isLiked,
   tags: p.tags,
+  commentsCount: p.commentsCount ?? 0,
+  latestComments: (p.latestComments ?? []).map((comment) => ({
+    ...comment,
+    author: {
+      ...comment.author,
+      avatar: comment.author.avatar ?? null,
+    },
+  })),
 });

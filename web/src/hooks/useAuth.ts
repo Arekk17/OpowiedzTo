@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import {
   login,
   register,
@@ -13,23 +13,11 @@ import {
 export function useAuth() {
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const queryClient = useQueryClient();
   const [tokenExpiresAt, setTokenExpiresAt] = useState<number | null>(null);
-  const [hasCheckedCookie, setHasCheckedCookie] = useState(false);
   const isAuthPage = pathname?.startsWith("/auth/");
-
-  useEffect(() => {
-    const checkCookie = async () => {
-      setHasCheckedCookie(document.cookie.includes("refreshToken"));
-    };
-    checkCookie();
-    document.addEventListener("visibilitychange", checkCookie);
-    window.addEventListener("focus", checkCookie);
-    return () => {
-      document.removeEventListener("visibilitychange", checkCookie);
-      window.removeEventListener("focus", checkCookie);
-    };
-  }, []);
+  const callbackUrl = searchParams?.get("callbackUrl") || "/dashboard/profile";
 
   const {
     data: user,
@@ -38,12 +26,9 @@ export function useAuth() {
   } = useQuery({
     queryKey: ["auth", "user"],
     queryFn: getCurrentUser,
-    enabled: !isAuthPage && hasCheckedCookie,
+    enabled: !isAuthPage,
     staleTime: 5 * 60 * 1000,
-    retry: (failureCount, error) => {
-      if ((error as { status?: number })?.status === 401) return false;
-      return failureCount < 2;
-    },
+    retry: false, // ← Nie retry, niech apiRequest sam obsłuży refresh
   });
 
   useEffect(() => {
@@ -52,26 +37,34 @@ export function useAuth() {
     }
   }, [user]);
 
+  // Prosty periodic refresh
   useEffect(() => {
     if (!user || !tokenExpiresAt) return;
 
-    const checkAndRefresh = async () => {
+    const interval = setInterval(async () => {
       const timeUntilExpiry = tokenExpiresAt - Date.now();
       const fiveMinutes = 5 * 60 * 1000;
 
+      console.log("[useAuth] Token expiry check:", {
+        tokenExpiresAt,
+        currentTime: Date.now(),
+        timeUntilExpiry,
+        willRefresh: timeUntilExpiry < fiveMinutes,
+      });
+
       if (timeUntilExpiry < fiveMinutes) {
         try {
+          console.log("[useAuth] Auto-refreshing token (periodic check)");
           await fetch("/api/auth/refresh", {
             method: "POST",
             credentials: "include",
           });
           refetch();
-        } catch {}
+        } catch (error) {
+          console.error("Periodic refresh failed:", error);
+        }
       }
-    };
-
-    const interval = setInterval(checkAndRefresh, 2 * 60 * 1000);
-    checkAndRefresh();
+    }, 2 * 60 * 1000);
 
     return () => clearInterval(interval);
   }, [user, tokenExpiresAt, refetch]);
@@ -79,30 +72,42 @@ export function useAuth() {
   const loginMutation = useMutation({
     mutationFn: login,
     onSuccess: (data) => {
+      console.log("[useAuth] Login successful, redirecting to:", callbackUrl);
+
+      // Oblicz czas wygaśnięcia względem czasu klienta
+      const clientTime = Date.now();
+      const timeDiff = clientTime - data.serverTime;
+      const adjustedExpiresAt = data.expiresAt + timeDiff;
+
       queryClient.setQueryData(["auth", "user"], {
         id: data.userId,
         email: "",
         nickname: data.nickname,
         createdAt: new Date().toISOString(),
-        expiresAt: data.expiresAt,
+        expiresAt: adjustedExpiresAt, // ← Skorygowany czas
       });
-      setTokenExpiresAt(data.expiresAt);
-      router.push("/dashboard");
+      setTokenExpiresAt(adjustedExpiresAt);
+      router.push(callbackUrl);
     },
   });
 
   const registerMutation = useMutation({
     mutationFn: register,
     onSuccess: (data) => {
+      // To samo co w login
+      const clientTime = Date.now();
+      const timeDiff = clientTime - data.serverTime;
+      const adjustedExpiresAt = data.expiresAt + timeDiff;
+
       queryClient.setQueryData(["auth", "user"], {
         id: data.userId,
         email: "",
         nickname: data.nickname,
         createdAt: new Date().toISOString(),
-        expiresAt: data.expiresAt,
+        expiresAt: adjustedExpiresAt,
       });
-      setTokenExpiresAt(data.expiresAt);
-      router.push("/dashboard");
+      setTokenExpiresAt(adjustedExpiresAt);
+      router.push(callbackUrl);
     },
   });
 
@@ -126,5 +131,7 @@ export function useAuth() {
     isSigningIn: loginMutation.isPending,
     isSigningUp: registerMutation.isPending,
     isSigningOut: logoutMutation.isPending,
+    signinError: loginMutation.error,
+    signupError: registerMutation.error,
   };
 }

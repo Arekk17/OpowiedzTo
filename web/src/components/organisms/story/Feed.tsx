@@ -32,7 +32,6 @@ export const Feed: React.FC<Props> = ({
     isFetchingNextPage,
     status,
     isLoading,
-    error,
   } = useInfiniteQuery({
     queryKey: ["posts", { tag, sortBy, pageSize }],
     queryFn: ({ pageParam }) =>
@@ -50,7 +49,6 @@ export const Feed: React.FC<Props> = ({
     staleTime: 60_000,
     gcTime: 10 * 60_000,
     retry: (failureCount, error) => {
-      // Nie retry dla błędów 401 na publicznych endpointach
       if (
         error &&
         typeof error === "object" &&

@@ -7,6 +7,18 @@ export interface Comment extends BaseEntity {
   author: User;
   content: string;
 }
+export interface CommentWithAuthor {
+  id: string;
+  content: string;
+  createdAt: string;
+  author: {
+    id: string;
+    nickname: string;
+    avatar: string | null;
+    createdAt: string;
+    updatedAt: string;
+  };
+}
 
 export interface CreateCommentForm {
   content: string;

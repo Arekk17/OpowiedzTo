@@ -7,6 +7,9 @@ import {
   Param,
   UseGuards,
   ParseUUIDPipe,
+  NotFoundException,
+  ForbiddenException,
+  BadRequestException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -15,17 +18,22 @@ import {
   ApiParam,
   ApiBearerAuth,
 } from '@nestjs/swagger';
-import { CommentService } from './comment.service';
+import { CommentRepository } from './repositories/comment.repository';
+import { PostsRepository } from './repositories/posts.repository';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { GetUser } from '../auth/decorators/get-user.decorator';
 import { User } from '../users/entities/user.entity';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { Comment } from './entities/comment.entity';
+import { BANNED_WORDS } from '../common/constants/banned-words';
 
 @ApiTags('comments')
 @Controller()
 export class CommentController {
-  constructor(private readonly commentService: CommentService) {}
+  constructor(
+    private readonly commentRepository: CommentRepository,
+    private readonly postsRepository: PostsRepository,
+  ) {}
 
   @Post('posts/:id/comments')
   @UseGuards(JwtAuthGuard)
@@ -44,12 +52,29 @@ export class CommentController {
     @Body() createCommentDto: CreateCommentDto,
     @GetUser() user: User,
   ): Promise<Comment> {
-    return this.commentService.createComment(postId, user.id, createCommentDto);
+    // Sprawdź czy post istnieje
+    const post = await this.postsRepository.findEntityById(postId);
+    if (!post) {
+      throw new NotFoundException('Post nie istnieje');
+    }
+
+    // Sprawdź banned words
+    const contentLower = createCommentDto.content.toLowerCase();
+    const containsBanned = BANNED_WORDS.some((word) =>
+      contentLower.includes(word),
+    );
+    if (containsBanned) {
+      throw new BadRequestException('Komentarz zawiera niedozwolone słowa');
+    }
+
+    return this.commentRepository.save({
+      postId,
+      authorId: user.id,
+      content: createCommentDto.content,
+    });
   }
 
   @Get('posts/:id/comments')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
   @ApiOperation({ summary: 'Pobierz komentarze do posta' })
   @ApiParam({ name: 'id', description: 'ID posta' })
   @ApiResponse({
@@ -60,7 +85,7 @@ export class CommentController {
   async getComments(
     @Param('id', ParseUUIDPipe) postId: string,
   ): Promise<Comment[]> {
-    return this.commentService.getComments(postId);
+    return this.commentRepository.findByPost(postId);
   }
 
   @Delete('comments/:id')
@@ -75,7 +100,14 @@ export class CommentController {
     @Param('id', ParseUUIDPipe) commentId: string,
     @GetUser() user: User,
   ): Promise<{ message: string }> {
-    await this.commentService.deleteComment(commentId, user.id);
+    const comment = await this.commentRepository.findWithAuthor(commentId);
+    if (!comment) {
+      throw new NotFoundException('Komentarz nie istnieje');
+    }
+    if (comment.authorId !== user.id) {
+      throw new ForbiddenException('Nie możesz usunąć tego komentarza');
+    }
+    await this.commentRepository.delete(commentId);
     return { message: 'Komentarz został usunięty' };
   }
 
@@ -86,7 +118,7 @@ export class CommentController {
   async getCommentCount(
     @Param('id', ParseUUIDPipe) postId: string,
   ): Promise<{ count: number }> {
-    const count = await this.commentService.getCommentCount(postId);
+    const count = await this.commentRepository.countComments(postId);
     return { count };
   }
 }

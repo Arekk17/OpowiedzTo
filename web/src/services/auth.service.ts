@@ -7,12 +7,14 @@ export interface AuthApiResponse {
   userId: string;
   nickname: string;
   expiresAt: number;
+  serverTime: number;
 }
 
 export interface CurrentUserResponse {
   id: string;
   email: string;
   nickname: string;
+  avatar?: string;
   createdAt: string;
   expiresAt?: number;
 }
@@ -21,6 +23,7 @@ export const login = async (data: LoginFormData): Promise<AuthApiResponse> => {
   return apiRequest<AuthApiResponse>(AUTH_ENDPOINTS.login, {
     method: "POST",
     body: JSON.stringify(data),
+    skipRefreshOn401: true,
   });
 };
 
@@ -30,6 +33,7 @@ export const register = async (
   return apiRequest<AuthApiResponse>(AUTH_ENDPOINTS.register, {
     method: "POST",
     body: JSON.stringify(data),
+    skipRefreshOn401: true,
   });
 };
 
@@ -40,10 +44,8 @@ export const logout = async (): Promise<{ message: string }> => {
 };
 
 export const getCurrentUser = async (): Promise<CurrentUserResponse> => {
-  return apiRequest<CurrentUserResponse>(AUTH_ENDPOINTS.me, {
-    // ważne: na publicznych stronach nie próbuj odświeżać przy 401
-    skipRefreshOn401: true,
-  });
+  return apiRequest<CurrentUserResponse>(AUTH_ENDPOINTS.me);
+  // Bez żadnych opcji - niech apiRequest sam obsłuży refresh
 };
 
 export const generateNickname = async (): Promise<{ nickname: string }> => {

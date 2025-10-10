@@ -87,14 +87,17 @@ export class PostsController {
     summary: 'Pobierz post po ID (tylko zalogowani użytkownicy)',
   })
   @ApiParam({ name: 'id' })
-  @ApiResponse({ status: 200, type: PostEntity })
+  @ApiResponse({ status: 200, type: PostWithDetailsDto })
   @ApiResponse({ status: 404 })
   @ApiResponse({ status: 401 })
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Get(':id')
-  findOne(@Param('id', ParseUUIDPipe) id: string): Promise<PostEntity> {
-    return this.postsService.findOne(id);
+  findOne(
+    @Param('id', ParseUUIDPipe) id: string,
+    @GetOptionalUser() user?: User,
+  ): Promise<PostWithDetailsDto> {
+    return this.postsService.findOneWithDetails(id, user?.id);
   }
 
   @ApiOperation({ summary: 'Dodaj nowy post (tylko zalogowani użytkownicy)' })

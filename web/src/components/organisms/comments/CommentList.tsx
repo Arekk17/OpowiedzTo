@@ -25,7 +25,11 @@ export const CommentList: React.FC<CommentListProps> = ({
         {comments.map((comment) => (
           <CommentItem
             key={comment.id}
-            author={comment.author}
+            author={{
+              ...comment.author,
+              createdAt: comment.author.createdAt.toString(),
+              updatedAt: comment.author.updatedAt.toString(),
+            }}
             content={comment.content}
             createdAt={comment.createdAt.toString()}
             updatedAt={comment.updatedAt.toString()}

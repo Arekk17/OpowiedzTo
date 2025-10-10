@@ -14,9 +14,6 @@ import { SortOption } from './enum/sort-option.enum';
 import { FeedCursor } from './dto/cursor.dto';
 import { encodeCursor } from './dto/cursor.dto';
 import { TagsService } from 'src/tags/tags.service';
-import { Comment } from './entities/comment.entity';
-import { CreateCommentDto } from './dto/create-comment.dto';
-import { BANNED_WORDS } from '../common/constants/banned-words';
 import { PostLike } from './entities/post-like.entity';
 @Injectable()
 export class PostsService {
@@ -24,56 +21,6 @@ export class PostsService {
     private readonly postsRepository: PostsRepository,
     private readonly tagsService: TagsService,
   ) {}
-
-  async findAll(
-    tag?: string,
-    authorId?: string,
-    page: number = 1,
-    limit: number = 10,
-    userId?: string,
-    sortBy?: SortOption,
-  ): Promise<{ data: PostWithDetailsDto[]; meta: any }> {
-    if (tag) {
-      const tagEntity = await this.tagsService.findOneBySlug(tag);
-      if (!tagEntity) {
-        return {
-          data: [],
-          meta: {
-            page,
-            limit,
-            total: 0,
-            totalPages: 0,
-            hasNextPage: false,
-            hasPreviousPage: false,
-          },
-        };
-      }
-      tag = tagEntity.slug;
-    }
-
-    const result = await this.postsRepository.findAllWithDetailsPage(
-      page,
-      limit,
-      userId,
-      tag,
-      authorId,
-      sortBy,
-    );
-
-    const totalPages = Math.ceil(result.total / limit);
-
-    return {
-      data: result.posts,
-      meta: {
-        page,
-        limit,
-        total: result.total,
-        totalPages,
-        hasNextPage: page < totalPages,
-        hasPreviousPage: page > 1,
-      },
-    };
-  }
 
   async findAllCursor(
     tag: string | undefined,
@@ -115,8 +62,11 @@ export class PostsService {
     return { data: sliced, nextCursor };
   }
 
-  async findOne(id: string): Promise<Post> {
-    const post = await this.postsRepository.findEntityById(id);
+  async findOneWithDetails(
+    id: string,
+    userId?: string,
+  ): Promise<PostWithDetailsDto> {
+    const post = await this.postsRepository.findOneWithDetails(id, userId);
     if (!post) {
       throw new NotFoundException(`Post o ID ${id} nie został znaleziony`);
     }
@@ -229,57 +179,6 @@ export class PostsService {
     const slugs = (post.tags || []).map((t) => t.slug);
     await this.postsRepository.delete(id);
     if (slugs.length) await this.tagsService.incrementPostCount(slugs, -1);
-  }
-
-  // Delegated comment operations (moved from CommentService)
-  async createComment(
-    postId: string,
-    authorId: string,
-    createCommentDto: CreateCommentDto,
-  ): Promise<Comment> {
-    const post = await this.postsRepository.findOneWithDetails(postId);
-    if (!post) {
-      throw new NotFoundException('Post nie istnieje');
-    }
-
-    const contentLower = createCommentDto.content.toLowerCase();
-    const containsBanned = BANNED_WORDS.some((word) =>
-      contentLower.includes(word),
-    );
-    if (containsBanned) {
-      throw new BadRequestException('Komentarz zawiera niedozwolone słowa');
-    }
-
-    return this.postsRepository.createComment({
-      postId,
-      authorId,
-      content: createCommentDto.content,
-    });
-  }
-
-  async getComments(postId: string): Promise<Comment[]> {
-    const post = await this.postsRepository.findOneWithDetails(postId);
-    if (!post) {
-      throw new NotFoundException('Post nie istnieje');
-    }
-    return this.postsRepository.findCommentsByPost(postId);
-  }
-
-  async deleteComment(commentId: string, userId: string): Promise<void> {
-    const comment = await this.postsRepository.findCommentWithAuthor(commentId);
-    if (!comment) {
-      throw new NotFoundException('Komentarz nie istnieje');
-    }
-    if (comment.authorId !== userId) {
-      throw new ForbiddenException(
-        'Nie masz uprawnień do usunięcia tego komentarza',
-      );
-    }
-    await this.postsRepository.deleteComment(commentId);
-  }
-
-  async getCommentCount(postId: string): Promise<number> {
-    return this.postsRepository.countComments(postId);
   }
 
   // Delegated like operations (moved from PostLikeService)

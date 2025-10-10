@@ -38,6 +38,7 @@ export const getPostsCursor = async (
     method: "GET",
     ...options,
   });
+
   return adaptCursorResponse(res);
 };
 

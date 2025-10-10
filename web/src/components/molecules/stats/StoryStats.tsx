@@ -1,4 +1,3 @@
-// src/components/molecules/stats/StoryStats.tsx
 import React from "react";
 import { CommentIcon } from "../../assets/icons/CommentIcon";
 import { LikeButton } from "./LikeButton";

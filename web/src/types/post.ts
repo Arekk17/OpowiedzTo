@@ -35,6 +35,25 @@ export const postSchema = z.object({
     updatedAt: z.string(),
   }),
   commentsCount: z.number(),
+  latestComments: z
+    .array(
+      z.object({
+        id: z.string(),
+        authorId: z.string().optional(),
+        content: z.string(),
+        createdAt: z.string(),
+        author: z.object({
+          id: z.string(),
+          email: z.string(),
+          nickname: z.string(),
+          gender: z.string().optional(),
+          createdAt: z.string(),
+          updatedAt: z.string(),
+          avatar: z.string().nullable().optional(),
+        }),
+      })
+    )
+    .default([]),
   likesCount: z.number(),
   isLiked: z.boolean(),
   createdAt: z.string(),

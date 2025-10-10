@@ -1,3 +1,5 @@
+import { ApiError, ApiErrorResponse, ERROR_MESSAGES } from "@/types/errors";
+
 type ApiRequestOptions = RequestInit & {
   cookieHeader?: string;
   skipRefreshOn401?: boolean;
@@ -14,55 +16,79 @@ export async function apiRequest<T>(
     ...(cookieHeader && { Cookie: cookieHeader }),
     ...fetchOptions.headers,
   };
+  const apiUrl =
+    typeof window === "undefined"
+      ? process.env.API_URL || process.env.NEXT_PUBLIC_API_URL
+      : process.env.NEXT_PUBLIC_API_URL;
 
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}${endpoint}`,
-    {
-      ...fetchOptions,
-      headers,
-      ...(cookieHeader ? {} : { credentials: "include" }),
-    }
-  );
+  const response = await fetch(`${apiUrl}${endpoint}`, {
+    ...fetchOptions,
+    headers,
+    ...(cookieHeader ? {} : { credentials: "include" }),
+  });
 
   if (response.ok) {
-    return response.json();
+    if (response.status === 204) {
+      return undefined as T;
+    }
+
+    const text = await response.text();
+    if (!text || text.length === 0) {
+      return undefined as T;
+    }
+    return JSON.parse(text);
   }
+
+  let errorData: ApiErrorResponse | null = null;
+  try {
+    errorData = await response.json();
+  } catch {}
 
   if (response.status === 401) {
     if (skipRefreshOn401) {
-      throw Object.assign(new Error("Unauthorized"), { status: 401 });
+      throw new ApiError(
+        errorData?.message || ERROR_MESSAGES[401] || "Unauthorized",
+        401,
+        errorData?.error || "Unauthorized"
+      );
     }
+
     if (typeof window !== "undefined") {
       try {
-        await fetch("/api/auth/refresh", {
+        const refreshResponse = await fetch("/api/auth/refresh", {
           method: "POST",
           credentials: "include",
         });
-        return apiRequest<T>(endpoint, options);
-      } catch {
-        throw Object.assign(new Error("Unauthorized"), { status: 401 });
-      }
-    } else if (cookieHeader) {
-      try {
-        const refreshResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh-token`,
-          {
-            method: "POST",
-            headers: { Cookie: cookieHeader },
-          }
-        );
 
         if (refreshResponse.ok) {
-          const setCookieHeader = refreshResponse.headers.get("set-cookie");
-          const newCookieHeader = setCookieHeader || cookieHeader;
           return apiRequest<T>(endpoint, {
             ...options,
-            cookieHeader: newCookieHeader,
+            skipRefreshOn401: true,
           });
         }
-      } catch {}
+      } catch {
+        throw new ApiError(
+          errorData?.message || ERROR_MESSAGES[401] || "Unauthorized",
+          401,
+          errorData?.error || "Unauthorized"
+        );
+      }
     }
+
+    throw new ApiError(
+      errorData?.message ||
+        ERROR_MESSAGES[response.status] ||
+        `API Error: ${response.status}`,
+      response.status,
+      errorData?.error || "Error"
+    );
   }
 
-  throw new Error(`API Error: ${response.status}`);
+  throw new ApiError(
+    errorData?.message ||
+      ERROR_MESSAGES[response.status] ||
+      `API Error: ${response.status}`,
+    response.status,
+    errorData?.error || "Error"
+  );
 }

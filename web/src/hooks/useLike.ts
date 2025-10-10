@@ -1,7 +1,8 @@
 "use client";
 import { likePost, unlikePost } from "@/services/likes.service";
 import { useMutation } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
+import { ApiError } from "@/types/errors";
 
 export const useLike = (
   postId: string,
@@ -24,20 +25,18 @@ export const useLike = (
       return unlikePost(postId);
     },
     onMutate: ({ nextLiked }) => {
+      const prevLiked = liked;
+      const prevCount = count;
+
       setLiked(nextLiked);
       setCount((prev) => (nextLiked ? prev + 1 : prev - 1));
-      return {
-        prevLiked: !nextLiked,
-        prevCount: nextLiked ? count - 1 : count + 1,
-      };
+
+      return { prevLiked, prevCount };
     },
-    onSuccess: () => {},
-    onError: (error, variables, ctx) => {
-      const axiosError = error as {
-        response?: { status?: number; data?: { message?: string } };
-      };
-      const status = axiosError?.response?.status;
-      const message = axiosError?.response?.data?.message || "";
+    onError: (error, _variables, ctx) => {
+      const apiError = error as ApiError;
+      const status = apiError?.statusCode;
+      const message = apiError?.message || "";
 
       if (status === 400 && message.includes("polubiłeś")) {
         setLiked(true);
@@ -58,10 +57,14 @@ export const useLike = (
     },
   });
 
+  const toggle = useCallback(() => {
+    mutate({ nextLiked: !liked });
+  }, [liked, mutate]);
+
   return {
     liked,
     count,
-    toggle: () => mutate({ nextLiked: !liked }),
+    toggle,
     isPending,
   };
 };

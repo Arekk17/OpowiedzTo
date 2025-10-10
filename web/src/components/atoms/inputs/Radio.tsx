@@ -36,10 +36,10 @@ export const Radio: React.FC<RadioProps> = ({
         onChange={(e) => onChange?.(e.target.checked)}
         className={`
           appearance-none relative w-5 h-5 rounded-full border-2 transition-colors duration-150
-          border-ui-border checked:border-accent-primary
+          border-ui-border checked:border-primary-accent
           focus-visible:ring-2 focus-visible:ring-accent-primary/30
           after:content-[''] after:absolute after:top-1/2 after:left-1/2 after:-translate-x-1/2 after:-translate-y-1/2
-          after:w-2.5 after:h-2.5 after:rounded-[3.75px] after:bg-accent-primary after:transition-opacity after:duration-150
+          after:w-2.5 after:h-2.5 after:rounded-[3.75px] after:bg-primary-accent after:transition-opacity after:duration-150
           after:opacity-0 checked:after:opacity-100
           ${className}
         `}

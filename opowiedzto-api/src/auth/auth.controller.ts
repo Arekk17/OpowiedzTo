@@ -61,12 +61,15 @@ export class AuthController {
     status: 401,
     description: 'Brak autoryzacji',
   })
-  async refreshToken(
+  @HttpCode(HttpStatus.OK)
+  @Post('refresh-token')
+  @UseGuards(RefreshTokenAuthGuard)
+  @ApiBearerAuth()
+  refreshToken(
     @GetUser() user: User,
     @Res({ passthrough: true }) res: Response,
-    @Req() req: Request,
-  ): Promise<AuthResponseDto> {
-    return this.authService.refreshTokens(user, res, req);
+  ) {
+    return this.authService.refreshTokens(user, res);
   }
 
   @ApiOperation({ summary: 'Logowanie użytkownika' })

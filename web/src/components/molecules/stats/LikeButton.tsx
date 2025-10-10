@@ -31,6 +31,7 @@ export const LikeButton: React.FC<Props> = ({
           className={`w-6 h-6 ${
             liked ? "text-accent-error" : "text-content-secondary"
           }`}
+          filled={liked}
         />
       </div>
       <span className="font-jakarta font-bold text-[13px] leading-5 text-content-secondary">

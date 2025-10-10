@@ -1,6 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { AuthorDto } from './author.dto';
 import { CommentWithAuthorDto } from './comment-with-author.dto';
+import { TagResponseDto } from '../../tags/dto/tag-response.dto';
+import { IsOptional } from 'class-validator';
 
 export class PostWithDetailsDto {
   @ApiProperty()
@@ -12,8 +14,8 @@ export class PostWithDetailsDto {
   @ApiProperty()
   content: string;
 
-  @ApiProperty({ type: [String] })
-  tags: string[];
+  @ApiProperty({ type: [TagResponseDto] })
+  tags: TagResponseDto[];
 
   @ApiProperty()
   authorId: string;
@@ -37,5 +39,6 @@ export class PostWithDetailsDto {
   updatedAt: Date;
 
   @ApiProperty({ type: () => [CommentWithAuthorDto] })
+  @IsOptional()
   latestComments: CommentWithAuthorDto[];
 }

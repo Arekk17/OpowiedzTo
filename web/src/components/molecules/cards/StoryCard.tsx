@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState, useCallback } from "react";
 import Image from "next/image";
 import { LikeButton, LikeButtonContent } from "../../atoms/buttons/LikeButton";
 import { CommentButton } from "../../atoms/buttons/CommentButton";
@@ -7,6 +7,10 @@ import { useLike } from "@/hooks/useLike";
 import { useAuth } from "@/hooks/useAuth";
 import Link from "next/link";
 import { getPostUrl } from "@/helpers/generateSlug";
+import { Comment as CommentItem } from "../../molecules/comments/Comment";
+import { TagType } from "@/types/tags";
+import { CommentWithAuthor } from "@/types/comment";
+
 export interface StoryCardProps {
   title: string;
   excerpt: string;
@@ -19,7 +23,9 @@ export interface StoryCardProps {
   id: string;
   likesCount?: number;
   isLiked?: boolean;
-  tags?: string[];
+  tags?: TagType[];
+  commentsCount?: number;
+  latestComments?: CommentWithAuthor[];
 }
 export const StoryCard: React.FC<StoryCardProps> = ({
   title,
@@ -34,9 +40,13 @@ export const StoryCard: React.FC<StoryCardProps> = ({
   likesCount = 0,
   isLiked = false,
   tags,
+  commentsCount = 0,
+  latestComments,
 }) => {
   const { liked, count, toggle, isPending } = useLike(id, isLiked, likesCount);
   const { isAuthenticated, isLoading } = useAuth();
+  const [commentsExpanded, setCommentsExpanded] = useState(false);
+  const toggleComments = useCallback(() => setCommentsExpanded((v) => !v), []);
   const getCategoryStyles = () => {
     switch (category) {
       case "none":
@@ -70,7 +80,7 @@ export const StoryCard: React.FC<StoryCardProps> = ({
       <div className="flex flex-col items-start gap-4 h-full">
         <div className="flex flex-col md:flex-row justify-between items-start gap-4 md:gap-6 w-full">
           <div
-            className={`flex flex-col items-start gap-1 w-full md:w-[428px] ${
+            className={`flex flex-col items-start gap-1 w-full ${
               imageSrc ? "md:min-h-[160px] md:justify-between" : ""
             }`}
           >
@@ -115,9 +125,11 @@ export const StoryCard: React.FC<StoryCardProps> = ({
                 {isAnonymous ? "Anonim" : author}
               </span>
               <span className="w-1 h-1 bg-current rounded-full"></span>
-              <time className="text-xs font-jakarta">{createdAt}</time>
+              <time className="text-xs font-jakarta" suppressHydrationWarning>
+                {createdAt}
+              </time>
             </div>
-            <Link href={getPostUrl(id, title)} onClick={() => {}}>
+            <Link href={getPostUrl(id, title)}>
               <h3
                 className="
     text-content-primary
@@ -139,7 +151,7 @@ export const StoryCard: React.FC<StoryCardProps> = ({
                     key={index}
                     className="inline-flex items-center h-6 px-2.5 rounded-full bg-ui-notification text-content-secondary font-jakarta text-[12px] leading-[18px]"
                   >
-                    #{tag}
+                    #{tag.name}
                   </span>
                 ))}
                 {tags.length > 3 && (
@@ -170,7 +182,84 @@ export const StoryCard: React.FC<StoryCardProps> = ({
                 >
                   <LikeButtonContent count={count} active={liked} />
                 </LikeButton>
-                <CommentButton count={12} />
+                <CommentButton
+                  count={commentsCount}
+                  onClick={toggleComments}
+                  className="inline-flex items-center"
+                />
+              </div>
+            </div>
+
+            <div
+              className={`w-full mt-3 border-t border-ui-border overflow-hidden transition-all duration-300 ease-out ${
+                commentsExpanded
+                  ? "pt-3 max-h-[680px] opacity-100"
+                  : "pt-0 max-h-0 opacity-0"
+              }`}
+              aria-hidden={!commentsExpanded}
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-jakarta text-content-muted">
+                  Ostatnie komentarze
+                </span>
+                <Link
+                  href={`${getPostUrl(id, title)}#comments`}
+                  className="text-xs font-jakarta text-primary hover:text-primary-dark"
+                >
+                  Zobacz wszystkie ({commentsCount})
+                </Link>
+              </div>
+              <div className="mt-2 space-y-2">
+                {latestComments && latestComments.length > 0 ? (
+                  latestComments.slice(0, 3).map((c, idx) => (
+                    <div
+                      key={c.id}
+                      className="transition-all duration-300 ease-out"
+                      style={{ transitionDelay: `${idx * 40}ms` }}
+                    >
+                      <CommentItem
+                        id={c.id}
+                        postId={id}
+                        content={c.content}
+                        createdAt={c.createdAt}
+                        updatedAt={c.createdAt}
+                        author={{
+                          id: c.author.id,
+                          nickname: c.author.nickname,
+                          createdAt: c.author.createdAt,
+                          updatedAt: c.author.updatedAt,
+                          avatar: c.author.avatar,
+                        }}
+                        compact
+                        className="border-b border-ui-border last:border-0 pb-2"
+                      />
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-xs text-content-muted font-jakarta">
+                    Bądź pierwszą osobą, która skomentuje.
+                  </p>
+                )}
+              </div>
+
+              <div className="mt-2">
+                {isAuthenticated ? (
+                  <div className="w-full px-1">
+                    {/* Kompaktowy input: użyj istniejącego Textarea jako placeholder UI; funkcjonalność dodamy później */}
+                    <textarea
+                      rows={2}
+                      placeholder="Napisz komentarz…"
+                      className="w-full resize-none rounded-lg border border-ui-border bg-background-paper p-2 text-sm font-jakarta focus:outline-none focus:ring-2 focus:ring-primary transition-shadow duration-200"
+                    />
+                  </div>
+                ) : (
+                  <Link
+                    href="/auth/login"
+                    className="text-xs text-content-muted hover:text-content-primary"
+                  >
+                    Zaloguj się, aby skomentować
+                  </Link>
+                )}
               </div>
             </div>
           </div>
