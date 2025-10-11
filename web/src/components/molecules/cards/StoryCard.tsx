@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import Link from "next/link";
 import { getPostUrl } from "@/helpers/generateSlug";
 import { Comment as CommentItem } from "../../molecules/comments/Comment";
+import { FormattedDate } from "../../atoms/time/FormattedDate";
 import { TagType } from "@/types/tags";
 import { CommentWithAuthor } from "@/types/comment";
 
@@ -125,9 +126,10 @@ export const StoryCard: React.FC<StoryCardProps> = ({
                 {isAnonymous ? "Anonim" : author}
               </span>
               <span className="w-1 h-1 bg-current rounded-full"></span>
-              <time className="text-xs font-jakarta" suppressHydrationWarning>
-                {createdAt}
-              </time>
+              <FormattedDate
+                date={createdAt}
+                className="text-xs font-jakarta"
+              />
             </div>
             <Link href={getPostUrl(id, title)}>
               <h3

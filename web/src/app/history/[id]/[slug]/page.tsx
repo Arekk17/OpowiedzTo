@@ -5,9 +5,8 @@ import { notFound } from "next/navigation";
 import { StoryDetailHeader } from "@/components/organisms/story/StoryDetailHeader";
 import { PageLayout } from "@/components/organisms/layout/PageLayout";
 import { StoryStats } from "@/components/molecules/stats/StoryStats";
-import { CommentList } from "@/components/organisms/comments/CommentList";
-import { CommentForm } from "@/components/organisms/comments/CommentForm";
 import type { Metadata } from "next";
+import { StoryCommentsSection } from "@/components/organisms/story/StoryCommentsSection";
 
 export async function generateMetadata({
   params,
@@ -73,8 +72,7 @@ export default async function HistoryPage({
         initialLiked={post.isLiked}
       />
 
-      <CommentForm postId={post.id} />
-      <CommentList comments={comments} title="Komentarze" />
+      <StoryCommentsSection postId={post.id} initialComments={comments} />
     </PageLayout>
   );
 }

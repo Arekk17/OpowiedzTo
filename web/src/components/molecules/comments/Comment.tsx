@@ -1,5 +1,6 @@
 import React from "react";
 import { ProfileAvatar } from "../../atoms/icons/ProfileAvatar";
+import { RelativeTime } from "../../atoms/time/RelativeTime";
 
 export interface CommentAuthor {
   id: string;
@@ -48,13 +49,12 @@ export const Comment: React.FC<CommentProps> = ({
           >
             {author.nickname}
           </span>
-          <span
+          <RelativeTime
+            date={createdAt}
             className={`font-jakarta font-normal ${
               compact ? "text-xs leading-[18px]" : "text-sm leading-[21px]"
             } text-content-secondary`}
-          >
-            {createdAt}
-          </span>
+          />
         </div>
 
         <p

@@ -1,9 +1,8 @@
-import React from "react";
 import { Comment as CommentItem } from "../../molecules/comments/Comment";
-import type { Comment as CommentModel } from "@/types/comment";
+import type { Comment } from "@/types/comment";
 
 export interface CommentListProps {
-  comments: CommentModel[];
+  comments: Comment[];
   title?: string;
   className?: string;
 }
@@ -27,12 +26,12 @@ export const CommentList: React.FC<CommentListProps> = ({
             key={comment.id}
             author={{
               ...comment.author,
-              createdAt: comment.author.createdAt.toString(),
-              updatedAt: comment.author.updatedAt.toString(),
+              createdAt: comment.author.createdAt,
+              updatedAt: comment.author.updatedAt,
             }}
             content={comment.content}
-            createdAt={comment.createdAt.toString()}
-            updatedAt={comment.updatedAt.toString()}
+            createdAt={comment.createdAt}
+            updatedAt={comment.updatedAt}
             id={comment.id}
             postId={comment.postId}
             className={className}

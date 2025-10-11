@@ -42,10 +42,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Refresh failed" }, { status: 401 });
     }
 
+    const data = await response.json();
+    console.log("[API] Backend data:", data);
+
     const setCookieHeader = response.headers.get("set-cookie");
     console.log("[API] Set-Cookie header from backend:", setCookieHeader);
 
-    const nextResponse = NextResponse.json({ success: true });
+    const nextResponse = NextResponse.json({
+      success: true,
+      ...data,
+    });
 
     if (setCookieHeader) {
       nextResponse.headers.set("set-cookie", setCookieHeader);

@@ -1,22 +1,22 @@
+// web/src/components/organisms/comments/CommentForm.tsx
 "use client";
 
 import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createCommentSchema, CreateCommentFormData } from "@/types/comment";
-import { createComment } from "@/services/comments.service";
 import { useAuth } from "@/hooks/useAuth";
 import { Textarea } from "@/components/atoms/inputs/Textarea";
 import { Button } from "@/components/atoms/buttons/button";
 
 interface CommentFormProps {
-  postId: string;
-  onCommentAdded?: () => void;
+  onAddComment: (data: CreateCommentFormData) => void; // ✅ Zmiana
+  isPending?: boolean; // ✅ Nowe
 }
 
 export const CommentForm: React.FC<CommentFormProps> = ({
-  postId,
-  onCommentAdded,
+  onAddComment,
+  isPending = false,
 }) => {
   const { isAuthenticated } = useAuth();
 
@@ -24,19 +24,14 @@ export const CommentForm: React.FC<CommentFormProps> = ({
     register,
     handleSubmit,
     reset,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<CreateCommentFormData>({
     resolver: zodResolver(createCommentSchema),
   });
 
   const onSubmit = async (data: CreateCommentFormData) => {
-    try {
-      await createComment(postId, data);
-      reset();
-      onCommentAdded?.();
-    } catch (error) {
-      console.error("Failed to create comment:", error);
-    }
+    onAddComment(data);
+    reset(); // ✅ Reset od razu (optimistic)
   };
 
   if (!isAuthenticated) {
@@ -58,19 +53,20 @@ export const CommentForm: React.FC<CommentFormProps> = ({
           placeholder="Napisz komentarz..."
           error={errors.content}
           fullWidth
-          rows={1} // ← Zmniejsz z 3 na 2
+          rows={3}
           label="Komentarz"
           showLabel={false}
+          disabled={isPending} // ✅ Disable podczas submitu
         />
       </div>
       <Button
         type="submit"
-        disabled={isSubmitting}
-        loading={isSubmitting}
+        disabled={isPending}
+        loading={isPending}
         variant="primary"
-        size="sm" // ← Zmień z "md" na "sm"
+        size="sm"
       >
-        {isSubmitting ? "Dodawanie..." : "Dodaj komentarz"}
+        {isPending ? "Dodawanie..." : "Dodaj komentarz"}
       </Button>
     </form>
   );

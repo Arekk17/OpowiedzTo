@@ -1,8 +1,8 @@
 import React from "react";
 import Image from "next/image";
 import { Tag } from "../../atoms/tags/Tag";
+import { FormattedDate } from "../../atoms/time/FormattedDate";
 import { TagType } from "@/types/tags";
-import { formatDateTime } from "@/helpers/mappers";
 
 export interface StoryDetailHeaderProps {
   title: string;
@@ -64,7 +64,8 @@ export const StoryDetailHeader: React.FC<StoryDetailHeaderProps> = ({
 
       <div className="flex flex-col items-start pt-1 px-4 pb-3 w-full">
         <p className="font-jakarta font-normal text-sm leading-[21px] text-content-secondary w-full">
-          Opublikowano {formatDateTime(publishedDate)} przez {author}
+          Opublikowano <FormattedDate date={publishedDate} className="inline" />{" "}
+          przez {author}
         </p>
       </div>
     </div>

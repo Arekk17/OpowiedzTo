@@ -7,7 +7,6 @@ export async function getAuthUser(): Promise<User | null> {
 
   if (!refreshToken) return null;
 
-  // Server-side: użyj API_URL jeśli dostępna (Docker), inaczej NEXT_PUBLIC_API_URL
   const apiUrl = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL;
 
   if (!apiUrl) {
@@ -16,26 +15,45 @@ export async function getAuthUser(): Promise<User | null> {
   }
 
   try {
-    const response = await fetch(`${apiUrl}/auth/me`, {
-      headers: { Cookie: cookieStore.toString() },
+    const cookieHeader = cookieStore.toString();
+
+    let response = await fetch(`${apiUrl}/auth/me`, {
+      headers: { Cookie: cookieHeader },
+      cache: "no-store",
     });
 
     if (response.ok) {
       return await response.json();
     }
 
-    if (response.status === 401) {
+    if (response.status === 401 && refreshToken) {
+      console.log("[auth-ssr] Token expired, attempting refresh...");
+
       const refreshResponse = await fetch(`${apiUrl}/auth/refresh-token`, {
         method: "POST",
-        headers: { Cookie: cookieStore.toString() },
+        headers: { Cookie: cookieHeader },
       });
 
       if (refreshResponse.ok) {
-        const userResponse = await fetch(`${apiUrl}/auth/me`, {
-          headers: { Cookie: cookieStore.toString() },
-        });
-        return userResponse.ok ? await userResponse.json() : null;
+        const newCookieHeader = refreshResponse.headers.get("set-cookie");
+
+        if (newCookieHeader) {
+          console.log(
+            "[auth-ssr] Refresh successful, retrying /auth/me with new token"
+          );
+
+          response = await fetch(`${apiUrl}/auth/me`, {
+            headers: { Cookie: newCookieHeader },
+            cache: "no-store",
+          });
+
+          if (response.ok) {
+            return await response.json();
+          }
+        }
       }
+
+      console.log("[auth-ssr] Refresh failed or invalid");
     }
 
     return null;

@@ -3,8 +3,8 @@ import { Gender } from "./auth";
 
 export interface BaseEntity {
   id: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
 }
 export interface User extends BaseEntity {
   email: string;

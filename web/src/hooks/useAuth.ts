@@ -28,7 +28,7 @@ export function useAuth() {
     queryFn: getCurrentUser,
     enabled: !isAuthPage,
     staleTime: 5 * 60 * 1000,
-    retry: false, // ← Nie retry, niech apiRequest sam obsłuży refresh
+    retry: false,
   });
 
   useEffect(() => {
@@ -37,36 +37,71 @@ export function useAuth() {
     }
   }, [user]);
 
-  // Prosty periodic refresh
   useEffect(() => {
     if (!user || !tokenExpiresAt) return;
 
-    const interval = setInterval(async () => {
-      const timeUntilExpiry = tokenExpiresAt - Date.now();
-      const fiveMinutes = 5 * 60 * 1000;
+    const timeUntilExpiry = tokenExpiresAt - Date.now();
+    const oneMinuteBeforeExpiry = timeUntilExpiry - 60 * 1000;
 
-      console.log("[useAuth] Token expiry check:", {
-        tokenExpiresAt,
-        currentTime: Date.now(),
-        timeUntilExpiry,
-        willRefresh: timeUntilExpiry < fiveMinutes,
-      });
+    if (oneMinuteBeforeExpiry <= 0) {
+      console.log("[useAuth] Token expired or about to expire, refreshing now");
+      fetch("/api/auth/refresh", {
+        method: "POST",
+        credentials: "include",
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success && data.expiresAt && data.serverTime) {
+            const clientTime = Date.now();
+            const timeDiff = clientTime - data.serverTime;
+            const adjustedExpiresAt = data.expiresAt + timeDiff;
 
-      if (timeUntilExpiry < fiveMinutes) {
-        try {
-          console.log("[useAuth] Auto-refreshing token (periodic check)");
-          await fetch("/api/auth/refresh", {
-            method: "POST",
-            credentials: "include",
-          });
+            setTokenExpiresAt(adjustedExpiresAt);
+            console.log(
+              "[useAuth] Token refreshed, new expiry:",
+              new Date(adjustedExpiresAt).toISOString()
+            );
+          }
           refetch();
-        } catch (error) {
-          console.error("Periodic refresh failed:", error);
-        }
-      }
-    }, 2 * 60 * 1000);
+        });
+      return;
+    }
 
-    return () => clearInterval(interval);
+    console.log("[useAuth] Setting refresh timer:", {
+      tokenExpiresAt: new Date(tokenExpiresAt).toISOString(),
+      currentTime: new Date().toISOString(),
+      refreshIn: Math.floor(oneMinuteBeforeExpiry / 1000) + " seconds",
+    });
+
+    const timeoutId = setTimeout(async () => {
+      try {
+        console.log("[useAuth] Auto-refreshing token (scheduled)");
+        const response = await fetch("/api/auth/refresh", {
+          method: "POST",
+          credentials: "include",
+        });
+
+        const data = await response.json();
+
+        if (data.success && data.expiresAt && data.serverTime) {
+          const clientTime = Date.now();
+          const timeDiff = clientTime - data.serverTime;
+          const adjustedExpiresAt = data.expiresAt + timeDiff;
+
+          setTokenExpiresAt(adjustedExpiresAt);
+          console.log(
+            "[useAuth] Token refreshed, new expiry:",
+            new Date(adjustedExpiresAt).toISOString()
+          );
+        }
+
+        refetch();
+      } catch (error) {
+        console.error("Scheduled refresh failed:", error);
+      }
+    }, oneMinuteBeforeExpiry);
+
+    return () => clearTimeout(timeoutId);
   }, [user, tokenExpiresAt, refetch]);
 
   const loginMutation = useMutation({
@@ -74,7 +109,6 @@ export function useAuth() {
     onSuccess: (data) => {
       console.log("[useAuth] Login successful, redirecting to:", callbackUrl);
 
-      // Oblicz czas wygaśnięcia względem czasu klienta
       const clientTime = Date.now();
       const timeDiff = clientTime - data.serverTime;
       const adjustedExpiresAt = data.expiresAt + timeDiff;
@@ -84,7 +118,7 @@ export function useAuth() {
         email: "",
         nickname: data.nickname,
         createdAt: new Date().toISOString(),
-        expiresAt: adjustedExpiresAt, // ← Skorygowany czas
+        expiresAt: adjustedExpiresAt,
       });
       setTokenExpiresAt(adjustedExpiresAt);
       router.push(callbackUrl);
@@ -94,7 +128,6 @@ export function useAuth() {
   const registerMutation = useMutation({
     mutationFn: register,
     onSuccess: (data) => {
-      // To samo co w login
       const clientTime = Date.now();
       const timeDiff = clientTime - data.serverTime;
       const adjustedExpiresAt = data.expiresAt + timeDiff;
