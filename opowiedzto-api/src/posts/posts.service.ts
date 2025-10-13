@@ -196,7 +196,9 @@ export class PostsService {
       throw new BadRequestException('Już polubiłeś ten post');
     }
 
-    return this.postsRepository.createLike({ userId, postId });
+    const like = await this.postsRepository.createLike({ userId, postId });
+    await this.postsRepository.incrementLikesCount(postId, 1);
+    return like;
   }
 
   async unlikePost(userId: string, postId: string): Promise<void> {
@@ -208,6 +210,7 @@ export class PostsService {
       throw new NotFoundException('Nie polubiłeś tego posta');
     }
     await this.postsRepository.deleteLike(like.id);
+    await this.postsRepository.incrementLikesCount(postId, -1);
   }
 
   async getLikes(postId: string): Promise<User[]> {

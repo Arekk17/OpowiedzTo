@@ -10,6 +10,8 @@ import {
   NotFoundException,
   ForbiddenException,
   BadRequestException,
+  ParseIntPipe,
+  Query,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -52,13 +54,11 @@ export class CommentController {
     @Body() createCommentDto: CreateCommentDto,
     @GetUser() user: User,
   ): Promise<Comment> {
-    // Sprawdź czy post istnieje
     const post = await this.postsRepository.findEntityById(postId);
     if (!post) {
       throw new NotFoundException('Post nie istnieje');
     }
 
-    // Sprawdź banned words
     const contentLower = createCommentDto.content.toLowerCase();
     const containsBanned = BANNED_WORDS.some((word) =>
       contentLower.includes(word),
@@ -67,11 +67,13 @@ export class CommentController {
       throw new BadRequestException('Komentarz zawiera niedozwolone słowa');
     }
 
-    return this.commentRepository.save({
+    const saved = await this.commentRepository.save({
       postId,
       authorId: user.id,
       content: createCommentDto.content,
     });
+    await this.postsRepository.incrementCommentsCount(postId, 1);
+    return saved;
   }
 
   @Get('posts/:id/comments')
@@ -84,8 +86,13 @@ export class CommentController {
   })
   async getComments(
     @Param('id', ParseUUIDPipe) postId: string,
+    @Query('limit', ParseIntPipe) limit: number = 3,
   ): Promise<Comment[]> {
-    return this.commentRepository.findByPost(postId);
+    const n = Number(limit);
+    const safeLimit = Number.isFinite(n)
+      ? Math.max(1, Math.min(n, 10))
+      : undefined;
+    return this.commentRepository.findByPost(postId, safeLimit);
   }
 
   @Delete('comments/:id')
@@ -108,6 +115,7 @@ export class CommentController {
       throw new ForbiddenException('Nie możesz usunąć tego komentarza');
     }
     await this.commentRepository.delete(commentId);
+    await this.postsRepository.incrementCommentsCount(comment.postId, -1);
     return { message: 'Komentarz został usunięty' };
   }
 

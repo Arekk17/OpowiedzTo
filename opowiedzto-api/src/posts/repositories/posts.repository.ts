@@ -19,6 +19,14 @@ export class PostsRepository {
     this.likeRepo = this.dataSource.getRepository(PostLike);
   }
 
+  async incrementLikesCount(postId: string, by: number = 1): Promise<void> {
+    await this.postRepo.increment({ id: postId }, 'likesCount', by);
+  }
+
+  async incrementCommentsCount(postId: string, by: number = 1): Promise<void> {
+    await this.postRepo.increment({ id: postId }, 'commentsCount', by);
+  }
+
   async findAllWithDetailsCursor(
     limit: number = 10,
     userId?: string,
@@ -74,12 +82,8 @@ export class PostsRepository {
 
     const postsWithDetails: PostWithDetailsDto[] = await Promise.all(
       posts.map(async (post) => {
-        const likeCount = await this.likeRepo.count({
-          where: { postId: post.id },
-        });
-        const commentCount = await this.commentRepo.count({
-          where: { postId: post.id },
-        });
+        const likeCount = post.likesCount ?? 0;
+        const commentCount = post.commentsCount ?? 0;
         const isLikedByUser = userId
           ? (await this.likeRepo.findOne({
               where: { userId, postId: post.id },
@@ -94,34 +98,12 @@ export class PostsRepository {
           updatedAt: post.author.updatedAt,
           avatar: post.author.avatar,
         };
-        const lastCommentsRaw = await this.commentRepo.find({
-          where: { postId: post.id },
-          order: { createdAt: 'DESC' },
-          take: 3,
-          relations: ['author'],
-        });
-        const lastComments = lastCommentsRaw.map((comment) => ({
-          id: comment.id,
-          authorId: comment.authorId,
-          content: comment.content,
-          createdAt: comment.createdAt,
-          author: {
-            id: comment.author.id,
-            email: comment.author.email,
-            nickname: comment.author.nickname,
-            gender: comment.author.gender as unknown as string,
-            createdAt: comment.author.createdAt,
-            updatedAt: comment.author.updatedAt,
-            avatar: comment.author.avatar,
-          },
-        }));
         return {
           id: post.id,
           title: post.title,
           content: post.content,
           authorId: post.authorId,
           author,
-          latestComments: lastComments,
           tags: post.tags,
           likesCount: likeCount,
           commentsCount: commentCount,
@@ -167,12 +149,8 @@ export class PostsRepository {
 
     const postsWithDetails: PostWithDetailsDto[] = await Promise.all(
       posts.map(async (post) => {
-        const likeCount = await this.likeRepo.count({
-          where: { postId: post.id },
-        });
-        const commentCount = await this.commentRepo.count({
-          where: { postId: post.id },
-        });
+        const likeCount = post.likesCount ?? 0;
+        const commentCount = post.commentsCount ?? 0;
         const isLikedByUser = userId
           ? (await this.likeRepo.findOne({
               where: { userId, postId: post.id },
@@ -187,27 +165,7 @@ export class PostsRepository {
           updatedAt: post.author.updatedAt,
           avatar: post.author.avatar,
         };
-        const lastCommentsRaw = await this.commentRepo.find({
-          where: { postId: post.id },
-          order: { createdAt: 'DESC' },
-          take: 3,
-          relations: ['author'],
-        });
-        const lastComments = lastCommentsRaw.map((comment) => ({
-          id: comment.id,
-          authorId: comment.authorId,
-          content: comment.content,
-          createdAt: comment.createdAt,
-          author: {
-            id: comment.author.id,
-            email: comment.author.email,
-            nickname: comment.author.nickname,
-            gender: comment.author.gender as unknown as string,
-            createdAt: comment.author.createdAt,
-            updatedAt: comment.author.updatedAt,
-            avatar: comment.author.avatar,
-          },
-        }));
+
         return {
           id: post.id,
           title: post.title,
@@ -220,7 +178,6 @@ export class PostsRepository {
           isLiked: isLikedByUser,
           createdAt: post.createdAt,
           updatedAt: post.updatedAt,
-          latestComments: lastComments,
         };
       }),
     );
@@ -255,13 +212,9 @@ export class PostsRepository {
       return null;
     }
 
-    const likeCount = await this.likeRepo.count({
-      where: { postId: post.id },
-    });
+    const likeCount = post.likesCount ?? 0;
 
-    const commentCount = await this.commentRepo.count({
-      where: { postId: post.id },
-    });
+    const commentCount = post.commentsCount ?? 0;
 
     const isLikedByUser = userId
       ? (await this.likeRepo.findOne({
@@ -291,7 +244,6 @@ export class PostsRepository {
       isLiked: isLikedByUser,
       createdAt: post.createdAt,
       updatedAt: post.updatedAt,
-      latestComments: [],
     };
   }
 

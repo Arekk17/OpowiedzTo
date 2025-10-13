@@ -9,9 +9,10 @@ import Link from "next/link";
 import { getPostUrl } from "@/helpers/generateSlug";
 import { FormattedDate } from "../../atoms/time/FormattedDate";
 import { TagType } from "@/types/tags";
-import { CommentWithAuthor } from "@/types/comment";
 import { CATEGORY_CONFIG } from "@/constants/getCategoryStyle";
 import { StoryCardComments } from "./StoryCardComments";
+import { useQueryClient } from "@tanstack/react-query";
+import { getComments } from "@/services/comments.service";
 
 export interface StoryCardProps {
   title: string;
@@ -27,7 +28,6 @@ export interface StoryCardProps {
   isLiked?: boolean;
   tags?: TagType[];
   commentsCount?: number;
-  latestComments?: CommentWithAuthor[];
 }
 export const StoryCard: React.FC<StoryCardProps> = ({
   title,
@@ -43,14 +43,22 @@ export const StoryCard: React.FC<StoryCardProps> = ({
   isLiked = false,
   tags,
   commentsCount = 0,
-  latestComments,
 }) => {
   const config = CATEGORY_CONFIG[category];
   const { liked, count, toggle, isPending } = useLike(id, isLiked, likesCount);
   const { isAuthenticated, isLoading } = useAuth();
   const [commentsExpanded, setCommentsExpanded] = useState(false);
   const toggleComments = useCallback(() => setCommentsExpanded((v) => !v), []);
+  const queryClient = useQueryClient();
 
+  const prefetchComments = useCallback(() => {
+    // klucz musi być identyczny jak w hooku: ["comments", postId, limit]
+    queryClient.prefetchQuery({
+      queryKey: ["comments", id, 3],
+      queryFn: () => getComments(id, { limit: 3 }),
+      staleTime: 30_000, // zgodnie z useComments
+    });
+  }, [id, queryClient]);
   return (
     <article
       className={`
@@ -150,13 +158,13 @@ export const StoryCard: React.FC<StoryCardProps> = ({
                 <CommentButton
                   count={commentsCount}
                   onClick={toggleComments}
+                  onFocus={prefetchComments}
                   className="inline-flex items-center"
                 />
               </div>
             </div>
             <StoryCardComments
               isExpanded={commentsExpanded}
-              comments={latestComments}
               commentsCount={commentsCount}
               postId={id}
               postTitle={title}

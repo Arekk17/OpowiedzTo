@@ -1,14 +1,13 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import Link from "next/link";
-import { CommentWithAuthor } from "@/types/comment";
 import { CommentItem } from "../comments/CommentItem";
+import { useComments } from "@/hooks/useComments";
 const MAX_VISIBLE_COMMENTS = 3;
 const COMMENTS_EXPANDED_HEIGHT = 680;
 
 interface StoryCardCommentsProps {
   isExpanded: boolean;
-  comments?: CommentWithAuthor[];
   commentsCount: number;
   postId: string;
   postTitle: string;
@@ -18,12 +17,20 @@ interface StoryCardCommentsProps {
 
 export const StoryCardComments: React.FC<StoryCardCommentsProps> = ({
   isExpanded,
-  comments,
   commentsCount,
   postId,
   postUrl,
   isAuthenticated,
 }) => {
+  const { comments, refetch } = useComments(postId, [], 3, {
+    enabled: isExpanded,
+  });
+
+  useEffect(() => {
+    if (isExpanded) {
+      refetch();
+    }
+  }, [isExpanded, refetch]);
   return (
     <div
       className={`w-full mt-3 border-t border-ui-border overflow-hidden transition-all duration-300 ease-out ${

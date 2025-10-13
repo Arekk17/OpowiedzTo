@@ -8,18 +8,21 @@ import { Gender } from "@/types/auth";
 
 export const useComments = (
   postId: string,
-  initialComments: Comment[] = []
+  initialComments: Comment[] = [],
+  limit?: number,
+  options?: { enabled?: boolean }
 ) => {
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const enabled = options?.enabled ?? true;
+  const queryKey = ["comments", postId, limit ?? "all"];
 
-  const queryKey = ["comments", postId];
-
-  const { data: comments = initialComments } = useQuery({
+  const { data: comments = initialComments, refetch } = useQuery({
     queryKey,
-    queryFn: () => getComments(postId),
+    queryFn: () => getComments(postId, { limit }),
     initialData: initialComments,
     staleTime: 30_000,
+    enabled: enabled && Boolean(postId),
   });
 
   const { mutate: addComment, isPending } = useMutation({
@@ -73,9 +76,5 @@ export const useComments = (
     },
   });
 
-  return {
-    comments,
-    addComment,
-    isPending,
-  };
+  return { comments, addComment, isPending, refetch };
 };
