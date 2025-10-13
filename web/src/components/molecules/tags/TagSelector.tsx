@@ -1,7 +1,9 @@
 "use client";
-import React from "react";
+import React, { useCallback, useMemo } from "react";
 import { Tag } from "../../atoms/tags/Tag";
 import { Input } from "../../atoms/inputs/Input";
+import { IconButton } from "../../atoms/buttons/IconButton";
+import { FormLabel } from "../../atoms/forms/FormLabel";
 
 export interface TagSelectorProps {
   options: string[];
@@ -22,123 +24,151 @@ export const TagSelector: React.FC<TagSelectorProps> = ({
 }) => {
   const [query, setQuery] = React.useState("");
 
-  const normalized = (t: string) => t.trim();
-  const exists = (t: string) =>
-    value.some((v) => v.toLowerCase() === t.toLowerCase());
+  const normalized = useCallback((t: string) => t.trim(), []);
 
-  const canAdd =
-    allowCustom &&
-    query.trim().length > 0 &&
-    !exists(query) &&
-    value.length < max;
+  const exists = useCallback(
+    (t: string) => value.some((v) => v.toLowerCase() === t.toLowerCase()),
+    [value]
+  );
 
-  const addTag = (t: string) => {
-    const tag = normalized(t);
-    if (!tag || exists(tag) || value.length >= max) return;
-    onChange([...value, tag]);
-    setQuery("");
-  };
+  const canAdd = useMemo(
+    () =>
+      allowCustom &&
+      query.trim().length > 0 &&
+      !exists(query) &&
+      value.length < max,
+    [allowCustom, query, exists, value.length, max]
+  );
 
-  const removeTag = (t: string) => {
-    onChange(value.filter((v) => v.toLowerCase() !== t.toLowerCase()));
-  };
+  const addTag = useCallback(
+    (t: string) => {
+      const tag = normalized(t);
+      if (!tag || exists(tag) || value.length >= max) return;
+      onChange([...value, tag]);
+      setQuery("");
+    },
+    [normalized, exists, value, max, onChange]
+  );
 
-  const toggleTag = (t: string) => {
-    if (exists(t)) {
-      removeTag(t);
-    } else {
-      addTag(t);
-    }
-  };
+  const removeTag = useCallback(
+    (t: string) => {
+      onChange(value.filter((v) => v.toLowerCase() !== t.toLowerCase()));
+    },
+    [onChange, value]
+  );
 
-  const filtered = options.filter(
-    (o) => o.toLowerCase().includes(query.toLowerCase()) && !exists(o)
+  const toggleTag = useCallback(
+    (t: string) => {
+      if (exists(t)) {
+        removeTag(t);
+      } else {
+        addTag(t);
+      }
+    },
+    [exists, removeTag, addTag]
+  );
+
+  const filtered = useMemo(
+    () =>
+      options.filter(
+        (o) => o.toLowerCase().includes(query.toLowerCase()) && !exists(o)
+      ),
+    [options, query, exists]
+  );
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        if (canAdd) addTag(query);
+      }
+    },
+    [canAdd, addTag, query]
+  );
+
+  const handleQueryChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setQuery(e.target.value);
+    },
+    []
   );
 
   return (
-    <div className={`flex flex-col gap-3 ${className}`}>
-      <div className="flex flex-row flex-wrap items-center gap-2 max-h-40 overflow-auto pr-1">
-        {value.map((t) => (
-          <button
-            key={t}
-            type="button"
-            onClick={() => removeTag(t)}
-            className="group relative"
-            aria-label={`Usuń tag ${t}`}
-            title="Usuń tag"
-          >
-            <Tag label={t} className="pr-6 relative" />
-            <span className="absolute right-1 top-1 w-4 h-4 rounded-full bg-content-primary text-background-paper text-[10px] leading-4 text-center group-hover:scale-110 transition-transform">
-              ×
-            </span>
-          </button>
-        ))}
-      </div>
-
-      <div className="flex flex-col gap-2">
-        {allowCustom && (
-          <>
-            <div className="flex items-center gap-3">
-              <Input
-                placeholder={
-                  value.length >= max
-                    ? `Limit ${max} tagów`
-                    : "Dodaj tag i naciśnij Enter"
-                }
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                disabled={value.length >= max}
-                fullWidth
-                size="sm"
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    if (canAdd) addTag(query);
-                  }
-                }}
-              />
+    <div className={`space-y-4 ${className}`}>
+      {value.length > 0 && (
+        <div className="space-y-2">
+          <FormLabel size="sm">Wybrane tagi:</FormLabel>
+          <div className="flex flex-wrap gap-2">
+            {value.map((tag) => (
               <button
+                key={tag}
                 type="button"
-                onClick={() => addTag(query)}
-                disabled={!canAdd}
-                className={`h-10 px-4 rounded-full transition-colors border ${
-                  canAdd
-                    ? "bg-accent-primary border-accent-primary text-background-paper hover:brightness-95"
-                    : "bg-transparent border-ui-border text-content-secondary cursor-not-allowed"
-                }`}
+                onClick={() => removeTag(tag)}
+                className="group relative"
+                aria-label={`Usuń tag ${tag}`}
+                title="Kliknij aby usunąć"
               >
-                Dodaj
-              </button>
-            </div>
-
-            {canAdd && (
-              <div className="text-sm text-content-secondary">
-                Dodasz nowy tag:{" "}
-                <span className="font-medium text-content-primary">
-                  {query}
+                <Tag label={tag} className="pr-6 relative" />
+                <span className="absolute right-1 top-1 w-3 h-3 rounded-full bg-content-primary text-background-paper text-[10px] flex items-center justify-center group-hover:scale-110 transition-transform">
+                  ×
                 </span>
-              </div>
-            )}
-          </>
-        )}
-
-        {filtered.length > 0 && (
-          <div className="flex flex-row flex-wrap items-center gap-2 max-h-40 overflow-auto pr-1">
-            {filtered.slice(0, 10).map((o) => (
-              <button
-                key={o}
-                type="button"
-                onClick={() => toggleTag(o)}
-                className="hover:opacity-90"
-              >
-                <Tag label={o} />
               </button>
             ))}
           </div>
-        )}
-      </div>
-      <div className="text-sm text-content-secondary">
-        {value.length}/{max} wybranych
+        </div>
+      )}
+
+      {allowCustom && value.length < max && (
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <Input
+              placeholder="Wpisz nazwę tagu..."
+              value={query}
+              onChange={handleQueryChange}
+              fullWidth
+              size="sm"
+              onKeyDown={handleKeyDown}
+            />
+            <IconButton
+              onClick={() => addTag(query)}
+              disabled={!canAdd}
+              tooltip="Dodaj tag"
+              variant={canAdd ? "primary" : "secondary"}
+              size="md"
+            >
+              <span className="text-lg font-bold">+</span>
+            </IconButton>
+          </div>
+
+          {canAdd && (
+            <div className="text-xs text-content-secondary bg-ui-notification/30 p-2 rounded">
+              Dodasz:{" "}
+              <span className="font-medium text-content-primary">{query}</span>
+            </div>
+          )}
+        </div>
+      )}
+
+      {filtered.length > 0 && (
+        <div className="space-y-2 pt-2">
+          <FormLabel size="sm">Dostępne tagi:</FormLabel>
+          <div className="flex flex-wrap gap-2 max-h-24 overflow-auto">
+            {filtered.slice(0, 12).map((option) => (
+              <button
+                key={option}
+                type="button"
+                onClick={() => toggleTag(option)}
+                className="transition-all duration-200 hover:scale-105"
+              >
+                <Tag label={option} />
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className="text-xs text-content-secondary">
+        {value.length}/{max} tagów
       </div>
     </div>
   );

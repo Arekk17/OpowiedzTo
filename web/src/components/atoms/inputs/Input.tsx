@@ -94,7 +94,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         <div
           className={clsx(
             "flex items-center box-border transition-all duration-200",
-            "bg-white border border-ui-border",
+            "bg-background-subtle border border-ui-border",
             "focus-within:ring-2 focus-within:ring-ui-focus/20 focus-within:border-ui-focus",
             sizeStyles.container,
             disabled && "cursor-not-allowed opacity-60",

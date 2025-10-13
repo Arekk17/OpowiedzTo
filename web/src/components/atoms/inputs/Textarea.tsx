@@ -10,7 +10,7 @@ export interface TextareaProps
   label?: string;
   showLabel?: boolean;
   fullWidth?: boolean;
-  compact?: boolean; // nowa właściwość dla kompaktowego stylu
+  compact?: boolean;
 }
 
 export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
@@ -27,7 +27,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
       id,
       fullWidth = false,
       rows = 4,
-      compact = false, // domyślnie false
+      compact = false,
       ...props
     },
     ref
