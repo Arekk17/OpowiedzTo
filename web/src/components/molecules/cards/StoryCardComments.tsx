@@ -1,0 +1,105 @@
+"use client";
+import React from "react";
+import Link from "next/link";
+import { CommentWithAuthor } from "@/types/comment";
+import { CommentItem } from "../comments/CommentItem";
+const MAX_VISIBLE_COMMENTS = 3;
+const COMMENTS_EXPANDED_HEIGHT = 680;
+
+interface StoryCardCommentsProps {
+  isExpanded: boolean;
+  comments?: CommentWithAuthor[];
+  commentsCount: number;
+  postId: string;
+  postTitle: string;
+  postUrl: string;
+  isAuthenticated: boolean;
+}
+
+export const StoryCardComments: React.FC<StoryCardCommentsProps> = ({
+  isExpanded,
+  comments,
+  commentsCount,
+  postId,
+  postUrl,
+  isAuthenticated,
+}) => {
+  return (
+    <div
+      className={`w-full mt-3 border-t border-ui-border overflow-hidden transition-all duration-300 ease-out ${
+        isExpanded
+          ? `pt-3 max-h-[${COMMENTS_EXPANDED_HEIGHT}px] opacity-100`
+          : "pt-0 max-h-0 opacity-0"
+      }`}
+      aria-hidden={!isExpanded}
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <span className="text-xs font-jakarta text-content-muted">
+          Ostatnie komentarze
+        </span>
+        <Link
+          href={`${postUrl}#comments`}
+          className="text-xs font-jakarta text-primary hover:text-primary-dark"
+        >
+          Zobacz wszystkie ({commentsCount})
+        </Link>
+      </div>
+
+      {/* Comments List */}
+      <div className="mt-2 space-y-2">
+        {comments && comments.length > 0 ? (
+          comments.slice(0, MAX_VISIBLE_COMMENTS).map((c, idx) => (
+            <div
+              key={c.id}
+              className="transition-all duration-300 ease-out"
+              style={{ transitionDelay: `${idx * 40}ms` }}
+            >
+              <CommentItem
+                id={c.id}
+                postId={postId}
+                content={c.content}
+                createdAt={c.createdAt}
+                updatedAt={c.createdAt}
+                author={{
+                  id: c.author.id,
+                  nickname: c.author.nickname,
+                  createdAt: c.author.createdAt,
+                  updatedAt: c.author.updatedAt,
+                  avatar: c.author.avatar,
+                }}
+                compact
+                className="border-b border-ui-border last:border-0 pb-2"
+              />
+            </div>
+          ))
+        ) : (
+          <p className="text-xs text-content-muted font-jakarta">
+            Bądź pierwszą osobą, która skomentuje.
+          </p>
+        )}
+      </div>
+
+      {/* Comment Input */}
+      <div className="mt-2">
+        {isAuthenticated ? (
+          <div className="w-full px-1">
+            <textarea
+              rows={2}
+              placeholder="Napisz komentarz…"
+              className="w-full resize-none rounded-lg border border-ui-border bg-background-paper p-2 text-sm font-jakarta focus:outline-none focus:ring-2 focus:ring-primary transition-shadow duration-200"
+              aria-label="Napisz komentarz"
+            />
+          </div>
+        ) : (
+          <Link
+            href="/auth/login"
+            className="text-xs text-content-muted hover:text-content-primary"
+          >
+            Zaloguj się, aby skomentować
+          </Link>
+        )}
+      </div>
+    </div>
+  );
+};

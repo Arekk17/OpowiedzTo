@@ -1,7 +1,7 @@
 import React from "react";
 import { clsx } from "clsx";
 
-type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
+type ButtonVariant = "primary" | "secondary" | "ghost" | "danger" | "success";
 type ButtonSize = "sm" | "md" | "lg";
 
 export interface ButtonProps
@@ -36,6 +36,8 @@ export const Button: React.FC<React.PropsWithChildren<ButtonProps>> = ({
       ? "bg-ui-notification text-content-primary hover:bg-ui-hover"
       : variant === "danger"
       ? "bg-accent-error text-background-paper hover:opacity-95"
+      : variant === "success"
+      ? "bg-accent-success text-background-paper hover:opacity-95"
       : "bg-primary border border-ui-border text-content-primary hover:bg-ui-hover";
 
   return (

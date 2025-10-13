@@ -7,7 +7,6 @@ import { UnauthenticatedActions } from "@/components/molecules/user-actions/Unau
 
 const Header = async () => {
   const user = await getAuthUser();
-  console.log(user);
   return (
     <header className="sticky top-0 z-50 w-full h-[65px] bg-background-paper border-b border-ui-border">
       <div className="mx-auto w-full max-w-[1440px] flex items-center justify-between px-10 py-3 h-full">

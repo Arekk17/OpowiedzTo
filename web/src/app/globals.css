@@ -9,9 +9,9 @@ body {
   font-family: "Plus Jakarta Sans", system-ui, sans-serif;
 }
 @theme {
-  --color-primary: #1e40af;
-  --color-primary-light: #3b82f6;
-  --color-primary-dark: #1e3a8a;
+  --color-primary: #10b981;
+  --color-primary-light: #34d399;
+  --color-primary-dark: #059669;
   --color-primary-accent: #10b981;
 
   --color-content-primary: #1f2937;
@@ -26,7 +26,7 @@ body {
 
   --color-accent-warm: #f59e0b;
   --color-accent-cool: #06b6d4;
-  --color-accent-primary: #3394f5;
+  --color-accent-primary: #10b981;
   --color-accent-success: #10b981;
   --color-accent-warning: #f59e0b;
   --color-accent-error: #ef4444;
@@ -34,7 +34,7 @@ body {
 
   --color-ui-border: #e5e7eb;
   --color-ui-hover: #f3f4f6;
-  --color-ui-focus: #2563eb;
+  --color-ui-focus: #10b981;
   --color-ui-notification: #e8edf5;
 
   --color-story-anonymous: #3b82f6;

@@ -10,6 +10,7 @@ export interface TextareaProps
   label?: string;
   showLabel?: boolean;
   fullWidth?: boolean;
+  compact?: boolean; // nowa właściwość dla kompaktowego stylu
 }
 
 export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
@@ -26,6 +27,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
       id,
       fullWidth = false,
       rows = 4,
+      compact = false, // domyślnie false
       ...props
     },
     ref
@@ -59,9 +61,10 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
             disabled={disabled || loading}
             rows={rows}
             className={clsx(
-              "w-full bg-transparent outline-none resize-y",
-              "font-jakarta font-normal leading-6 p-[15px]",
+              "w-full bg-transparent outline-none resize-none",
+              "font-jakarta font-normal leading-6",
               "placeholder-content-secondary text-content-primary",
+              compact ? "p-3 text-sm" : "p-[15px]",
               className
             )}
             placeholder={placeholder}

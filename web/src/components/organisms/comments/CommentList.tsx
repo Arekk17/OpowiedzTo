@@ -1,4 +1,4 @@
-import { Comment as CommentItem } from "../../molecules/comments/Comment";
+import { CommentItem } from "../../molecules/comments/CommentItem";
 import type { Comment } from "@/types/comment";
 
 export interface CommentListProps {

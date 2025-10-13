@@ -21,7 +21,7 @@ export interface CommentProps {
   compact?: boolean;
 }
 
-export const Comment: React.FC<CommentProps> = ({
+export const CommentItem: React.FC<CommentProps> = ({
   author,
   content,
   createdAt,

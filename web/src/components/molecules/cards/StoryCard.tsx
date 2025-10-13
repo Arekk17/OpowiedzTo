@@ -7,10 +7,11 @@ import { useLike } from "@/hooks/useLike";
 import { useAuth } from "@/hooks/useAuth";
 import Link from "next/link";
 import { getPostUrl } from "@/helpers/generateSlug";
-import { Comment as CommentItem } from "../../molecules/comments/Comment";
 import { FormattedDate } from "../../atoms/time/FormattedDate";
 import { TagType } from "@/types/tags";
 import { CommentWithAuthor } from "@/types/comment";
+import { CATEGORY_CONFIG } from "@/constants/getCategoryStyle";
+import { StoryCardComments } from "./StoryCardComments";
 
 export interface StoryCardProps {
   title: string;
@@ -44,24 +45,11 @@ export const StoryCard: React.FC<StoryCardProps> = ({
   commentsCount = 0,
   latestComments,
 }) => {
+  const config = CATEGORY_CONFIG[category];
   const { liked, count, toggle, isPending } = useLike(id, isLiked, likesCount);
   const { isAuthenticated, isLoading } = useAuth();
   const [commentsExpanded, setCommentsExpanded] = useState(false);
   const toggleComments = useCallback(() => setCommentsExpanded((v) => !v), []);
-  const getCategoryStyles = () => {
-    switch (category) {
-      case "none":
-        return "";
-      case "featured":
-        return "border-l-story-featured bg-accent-warm/5";
-      case "trending":
-        return "border-l-story-trending bg-accent-error/5";
-      case "new":
-        return "border-l-story-new bg-accent-success/5";
-      default:
-        return "border-l-story-anonymous bg-primary/5";
-    }
-  };
 
   return (
     <article
@@ -75,7 +63,8 @@ export const StoryCard: React.FC<StoryCardProps> = ({
       transition-all duration-300
       border-l-4
       w-full max-w-[900px]
-      ${getCategoryStyles()}
+      ${config.border}
+      ${config.bg}
     `}
     >
       <div className="flex flex-col items-start gap-4 h-full">
@@ -85,38 +74,12 @@ export const StoryCard: React.FC<StoryCardProps> = ({
               imageSrc ? "md:min-h-[160px] md:justify-between" : ""
             }`}
           >
-            {category !== "none" && (
+            {category !== "none" && config.badge && (
               <div className="w-full mb-2">
                 <span
-                  className={`
-                  inline-flex items-center px-sm py-xs 
-                  rounded-button text-xs font-jakarta font-medium
-                  ${
-                    category === "featured"
-                      ? "bg-accent-warm text-content-inverse"
-                      : ""
-                  }
-                  ${
-                    category === "trending"
-                      ? "bg-accent-error text-content-inverse"
-                      : ""
-                  }
-                  ${
-                    category === "new"
-                      ? "bg-accent-success text-content-inverse"
-                      : ""
-                  }
-                  ${
-                    category === "anonymous"
-                      ? "bg-primary text-content-inverse"
-                      : ""
-                  }
-                `}
+                  className={`inline-flex items-center px-sm py-xs rounded-button text-xs font-jakarta font-medium ${config.badge?.className}`}
                 >
-                  {category === "featured" && "⭐ Wyróżniona"}
-                  {category === "trending" && "🔥 Popularna"}
-                  {category === "new" && "✨ Nowa"}
-                  {category === "anonymous" && "🎭 Anonimowa"}
+                  {config.badge?.text}
                 </span>
               </div>
             )}
@@ -137,7 +100,7 @@ export const StoryCard: React.FC<StoryCardProps> = ({
     text-content-primary
     font-jakarta font-bold text-[16px] leading-5 
     whitespace-normal
-    hover:text-primary
+    hover:text-primary-accent
     transition-colors
     w-full max-w-[428px] break-words
   "
@@ -191,79 +154,15 @@ export const StoryCard: React.FC<StoryCardProps> = ({
                 />
               </div>
             </div>
-
-            <div
-              className={`w-full mt-3 border-t border-ui-border overflow-hidden transition-all duration-300 ease-out ${
-                commentsExpanded
-                  ? "pt-3 max-h-[680px] opacity-100"
-                  : "pt-0 max-h-0 opacity-0"
-              }`}
-              aria-hidden={!commentsExpanded}
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-jakarta text-content-muted">
-                  Ostatnie komentarze
-                </span>
-                <Link
-                  href={`${getPostUrl(id, title)}#comments`}
-                  className="text-xs font-jakarta text-primary hover:text-primary-dark"
-                >
-                  Zobacz wszystkie ({commentsCount})
-                </Link>
-              </div>
-              <div className="mt-2 space-y-2">
-                {latestComments && latestComments.length > 0 ? (
-                  latestComments.slice(0, 3).map((c, idx) => (
-                    <div
-                      key={c.id}
-                      className="transition-all duration-300 ease-out"
-                      style={{ transitionDelay: `${idx * 40}ms` }}
-                    >
-                      <CommentItem
-                        id={c.id}
-                        postId={id}
-                        content={c.content}
-                        createdAt={c.createdAt}
-                        updatedAt={c.createdAt}
-                        author={{
-                          id: c.author.id,
-                          nickname: c.author.nickname,
-                          createdAt: c.author.createdAt,
-                          updatedAt: c.author.updatedAt,
-                          avatar: c.author.avatar,
-                        }}
-                        compact
-                        className="border-b border-ui-border last:border-0 pb-2"
-                      />
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-xs text-content-muted font-jakarta">
-                    Bądź pierwszą osobą, która skomentuje.
-                  </p>
-                )}
-              </div>
-
-              <div className="mt-2">
-                {isAuthenticated ? (
-                  <div className="w-full px-1">
-                    {/* Kompaktowy input: użyj istniejącego Textarea jako placeholder UI; funkcjonalność dodamy później */}
-                    <textarea
-                      rows={2}
-                      placeholder="Napisz komentarz…"
-                      className="w-full resize-none rounded-lg border border-ui-border bg-background-paper p-2 text-sm font-jakarta focus:outline-none focus:ring-2 focus:ring-primary transition-shadow duration-200"
-                    />
-                  </div>
-                ) : (
-                  <Link
-                    href="/auth/login"
-                    className="text-xs text-content-muted hover:text-content-primary"
-                  >
-                    Zaloguj się, aby skomentować
-                  </Link>
-                )}
-              </div>
-            </div>
+            <StoryCardComments
+              isExpanded={commentsExpanded}
+              comments={latestComments}
+              commentsCount={commentsCount}
+              postId={id}
+              postTitle={title}
+              postUrl={getPostUrl(id, title)}
+              isAuthenticated={isAuthenticated}
+            />
           </div>
 
           {imageSrc && (
