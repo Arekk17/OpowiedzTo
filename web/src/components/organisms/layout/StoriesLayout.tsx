@@ -2,29 +2,33 @@ import React from "react";
 import { Input } from "../../atoms/inputs/Input";
 import { SearchIcon } from "../../assets/icons/SearchIcon";
 import { StoryCard } from "../../molecules/cards/StoryCard";
-import type { StoryCardProps } from "../../molecules/cards/StoryCard";
-
-export type StoryListItem = { id: string | number } & StoryCardProps;
+import type { StoryListItem } from "@/types/story";
 
 interface StoriesLayoutProps {
   className?: string;
   stories: StoryListItem[];
+  isSearching?: boolean;
+  currentUserId?: string;
 }
 
 export const StoriesLayout: React.FC<StoriesLayoutProps> = ({
   className = "",
   stories,
+  isSearching = true,
+  currentUserId,
 }) => (
   <div
     className={`flex flex-col items-start w-full max-w-[900px] ${className}`}
   >
-    <div className="w-full px-4 py-3">
-      <Input
-        placeholder="Szukaj historii..."
-        fullWidth
-        leftIcon={<SearchIcon className="w-5 h-5" />}
-      />
-    </div>
+    {isSearching && (
+      <div className="w-full px-4 py-3">
+        <Input
+          placeholder="Szukaj historii..."
+          fullWidth
+          leftIcon={<SearchIcon className="w-5 h-5" />}
+        />
+      </div>
+    )}
 
     <div className="w-full px-4 py-5 pb-3">
       <h1 className="font-jakarta font-bold text-[22px] leading-7 text-content-primary">
@@ -39,6 +43,8 @@ export const StoriesLayout: React.FC<StoriesLayoutProps> = ({
           title={story.title}
           excerpt={story.excerpt}
           author={story.author}
+          authorId={story.authorId}
+          currentUserId={currentUserId}
           createdAt={story.createdAt}
           category={story.category}
           isAnonymous={story.isAnonymous}

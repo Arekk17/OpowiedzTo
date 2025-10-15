@@ -34,6 +34,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
   ) => {
     const textareaId =
       id || `textarea-${Math.random().toString(36).slice(2, 11)}`;
+    const isDisabled = disabled || loading;
 
     return (
       <div className={clsx("flex flex-col", containerClassName)}>
@@ -48,23 +49,24 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
 
         <div
           className={clsx(
-            "box-border transition-all duration-200",
+            "transition-all duration-200",
             "bg-background-subtle border border-ui-border rounded-[12px]",
             "focus-within:ring-2 focus-within:ring-ui-focus/20 focus-within:border-ui-focus",
-            disabled && "cursor-not-allowed opacity-60",
-            fullWidth ? "w-full" : "w-[448px] min-w-[160px]"
+            isDisabled && "cursor-not-allowed opacity-60",
+            fullWidth ? "w-full" : "w-[448px] min-w-[160px]",
+            "flex items-center" // Dodaj flexbox dla wyśrodkowania
           )}
         >
           <textarea
             ref={ref}
             id={textareaId}
-            disabled={disabled || loading}
+            disabled={isDisabled}
             rows={rows}
             className={clsx(
               "w-full bg-transparent outline-none resize-none",
-              "font-jakarta font-normal leading-6",
-              "placeholder-content-secondary text-content-primary",
-              compact ? "p-3 text-sm" : "p-[15px]",
+              "font-jakarta font-normal text-content-primary",
+              "placeholder:text-content-secondary placeholder:font-normal",
+              compact ? "px-3 py-2 text-sm leading-5" : "p-[15px] leading-6",
               className
             )}
             placeholder={placeholder}

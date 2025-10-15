@@ -11,6 +11,7 @@ import {
   HttpStatus,
   UseGuards,
   ParseUUIDPipe,
+  BadRequestException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -56,6 +57,12 @@ export class PostsController {
           items: { $ref: getSchemaPath(PostWithDetailsDto) },
         },
         nextCursor: { type: 'string', nullable: true },
+        meta: {
+          type: 'object',
+          properties: {
+            total: { type: 'number' },
+          },
+        },
       },
     },
   })
@@ -72,7 +79,11 @@ export class PostsController {
     @Query() filters: PostFiltersDto,
     @Query('cursor') cursor?: string,
     @GetOptionalUser() user?: User,
-  ): Promise<{ data: PostWithDetailsDto[]; nextCursor: string | null }> {
+  ): Promise<{
+    data: PostWithDetailsDto[];
+    nextCursor: string | null;
+    meta: { total: number };
+  }> {
     const decoded = decodeCursor(cursor);
     return this.postsService.findAllCursor(
       filters.tag,
@@ -94,9 +105,14 @@ export class PostsController {
   @UseGuards(JwtAuthGuard)
   @Get(':id')
   findOne(
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param('id') id: string,
     @GetOptionalUser() user?: User,
   ): Promise<PostWithDetailsDto> {
+    const uuidRegex =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(id)) {
+      throw new BadRequestException('Invalid post ID format');
+    }
     return this.postsService.findOneWithDetails(id, user?.id);
   }
 

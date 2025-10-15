@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { createCommentSchema, CreateCommentFormData } from "@/types/comment";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/atoms/buttons/button";
+import { Textarea } from "@/components/atoms/inputs/Textarea";
 
 interface CommentFormProps {
   onAddComment: (data: CreateCommentFormData) => void;
@@ -48,17 +49,15 @@ export const CommentForm: React.FC<CommentFormProps> = ({
     >
       <div className="max-w-2xl">
         <div className="flex gap-2 items-center">
-          <div className="flex-1 relative">
-            <textarea
+          <div className="flex-1">
+            <Textarea
               {...register("content")}
               placeholder="Napisz komentarz..."
               disabled={isPending}
               rows={1}
-              className="w-full bg-background-paper border border-ui-border rounded-lg px-4 py-2.5 
-                       text-sm font-jakarta outline-none resize-none overflow-hidden
-                       focus:ring-2 focus:ring-ui-focus/20 focus:border-ui-focus
-                       placeholder-content-secondary text-content-primary
-                       disabled:opacity-60 disabled:cursor-not-allowed"
+              compact
+              fullWidth
+              error={errors.content}
             />
           </div>
           <Button
@@ -67,16 +66,11 @@ export const CommentForm: React.FC<CommentFormProps> = ({
             loading={isPending}
             variant="success"
             size="sm"
-            className="shrink-0 !h-10 !w-10 !p-0 !rounded-full flex items-center justify-center"
+            className="shrink-0 h-10 w-10 p-0 rounded-full flex items-center justify-center"
           >
             <span className="text-lg leading-none">➤</span>
           </Button>
         </div>
-        {errors.content && (
-          <p className="mt-1 text-xs text-accent-error ml-1">
-            {errors.content.message}
-          </p>
-        )}
       </div>
     </form>
   );

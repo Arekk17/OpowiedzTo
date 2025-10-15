@@ -10,7 +10,6 @@ import {
   NotFoundException,
   ForbiddenException,
   BadRequestException,
-  ParseIntPipe,
   Query,
 } from '@nestjs/common';
 import {
@@ -86,12 +85,10 @@ export class CommentController {
   })
   async getComments(
     @Param('id', ParseUUIDPipe) postId: string,
-    @Query('limit', ParseIntPipe) limit: number = 3,
+    @Query('limit') limit?: string, // Usuń ParseIntPipe
   ): Promise<Comment[]> {
-    const n = Number(limit);
-    const safeLimit = Number.isFinite(n)
-      ? Math.max(1, Math.min(n, 10))
-      : undefined;
+    const n = limit ? Number(limit) : 3;
+    const safeLimit = Number.isFinite(n) ? Math.max(1, Math.min(n, 10)) : 3;
     return this.commentRepository.findByPost(postId, safeLimit);
   }
 

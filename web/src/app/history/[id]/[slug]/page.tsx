@@ -1,12 +1,13 @@
 import { getPost } from "@/services/posts.service";
 import { getComments } from "@/services/comments.service";
 import { cookies } from "next/headers";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { StoryDetailHeader } from "@/components/organisms/story/StoryDetailHeader";
 import { PageLayout } from "@/components/organisms/layout/PageLayout";
 import { StoryStats } from "@/components/molecules/stats/StoryStats";
 import type { Metadata } from "next";
 import { StoryCommentsSection } from "@/components/organisms/story/StoryCommentsSection";
+import { getAuthUser } from "@/lib/auth-ssr";
 
 export async function generateMetadata({
   params,
@@ -42,7 +43,16 @@ export default async function HistoryPage({
 }: {
   params: Promise<{ id: string; slug: string }>;
 }) {
-  const { id } = await params;
+  const { id, slug } = await params;
+
+  // Sprawdź autentyfikację użytkownika
+  const user = await getAuthUser();
+
+  if (!user) {
+    // Przekieruj do logowania jeśli użytkownik nie jest zalogowany
+    redirect(`/auth/login?redirect=/history/${id}/${slug}`);
+  }
+
   const cookieStore = await cookies();
   const cookieHeader = cookieStore.toString();
 
@@ -71,7 +81,6 @@ export default async function HistoryPage({
         comments={post.commentsCount}
         initialLiked={post.isLiked}
       />
-
       <StoryCommentsSection postId={post.id} initialComments={comments} />
     </PageLayout>
   );

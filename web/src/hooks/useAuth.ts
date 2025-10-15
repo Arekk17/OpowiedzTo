@@ -122,6 +122,7 @@ export function useAuth() {
       });
       setTokenExpiresAt(adjustedExpiresAt);
       router.push(callbackUrl);
+      router.refresh();
     },
   });
 
@@ -141,6 +142,7 @@ export function useAuth() {
       });
       setTokenExpiresAt(adjustedExpiresAt);
       router.push(callbackUrl);
+      router.refresh();
     },
   });
 
@@ -150,6 +152,7 @@ export function useAuth() {
       queryClient.clear();
       setTokenExpiresAt(null);
       router.push("/auth/login");
+      router.refresh();
     },
   });
 

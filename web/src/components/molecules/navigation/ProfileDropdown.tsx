@@ -63,14 +63,22 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
 
           <div className="py-1">
             <Link
-              href="/dashboard/profile"
+              href={
+                currentUser
+                  ? `/users/${currentUser.id}/profile`
+                  : "/dashboard/profile"
+              }
               onClick={() => setIsOpen(false)}
               className="block px-4 py-2 text-content-primary hover:bg-background-default hover:text-primary-accent font-jakarta font-medium text-sm leading-[21px] transition-colors"
             >
               Profil
             </Link>
             <Link
-              href="/dashboard/settings"
+              href={
+                currentUser
+                  ? `/users/${currentUser.id}/settings`
+                  : "/dashboard/settings"
+              }
               onClick={() => setIsOpen(false)}
               className="block px-4 py-2 text-content-primary hover:bg-background-default hover:text-primary-accent font-jakarta font-medium text-sm leading-[21px] transition-colors"
             >

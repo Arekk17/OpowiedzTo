@@ -13,11 +13,14 @@ import { CATEGORY_CONFIG } from "@/constants/getCategoryStyle";
 import { StoryCardComments } from "./StoryCardComments";
 import { useQueryClient } from "@tanstack/react-query";
 import { getComments } from "@/services/comments.service";
+import { CommentWithAuthor } from "@/types/comment";
 
 export interface StoryCardProps {
   title: string;
   excerpt: string;
   author: string;
+  authorId?: string; // Dodaj authorId
+  currentUserId?: string; // Dodaj currentUserId
   createdAt: string;
   category?: "none" | "featured" | "trending" | "new" | "anonymous";
   isAnonymous?: boolean;
@@ -28,11 +31,14 @@ export interface StoryCardProps {
   isLiked?: boolean;
   tags?: TagType[];
   commentsCount?: number;
+  latestComments?: CommentWithAuthor[];
 }
 export const StoryCard: React.FC<StoryCardProps> = ({
   title,
   excerpt,
   author,
+  authorId,
+  currentUserId,
   createdAt,
   category = "anonymous",
   isAnonymous = true,
@@ -59,6 +65,11 @@ export const StoryCard: React.FC<StoryCardProps> = ({
       staleTime: 30_000, // zgodnie z useComments
     });
   }, [id, queryClient]);
+
+  // Sprawdź czy to post zalogowanego użytkownika
+  const isMyPost = currentUserId && authorId && currentUserId === authorId;
+  const displayAuthor = isMyPost ? "Ja" : isAnonymous ? "Anonim" : author;
+
   return (
     <article
       className={`
@@ -93,9 +104,7 @@ export const StoryCard: React.FC<StoryCardProps> = ({
             )}
 
             <div className="flex items-center gap-1 text-content-muted mb-1">
-              <span className="text-xs font-jakarta">
-                {isAnonymous ? "Anonim" : author}
-              </span>
+              <span className="text-xs font-jakarta">{displayAuthor}</span>
               <span className="w-1 h-1 bg-current rounded-full"></span>
               <FormattedDate
                 date={createdAt}

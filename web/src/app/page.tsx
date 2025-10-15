@@ -12,6 +12,7 @@ import TagChips from "@/components/molecules/tags/TagChips";
 import { PageLayout } from "@/components/organisms/layout/PageLayout";
 import { cookies } from "next/headers";
 import { Metadata } from "next";
+import { getAuthUser } from "@/lib/auth-ssr";
 
 export const metadata: Metadata = {
   title: "Strona główna",
@@ -43,7 +44,7 @@ export default async function Home({
   const cookieStore = await cookies();
   const cookieHeader = cookieStore.toString();
 
-  const [initialPage, trendingTags, tags] = await Promise.all([
+  const [initialPage, trendingTags, tags, user] = await Promise.all([
     getPostsCursor(
       {
         limit: 10,
@@ -54,6 +55,7 @@ export default async function Home({
     ),
     getTrendingTags({ cookieHeader }),
     getTags({ limit: 10, cookieHeader }),
+    getAuthUser(),
   ]);
 
   const baseQuery = (next: Partial<{ tag?: string; sort?: string }>) => {
@@ -91,6 +93,7 @@ export default async function Home({
           sortBy={validSort}
           pageSize={10}
           initialPage={initialPage}
+          currentUserId={user?.id}
         />
       </section>
 

@@ -8,8 +8,8 @@ export const getComments = async (
   postId: string,
   options?: ApiOptions & { limit?: number }
 ): Promise<Comment[]> => {
-  const qs = options?.limit ? `?limit=${options.limit}` : "";
-  // ważne: zwracamy ŚCIEŻKĘ względną, nie pełny URL
+  const limit = options?.limit || 10;
+  const qs = `?limit=${limit}`;
   return apiRequest<Comment[]>(`${COMMENTS_ENDPOINTS.list(postId)}${qs}`, {
     method: "GET",
     ...options,

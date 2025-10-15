@@ -3,6 +3,7 @@ import React, { useEffect } from "react";
 import Link from "next/link";
 import { CommentItem } from "../comments/CommentItem";
 import { useComments } from "@/hooks/useComments";
+import { CommentForm } from "@/components/organisms/comments/CommentForm";
 const MAX_VISIBLE_COMMENTS = 3;
 const COMMENTS_EXPANDED_HEIGHT = 680;
 
@@ -22,9 +23,14 @@ export const StoryCardComments: React.FC<StoryCardCommentsProps> = ({
   postUrl,
   isAuthenticated,
 }) => {
-  const { comments, refetch } = useComments(postId, [], 3, {
-    enabled: isExpanded,
-  });
+  const { comments, addComment, refetch, isPending } = useComments(
+    postId,
+    [],
+    3,
+    {
+      enabled: isExpanded,
+    }
+  );
 
   useEffect(() => {
     if (isExpanded) {
@@ -90,14 +96,7 @@ export const StoryCardComments: React.FC<StoryCardCommentsProps> = ({
       {/* Comment Input */}
       <div className="mt-2">
         {isAuthenticated ? (
-          <div className="w-full px-1">
-            <textarea
-              rows={2}
-              placeholder="Napisz komentarz…"
-              className="w-full resize-none rounded-lg border border-ui-border bg-background-paper p-2 text-sm font-jakarta focus:outline-none focus:ring-2 focus:ring-primary transition-shadow duration-200"
-              aria-label="Napisz komentarz"
-            />
-          </div>
+          <CommentForm onAddComment={addComment} isPending={isPending} />
         ) : (
           <Link
             href="/auth/login"

@@ -29,22 +29,27 @@ export class PostsService {
     userId?: string,
     sortBy?: SortOption,
     cursor?: { createdAt: string; id: string } | null,
-  ): Promise<{ data: PostWithDetailsDto[]; nextCursor: string | null }> {
+  ): Promise<{
+    data: PostWithDetailsDto[];
+    nextCursor: string | null;
+    meta: { total: number };
+  }> {
     const take = Math.min(Math.max(Number(limit) || 10, 1), 50);
-    const { posts } = await this.postsRepository.findAllWithDetailsCursor(
-      take + 1,
-      userId,
-      tag,
-      authorId,
-      sortBy,
-      cursor || null,
-    );
+    const { posts, total } =
+      await this.postsRepository.findAllWithDetailsCursor(
+        take + 1,
+        userId,
+        tag,
+        authorId,
+        sortBy,
+        cursor || null,
+      );
 
     const hasMore = posts.length > take;
     const sliced = hasMore ? posts.slice(0, take) : posts;
 
     const last: PostWithDetailsDto | undefined = sliced[sliced.length - 1];
-    if (!last) return { data: sliced, nextCursor: null };
+    if (!last) return { data: sliced, nextCursor: null, meta: { total } };
 
     const createdAtISO =
       last.createdAt instanceof Date
@@ -59,7 +64,7 @@ export class PostsService {
     };
 
     const nextCursor = encodeCursor(payload);
-    return { data: sliced, nextCursor };
+    return { data: sliced, nextCursor, meta: { total } };
   }
 
   async findOneWithDetails(
