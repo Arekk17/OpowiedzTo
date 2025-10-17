@@ -18,7 +18,7 @@ on:
           - web
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: code-quality-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -91,15 +91,15 @@ jobs:
           npm_config_target_platform: linux
           npm_config_target_arch: x64
 
-      - name: Check API formatting
+      - name: Format API code
         if: ${{ (github.event_name != 'workflow_dispatch' || inputs.check_type == 'all' || inputs.check_type == 'api') && needs.changes.outputs.api == 'true' }}
         working-directory: ./opowiedzto-api
-        run: npm run format -- --check
+        run: npm run format
 
-      - name: Check Web formatting
+      - name: Format Web code
         if: ${{ (github.event_name != 'workflow_dispatch' || inputs.check_type == 'all' || inputs.check_type == 'web') && needs.changes.outputs.web == 'true' }}
         working-directory: ./web
-        run: npm run format:check
+        run: npm run format
 
       - name: Lint API code
         if: ${{ (github.event_name != 'workflow_dispatch' || inputs.check_type == 'all' || inputs.check_type == 'api') && needs.changes.outputs.api == 'true' }}
@@ -110,3 +110,16 @@ jobs:
         if: ${{ (github.event_name != 'workflow_dispatch' || inputs.check_type == 'all' || inputs.check_type == 'web') && needs.changes.outputs.web == 'true' }}
         working-directory: ./web
         run: npm run lint
+
+      - name: Commit formatted code
+        if: ${{ github.event_name == 'pull_request' }}
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add .
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "style: auto-format code with Prettier [skip ci]"
+            git push
+          fi
