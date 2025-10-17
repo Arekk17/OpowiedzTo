@@ -2,9 +2,9 @@ name: Unit Tests
 
 on:
   pull_request:
-    branches: [main, develop]
+    branches: ["**"]
   push:
-    branches: [main, develop]
+    branches: [master, dev]
   workflow_dispatch:
     inputs:
       test_type:
@@ -22,11 +22,41 @@ on:
         default: true
         type: boolean
 
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: unit-tests-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
+  changes:
+    name: Detect changes
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Paths filter
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          filters: |
+            backend:
+              - 'opowiedzto-api/**'
+            frontend:
+              - 'web/**'
+
   backend-tests:
     name: Backend Tests (API)
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'workflow_dispatch' && (inputs.test_type == 'all' || inputs.test_type == 'backend') || github.event_name != 'workflow_dispatch' }}
+    needs: [changes]
+    if: ${{ github.event_name == 'workflow_dispatch' && (inputs.test_type == 'all' || inputs.test_type == 'backend') || (github.event_name != 'workflow_dispatch' && needs.changes.outputs.backend == 'true') }}
 
     steps:
       - name: Checkout code
@@ -58,17 +88,24 @@ jobs:
         run: npm run test:ci
 
       - name: Upload coverage reports
-        if: ${{ github.event_name != 'workflow_dispatch' || inputs.run_coverage == true }}
+        if: ${{ (
+          (github.event_name == 'workflow_dispatch' && inputs.run_coverage == true) ||
+          (github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')) ||
+          (github.event_name == 'pull_request' && (github.base_ref == 'master' || github.base_ref == 'dev'))
+          ) && (!github.event.pull_request || !github.event.pull_request.head.repo.fork) }}
         uses: codecov/codecov-action@v4
+        continue-on-error: true
         with:
           file: ./opowiedzto-api/coverage/lcov.info
           flags: backend
           name: backend-coverage
+          token: ${{ secrets.CODECOV_TOKEN }}
 
   frontend-tests:
     name: Frontend Tests (Web)
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'workflow_dispatch' && (inputs.test_type == 'all' || inputs.test_type == 'frontend') || github.event_name != 'workflow_dispatch' }}
+    needs: [changes]
+    if: ${{ github.event_name == 'workflow_dispatch' && (inputs.test_type == 'all' || inputs.test_type == 'frontend') || (github.event_name != 'workflow_dispatch' && needs.changes.outputs.frontend == 'true') }}
 
     steps:
       - name: Checkout code
@@ -103,12 +140,18 @@ jobs:
         run: npm run test:ci
 
       - name: Upload coverage reports
-        if: ${{ github.event_name != 'workflow_dispatch' || inputs.run_coverage == true }}
+        if: ${{ (
+          (github.event_name == 'workflow_dispatch' && inputs.run_coverage == true) ||
+          (github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')) ||
+          (github.event_name == 'pull_request' && (github.base_ref == 'master' || github.base_ref == 'dev'))
+          ) && (!github.event.pull_request || !github.event.pull_request.head.repo.fork) }}
         uses: codecov/codecov-action@v4
+        continue-on-error: true
         with:
           file: ./web/coverage/lcov.info
           flags: frontend
           name: frontend-coverage
+          token: ${{ secrets.CODECOV_TOKEN }}
 
   test-summary:
     name: Test Summary
