@@ -5,11 +5,28 @@ on:
     branches: [main, develop]
   push:
     branches: [main, develop]
+  workflow_dispatch:
+    inputs:
+      test_type:
+        description: "Typ testów do uruchomienia"
+        required: true
+        default: "all"
+        type: choice
+        options:
+          - all
+          - backend
+          - frontend
+      run_coverage:
+        description: "Uruchomić raporty pokrycia?"
+        required: false
+        default: true
+        type: boolean
 
 jobs:
   backend-tests:
     name: Backend Tests (API)
     runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'workflow_dispatch' && (inputs.test_type == 'all' || inputs.test_type == 'backend') || github.event_name != 'workflow_dispatch' }}
 
     steps:
       - name: Checkout code
@@ -35,6 +52,7 @@ jobs:
         run: npm run test:ci
 
       - name: Upload coverage reports
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.run_coverage == true }}
         uses: codecov/codecov-action@v4
         with:
           file: ./opowiedzto-api/coverage/lcov.info
@@ -44,6 +62,7 @@ jobs:
   frontend-tests:
     name: Frontend Tests (Web)
     runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'workflow_dispatch' && (inputs.test_type == 'all' || inputs.test_type == 'frontend') || github.event_name != 'workflow_dispatch' }}
 
     steps:
       - name: Checkout code
@@ -69,6 +88,7 @@ jobs:
         run: npm run test:ci
 
       - name: Upload coverage reports
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.run_coverage == true }}
         uses: codecov/codecov-action@v4
         with:
           file: ./web/coverage/lcov.info

@@ -5,6 +5,17 @@ on:
     branches: [main, develop]
   push:
     branches: [main, develop]
+  workflow_dispatch:
+    inputs:
+      check_type:
+        description: "Typ sprawdzenia do uruchomienia"
+        required: true
+        default: "all"
+        type: choice
+        options:
+          - all
+          - api
+          - web
 
 jobs:
   lint-and-format:
@@ -22,25 +33,31 @@ jobs:
           cache: "npm"
 
       - name: Install API dependencies
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.check_type == 'all' || inputs.check_type == 'api' }}
         working-directory: ./opowiedzto-api
         run: npm ci
 
       - name: Install Web dependencies
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.check_type == 'all' || inputs.check_type == 'web' }}
         working-directory: ./web
         run: npm ci
 
       - name: Check API formatting
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.check_type == 'all' || inputs.check_type == 'api' }}
         working-directory: ./opowiedzto-api
         run: npm run format -- --check
 
       - name: Check Web formatting
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.check_type == 'all' || inputs.check_type == 'web' }}
         working-directory: ./web
         run: npm run format:check
 
       - name: Lint API code
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.check_type == 'all' || inputs.check_type == 'api' }}
         working-directory: ./opowiedzto-api
         run: npm run lint
 
       - name: Lint Web code
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.check_type == 'all' || inputs.check_type == 'web' }}
         working-directory: ./web
         run: npm run lint
