@@ -86,6 +86,8 @@ jobs:
       - name: Run unit tests
         working-directory: ./opowiedzto-api
         run: npm run test:ci
+        env:
+          NODE_ENV: test
 
       - name: Upload coverage reports
         if: ${{ (
@@ -138,6 +140,8 @@ jobs:
       - name: Run unit tests
         working-directory: ./web
         run: npm run test:ci
+        env:
+          NODE_ENV: test
 
       - name: Upload coverage reports
         if: ${{ (

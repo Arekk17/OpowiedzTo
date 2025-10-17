@@ -96,12 +96,12 @@ describe("likes.service", () => {
       expect(apiRequest).toHaveBeenNthCalledWith(
         1,
         LIKES_ENDPOINTS.like(postId),
-        { method: "POST" }
+        { method: "POST" },
       );
       expect(apiRequest).toHaveBeenNthCalledWith(
         2,
         LIKES_ENDPOINTS.unlike(postId),
-        { method: "DELETE" }
+        { method: "DELETE" },
       );
     });
   });

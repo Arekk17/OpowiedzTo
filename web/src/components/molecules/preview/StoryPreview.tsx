@@ -34,11 +34,11 @@ export const StoryPreview: React.FC<StoryPreviewProps> = ({
         typeof formData.image === "string"
           ? formData.image
           : formData.image
-          ? URL.createObjectURL(formData.image)
-          : undefined,
+            ? URL.createObjectURL(formData.image)
+            : undefined,
       imageAlt: formData.title || "Obrazek historii",
     }),
-    [formData, user]
+    [formData, user],
   );
 
   if (!open) return null;

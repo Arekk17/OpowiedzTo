@@ -8,7 +8,7 @@ export class ApiError extends Error {
   constructor(
     message: string,
     public statusCode: number,
-    public error: string
+    public error: string,
   ) {
     super(message);
     this.name = "ApiError";

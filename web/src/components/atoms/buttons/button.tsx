@@ -26,19 +26,19 @@ export const Button: React.FC<React.PropsWithChildren<ButtonProps>> = ({
     size === "sm"
       ? "h-10 px-4 text-sm rounded-lg"
       : size === "lg"
-      ? "h-14 px-6 text-base rounded-xl"
-      : "h-12 px-5 text-base rounded-xl";
+        ? "h-14 px-6 text-base rounded-xl"
+        : "h-12 px-5 text-base rounded-xl";
 
   const variantClasses =
     variant === "primary"
       ? "bg-primary text-background-paper hover:opacity-95"
       : variant === "secondary"
-      ? "bg-ui-notification text-content-primary hover:bg-ui-hover"
-      : variant === "danger"
-      ? "bg-accent-error text-background-paper hover:opacity-95"
-      : variant === "success"
-      ? "bg-accent-success text-background-paper hover:opacity-95"
-      : "bg-primary border border-ui-border text-content-primary hover:bg-ui-hover";
+        ? "bg-ui-notification text-content-primary hover:bg-ui-hover"
+        : variant === "danger"
+          ? "bg-accent-error text-background-paper hover:opacity-95"
+          : variant === "success"
+            ? "bg-accent-success text-background-paper hover:opacity-95"
+            : "bg-primary border border-ui-border text-content-primary hover:bg-ui-hover";
 
   return (
     <button
@@ -50,7 +50,7 @@ export const Button: React.FC<React.PropsWithChildren<ButtonProps>> = ({
         variantClasses,
         (disabled || loading) && "opacity-60 cursor-not-allowed",
         fullWidth && "w-full",
-        className
+        className,
       )}
     >
       {loading && (

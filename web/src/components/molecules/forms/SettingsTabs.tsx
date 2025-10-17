@@ -19,7 +19,7 @@ export const SettingsTabs: React.FC<SettingsTabsProps> = ({
             "px-6 py-4 font-medium text-sm transition-colors",
             activeTab === "profile"
               ? "text-primary border-b-2 border-primary"
-              : "text-content-secondary hover:text-content-primary"
+              : "text-content-secondary hover:text-content-primary",
           )}
         >
           Profil
@@ -30,7 +30,7 @@ export const SettingsTabs: React.FC<SettingsTabsProps> = ({
             "px-6 py-4 font-medium text-sm transition-colors",
             activeTab === "password"
               ? "text-primary border-b-2 border-primary"
-              : "text-content-secondary hover:text-content-primary"
+              : "text-content-secondary hover:text-content-primary",
           )}
         >
           Bezpieczeństwo
@@ -41,7 +41,7 @@ export const SettingsTabs: React.FC<SettingsTabsProps> = ({
             "px-6 py-4 font-medium text-sm transition-colors",
             activeTab === "danger"
               ? "text-accent-error border-b-2 border-accent-error"
-              : "text-content-secondary hover:text-content-primary"
+              : "text-content-secondary hover:text-content-primary",
           )}
         >
           Konto

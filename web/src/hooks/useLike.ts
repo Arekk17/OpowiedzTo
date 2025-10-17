@@ -7,7 +7,7 @@ import { ApiError } from "@/types/errors";
 export const useLike = (
   postId: string,
   initialLiked: boolean,
-  initialCount: number
+  initialCount: number,
 ) => {
   const [liked, setLiked] = useState(initialLiked);
   const [count, setCount] = useState(initialCount);

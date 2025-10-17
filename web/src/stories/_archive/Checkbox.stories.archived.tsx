@@ -112,7 +112,7 @@ export const MultipleCheckboxes: Story = {
 
     const handleChange = (index: number) => (checked: boolean) => {
       setStates((prev) =>
-        prev.map((state, i) => (i === index ? checked : state))
+        prev.map((state, i) => (i === index ? checked : state)),
       );
     };
 

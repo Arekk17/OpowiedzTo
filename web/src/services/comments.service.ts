@@ -6,7 +6,7 @@ type ApiOptions = { cookieHeader?: string };
 
 export const getComments = async (
   postId: string,
-  options?: ApiOptions & { limit?: number }
+  options?: ApiOptions & { limit?: number },
 ): Promise<Comment[]> => {
   const limit = options?.limit || 10;
   const qs = `?limit=${limit}`;
@@ -18,7 +18,7 @@ export const getComments = async (
 
 export const createComment = async (
   postId: string,
-  data: CreateCommentFormData
+  data: CreateCommentFormData,
 ): Promise<Comment> => {
   return apiRequest<Comment>(COMMENTS_ENDPOINTS.create(postId), {
     method: "POST",

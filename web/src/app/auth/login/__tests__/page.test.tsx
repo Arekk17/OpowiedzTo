@@ -18,7 +18,7 @@ describe("LoginPage", () => {
     const mockError = new ApiError(
       "Nieprawidłowy email lub hasło",
       401,
-      "Unauthorized"
+      "Unauthorized",
     );
 
     mockUseAuth.mockReturnValue({
@@ -39,7 +39,7 @@ describe("LoginPage", () => {
     render(<LoginPage />);
 
     expect(
-      screen.getByText("Nieprawidłowy email lub hasło")
+      screen.getByText("Nieprawidłowy email lub hasło"),
     ).toBeInTheDocument();
   });
 
@@ -62,7 +62,7 @@ describe("LoginPage", () => {
     render(<LoginPage />);
 
     expect(
-      screen.queryByText("Nieprawidłowy email lub hasło")
+      screen.queryByText("Nieprawidłowy email lub hasło"),
     ).not.toBeInTheDocument();
   });
 
@@ -107,7 +107,7 @@ describe("LoginPage", () => {
     render(<LoginPage />);
 
     expect(
-      screen.getByRole("button", { name: /zaloguj się/i })
+      screen.getByRole("button", { name: /zaloguj się/i }),
     ).toBeInTheDocument();
   });
 
@@ -115,7 +115,7 @@ describe("LoginPage", () => {
     const mockError = new ApiError(
       "Konto zostało zablokowane",
       403,
-      "Forbidden"
+      "Forbidden",
     );
 
     mockUseAuth.mockReturnValue({
@@ -138,5 +138,3 @@ describe("LoginPage", () => {
     expect(screen.getByText("Konto zostało zablokowane")).toBeInTheDocument();
   });
 });
-
-

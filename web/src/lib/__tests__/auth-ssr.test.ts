@@ -41,10 +41,10 @@ describe("getAuthUser (SSR)", () => {
         new Response("", {
           status: 200,
           headers: { "set-cookie": "refreshToken=y" },
-        })
+        }),
       )
       .mockResolvedValueOnce(
-        new Response(JSON.stringify({ id: "u1" }), { status: 200 })
+        new Response(JSON.stringify({ id: "u1" }), { status: 200 }),
       );
 
     const { getAuthUser } = await import("@/lib/auth-ssr");

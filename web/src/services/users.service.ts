@@ -10,7 +10,7 @@ export const getUser = async (id: string): Promise<User> => {
 
 export const updateUser = async (
   id: string,
-  data: Partial<User>
+  data: Partial<User>,
 ): Promise<User> => {
   return apiRequest<User>(USERS_ENDPOINTS.updateProfile(id), {
     method: "PATCH",
@@ -19,7 +19,7 @@ export const updateUser = async (
 };
 
 export const uploadAvatar = async (
-  file: File
+  file: File,
 ): Promise<{ filename: string; path: string }> => {
   const formData = new FormData();
   formData.append("file", file);
@@ -28,7 +28,7 @@ export const uploadAvatar = async (
     {
       method: "POST",
       body: formData,
-    }
+    },
   );
 };
 

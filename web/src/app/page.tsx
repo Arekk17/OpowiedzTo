@@ -51,7 +51,7 @@ export default async function Home({
         tag,
         sortBy: validSort,
       },
-      { cookieHeader }
+      { cookieHeader },
     ),
     getTrendingTags({ cookieHeader }),
     getTags({ limit: 10, cookieHeader }),

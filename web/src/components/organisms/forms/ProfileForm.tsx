@@ -18,7 +18,7 @@ const profileSchema = z.object({
 type ProfileFormData = z.infer<typeof profileSchema>;
 
 interface ProfileFormProps {
-  user: User;
+  user: Pick<User, "nickname" | "email">;
   onSubmit: (data: ProfileFormData) => void;
 }
 

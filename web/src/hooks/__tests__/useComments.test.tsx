@@ -102,7 +102,7 @@ describe("useComments", () => {
             limit: undefined,
           });
         },
-        { timeout: 3000 }
+        { timeout: 3000 },
       );
     });
 
@@ -131,7 +131,7 @@ describe("useComments", () => {
         () => {
           expect(mockGetComments).not.toHaveBeenCalled();
         },
-        { timeout: 3000 }
+        { timeout: 3000 },
       );
     });
 
@@ -144,7 +144,7 @@ describe("useComments", () => {
         () => {
           expect(mockGetComments).not.toHaveBeenCalled();
         },
-        { timeout: 3000 }
+        { timeout: 3000 },
       );
     });
 
@@ -153,14 +153,14 @@ describe("useComments", () => {
 
       const { rerender } = renderHook(
         ({ limit }: { limit: number }) => useComments("p1", [], limit),
-        { initialProps: { limit: 10 }, wrapper }
+        { initialProps: { limit: 10 }, wrapper },
       );
 
       await waitFor(
         () => {
           expect(mockGetComments).toHaveBeenCalledWith("p1", { limit: 10 });
         },
-        { timeout: 3000 }
+        { timeout: 3000 },
       );
 
       // Zmień limit - to spowoduje nowy query
@@ -170,7 +170,7 @@ describe("useComments", () => {
         () => {
           expect(mockGetComments).toHaveBeenCalledWith("p1", { limit: 20 });
         },
-        { timeout: 3000 }
+        { timeout: 3000 },
       );
     });
 
@@ -183,7 +183,7 @@ describe("useComments", () => {
         () => {
           expect(mockGetComments).toHaveBeenCalledTimes(1);
         },
-        { timeout: 3000 }
+        { timeout: 3000 },
       );
 
       act(() => {
@@ -194,7 +194,7 @@ describe("useComments", () => {
         () => {
           expect(mockGetComments).toHaveBeenCalledTimes(2);
         },
-        { timeout: 3000 }
+        { timeout: 3000 },
       );
     });
   });
@@ -226,7 +226,7 @@ describe("useComments", () => {
           expect(result.current.comments[0].content).toBe("New comment");
           expect(result.current.comments[0].authorId).toBe("u1");
         },
-        { timeout: 3000 }
+        { timeout: 3000 },
       );
     });
 
@@ -272,7 +272,7 @@ describe("useComments", () => {
           expect(result.current.comments[0]).toEqual(realComment);
           expect(result.current.comments[0].id).not.toMatch(/^temp-/);
         },
-        { timeout: 3000 }
+        { timeout: 3000 },
       );
     });
 
@@ -303,7 +303,7 @@ describe("useComments", () => {
         () => {
           expect(result.current.comments).toEqual(mockComments);
         },
-        { timeout: 3000 }
+        { timeout: 3000 },
       );
     });
 
@@ -321,7 +321,7 @@ describe("useComments", () => {
         () => {
           expect(result.current.isPending).toBe(true);
         },
-        { timeout: 3000 }
+        { timeout: 3000 },
       );
     });
 
@@ -349,7 +349,7 @@ describe("useComments", () => {
           expect(optimisticComment.author.email).toBe("test@example.com");
           expect(optimisticComment.author.nickname).toBe("TestUser");
         },
-        { timeout: 3000 }
+        { timeout: 3000 },
       );
     });
 
@@ -392,7 +392,7 @@ describe("useComments", () => {
           expect(optimisticComment.author.email).toBe("");
           expect(optimisticComment.author.nickname).toBe("Ty");
         },
-        { timeout: 3000 }
+        { timeout: 3000 },
       );
     });
   });
@@ -414,14 +414,14 @@ describe("useComments", () => {
 
       const { rerender } = renderHook(
         ({ limit }: { limit: number }) => useComments("p1", [], limit),
-        { initialProps: { limit: 5 }, wrapper }
+        { initialProps: { limit: 5 }, wrapper },
       );
 
       await waitFor(
         () => {
           expect(mockGetComments).toHaveBeenCalledWith("p1", { limit: 5 });
         },
-        { timeout: 3000 }
+        { timeout: 3000 },
       );
 
       // Zmień limit - to spowoduje nowy query
@@ -431,7 +431,7 @@ describe("useComments", () => {
         () => {
           expect(mockGetComments).toHaveBeenCalledWith("p1", { limit: 15 });
         },
-        { timeout: 3000 }
+        { timeout: 3000 },
       );
     });
 
@@ -453,7 +453,7 @@ describe("useComments", () => {
           expect(result.current.comments).toHaveLength(1);
           expect(result.current.comments[0].content).toBe("First comment");
         },
-        { timeout: 3000 }
+        { timeout: 3000 },
       );
     });
   });

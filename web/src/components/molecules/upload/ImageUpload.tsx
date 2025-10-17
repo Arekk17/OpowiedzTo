@@ -25,29 +25,35 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
     inputRef.current?.click();
   }, []);
 
-  const handleFile = useCallback((f?: File) => {
-    if (!f) return;
-    setError(null);
-    if (f.size > maxSizeMb * 1024 * 1024) {
-      setError(`Maksymalny rozmiar pliku to ${maxSizeMb}MB`);
-      return;
-    }
-    if (!f.type.startsWith("image/")) {
-      setError("Nieprawidłowy typ pliku (wymagany obraz)");
-      return;
-    }
-    onChange(f);
-  }, [maxSizeMb, onChange]);
+  const handleFile = useCallback(
+    (f?: File) => {
+      if (!f) return;
+      setError(null);
+      if (f.size > maxSizeMb * 1024 * 1024) {
+        setError(`Maksymalny rozmiar pliku to ${maxSizeMb}MB`);
+        return;
+      }
+      if (!f.type.startsWith("image/")) {
+        setError("Nieprawidłowy typ pliku (wymagany obraz)");
+        return;
+      }
+      onChange(f);
+    },
+    [maxSizeMb, onChange],
+  );
 
-  const onDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setDragOver(false);
-    const f = e.dataTransfer.files?.[0];
-    if (f) handleFile(f);
-  }, [handleFile]);
+  const onDrop = useCallback(
+    (e: React.DragEvent<HTMLDivElement>) => {
+      e.preventDefault();
+      setDragOver(false);
+      const f = e.dataTransfer.files?.[0];
+      if (f) handleFile(f);
+    },
+    [handleFile],
+  );
 
   const hasPreview = useMemo(() => Boolean(file), [file]);
-  
+
   const previewURL = useMemo(() => {
     if (typeof file === "string") return file;
     if (file) return URL.createObjectURL(file);
@@ -63,14 +69,20 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
     setDragOver(false);
   }, []);
 
-  const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    handleFile(e.target.files?.[0]);
-  }, [handleFile]);
+  const handleFileChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      handleFile(e.target.files?.[0]);
+    },
+    [handleFile],
+  );
 
-  const handleRemoveImage = useCallback((e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
-    onChange(undefined);
-  }, [onChange]);
+  const handleRemoveImage = useCallback(
+    (e?: React.MouseEvent) => {
+      if (e) e.stopPropagation();
+      onChange(undefined);
+    },
+    [onChange],
+  );
 
   return (
     <div className={`flex flex-col gap-3 ${className}`}>

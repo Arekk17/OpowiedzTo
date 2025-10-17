@@ -44,7 +44,7 @@ describe("useLike", () => {
   });
   it("onError 400 with 'polubiłeś' -> optimistic + doesn't call likePost", async () => {
     likePost.mockImplementationOnce(() =>
-      Promise.reject({ statusCode: 400, message: "Już polubiłeś ten post" })
+      Promise.reject({ statusCode: 400, message: "Już polubiłeś ten post" }),
     );
     const { result } = renderHook(() => useLike("p1", false, 0), { wrapper });
 
@@ -59,7 +59,7 @@ describe("useLike", () => {
   });
   it("onError 404 with 'Nie polubiłeś' keeps liked = false and count >= 0", async () => {
     unlikePost.mockImplementationOnce(() =>
-      Promise.reject({ statusCode: 404, message: "Nie polubiłeś tego posta" })
+      Promise.reject({ statusCode: 404, message: "Nie polubiłeś tego posta" }),
     );
     const { result } = renderHook(() => useLike("p1", true, 1), { wrapper });
     await act(async () => {
@@ -72,7 +72,7 @@ describe("useLike", () => {
   });
   it("onError generic reverts to previous state from context", async () => {
     likePost.mockImplementationOnce(() =>
-      Promise.reject({ statusCode: 500, message: "Oops" })
+      Promise.reject({ statusCode: 500, message: "Oops" }),
     );
 
     const { result } = renderHook(() => useLike("p1", false, 5), { wrapper });
@@ -91,7 +91,7 @@ describe("useLike", () => {
     const { result, rerender } = renderHook(
       (p: { id: string; liked: boolean; count: number }) =>
         useLike(p.id, p.liked, p.count),
-      { initialProps: { id: "p1", liked: false, count: 2 }, wrapper }
+      { initialProps: { id: "p1", liked: false, count: 2 }, wrapper },
     );
 
     expect(result.current.liked).toBe(false);

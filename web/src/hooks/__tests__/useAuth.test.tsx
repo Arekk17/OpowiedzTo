@@ -93,7 +93,7 @@ describe("useAuth", () => {
     (global.fetch as jest.Mock).mockImplementation((url: string) => {
       if (url.includes("/api/auth/refresh")) {
         return Promise.resolve(
-          new Response(JSON.stringify(mockRefresh()), { status: 200 })
+          new Response(JSON.stringify(mockRefresh()), { status: 200 }),
         );
       }
       return Promise.resolve(new Response("{}", { status: 200 }));
@@ -110,7 +110,7 @@ describe("useAuth", () => {
     });
 
     const calls = (global.fetch as jest.Mock).mock.calls.map(
-      (c) => c[0] as string
+      (c) => c[0] as string,
     );
     expect(calls).toContain("/api/auth/refresh");
   });
@@ -131,7 +131,7 @@ describe("useAuth", () => {
     (global.fetch as jest.Mock).mockImplementation((url: string) => {
       if (url.includes("/api/auth/refresh")) {
         return Promise.resolve(
-          new Response(JSON.stringify(mockRefresh()), { status: 200 })
+          new Response(JSON.stringify(mockRefresh()), { status: 200 }),
         );
       }
       return Promise.resolve(new Response("{}", { status: 200 }));
@@ -141,7 +141,7 @@ describe("useAuth", () => {
 
     await waitFor(() => {
       const calls = (global.fetch as jest.Mock).mock.calls.map(
-        (c) => c[0] as string
+        (c) => c[0] as string,
       );
       expect(calls).toContain("/api/auth/refresh");
     });
@@ -170,15 +170,18 @@ describe("useAuth", () => {
       expect(mockRefresh).toHaveBeenCalled();
     });
 
-    expect(mockLogin).toHaveBeenCalledWith({
-      email: "a@b.c",
-      password: "x",
-    });
+    expect(mockLogin).toHaveBeenCalledWith(
+      {
+        email: "a@b.c",
+        password: "x",
+      },
+      expect.anything(),
+    );
   });
 
   it("register mutation updates cache and redirects to callbackUrl from search params", async () => {
     (useSearchParams as jest.Mock).mockReturnValue(
-      new URLSearchParams("callbackUrl=/dashboard")
+      new URLSearchParams("callbackUrl=/dashboard"),
     );
 
     const now = Date.now();
@@ -207,11 +210,14 @@ describe("useAuth", () => {
       expect(mockRefresh).toHaveBeenCalled();
     });
 
-    expect(mockRegister).toHaveBeenCalledWith({
-      email: "a@b.c",
-      password: "x",
-      nickname: "Alice",
-    });
+    expect(mockRegister).toHaveBeenCalledWith(
+      {
+        email: "a@b.c",
+        password: "x",
+        nickname: "Alice",
+      },
+      expect.anything(),
+    );
   });
 
   it("logout mutation clears cache, resets token, and redirects to /auth/login", async () => {
@@ -221,8 +227,8 @@ describe("useAuth", () => {
     (global.fetch as jest.Mock).mockResolvedValueOnce(
       new Response(
         JSON.stringify({ id: "u1", expiresAt: Date.now() + 300_000 }),
-        { status: 200 }
-      )
+        { status: 200 },
+      ),
     );
 
     const { result } = renderHook(() => useAuth(), { wrapper });

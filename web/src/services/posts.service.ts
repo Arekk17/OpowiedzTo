@@ -16,7 +16,7 @@ export type PostsCursorResponse = ApiResponse<Post[], CursorMeta>;
 type CursorFilters = Omit<PostFiltersData, "page"> & { cursor?: string };
 
 const adaptCursorResponse = (
-  res: PostsCursorResponse | { data: Post[]; nextCursor: string | null }
+  res: PostsCursorResponse | { data: Post[]; nextCursor: string | null },
 ): PostsCursorResponse => {
   if ((res as PostsCursorResponse).meta) return res as PostsCursorResponse;
   const flat = res as { data: Post[]; nextCursor: string | null };
@@ -29,7 +29,7 @@ type ApiOptions = {
 
 export const getPostsCursor = async (
   filters: CursorFilters,
-  options?: ApiOptions
+  options?: ApiOptions,
 ): Promise<PostsCursorResponse> => {
   const params = buildCursorParams(filters);
   const res = await apiRequest<
@@ -44,7 +44,7 @@ export const getPostsCursor = async (
 
 export const getPosts = async (
   filters: PostFiltersData,
-  options?: ApiOptions
+  options?: ApiOptions,
 ): Promise<PaginatedResponse<Post>> => {
   const params = buildQueryParams(filters);
   return apiRequest<PaginatedResponse<Post>>(
@@ -52,13 +52,13 @@ export const getPosts = async (
     {
       method: "GET",
       ...options,
-    }
+    },
   );
 };
 
 export const getPost = async (
   id: string,
-  options?: ApiOptions
+  options?: ApiOptions,
 ): Promise<Post> => {
   return apiRequest<Post>(POSTS_ENDPOINTS.detail(id), {
     method: "GET",
@@ -67,7 +67,7 @@ export const getPost = async (
 };
 
 export const getTrendingTags = async (
-  options?: ApiOptions
+  options?: ApiOptions,
 ): Promise<TrendingTags[]> => {
   return apiRequest<TrendingTags[]>(TAGS_ENDPOINTS.trending, {
     method: "GET",
@@ -76,7 +76,7 @@ export const getTrendingTags = async (
 };
 
 export const getTags = async (
-  options?: ApiOptions & { limit?: number }
+  options?: ApiOptions & { limit?: number },
 ): Promise<TagsResponse> => {
   const { limit, ...apiOptions } = options || {};
   return apiRequest<TagsResponse>(
@@ -84,7 +84,7 @@ export const getTags = async (
     {
       method: "GET",
       ...apiOptions,
-    }
+    },
   );
 };
 
@@ -96,7 +96,7 @@ export interface SearchPostsApiResponse extends PaginatedResponse<Post> {
 
 export const searchPosts = async (
   searchData: SearchPostsData,
-  options?: ApiOptions
+  options?: ApiOptions,
 ): Promise<SearchPostsApiResponse> => {
   const params = new URLSearchParams();
   params.set("q", searchData.q);
@@ -108,13 +108,13 @@ export const searchPosts = async (
     {
       method: "GET",
       ...options,
-    }
+    },
   );
 };
 
 export const createPost = async (
   data: CreatePostFormData,
-  options?: ApiOptions
+  options?: ApiOptions,
 ): Promise<Post> => {
   return apiRequest<Post>(POSTS_ENDPOINTS.create, {
     method: "POST",
@@ -126,7 +126,7 @@ export const createPost = async (
 export const updatePost = async (
   id: string,
   data: UpdatePostFormData,
-  options?: ApiOptions
+  options?: ApiOptions,
 ): Promise<Post> => {
   return apiRequest<Post>(POSTS_ENDPOINTS.update(id), {
     method: "PATCH",
@@ -137,7 +137,7 @@ export const updatePost = async (
 
 export const deletePost = async (
   id: string,
-  options?: ApiOptions
+  options?: ApiOptions,
 ): Promise<void> => {
   return apiRequest(POSTS_ENDPOINTS.delete(id), {
     method: "DELETE",

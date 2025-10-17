@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
       console.error("[API] NEXT_PUBLIC_API_URL not set");
       return NextResponse.json(
         { error: "Backend URL not configured" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 

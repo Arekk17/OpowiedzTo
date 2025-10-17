@@ -36,7 +36,7 @@ export default function CreateStoryPage() {
     onSuccess: (post) => {
       toast.success("Historia została opublikowana!");
       router.push(
-        `/history/${post.id}/${post.title.toLowerCase().replace(/\s+/g, "-")}`
+        `/history/${post.id}/${post.title.toLowerCase().replace(/\s+/g, "-")}`,
       );
     },
     onError: (error: Error) => {

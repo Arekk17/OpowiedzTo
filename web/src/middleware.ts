@@ -9,7 +9,7 @@ export default function middleware(req: NextRequest) {
   const isAuthenticated = !!refreshToken;
 
   const isProtectedRoute = protectedRoutes.some((route) =>
-    pathname.startsWith(route)
+    pathname.startsWith(route),
   );
   const isAuthRoute = authRoutes.some((route) => pathname.startsWith(route));
 

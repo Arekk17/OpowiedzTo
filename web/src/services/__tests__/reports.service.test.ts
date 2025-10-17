@@ -28,7 +28,7 @@ describe("reports.service", () => {
         {
           method: "POST",
           body: JSON.stringify(reportData),
-        }
+        },
       );
     });
 
@@ -47,7 +47,7 @@ describe("reports.service", () => {
         {
           method: "POST",
           body: JSON.stringify(reportData),
-        }
+        },
       );
     });
   });
@@ -69,7 +69,7 @@ describe("reports.service", () => {
         {
           method: "POST",
           body: JSON.stringify(reportData),
-        }
+        },
       );
     });
 
@@ -89,7 +89,7 @@ describe("reports.service", () => {
         {
           method: "POST",
           body: JSON.stringify(reportData),
-        }
+        },
       );
     });
   });
@@ -105,7 +105,7 @@ describe("reports.service", () => {
 
       expect(apiRequest).toHaveBeenCalledWith(
         REPORTS_ENDPOINTS.postReportCount(postId),
-        { method: "GET" }
+        { method: "GET" },
       );
       expect(result).toBe(5);
     });
@@ -133,7 +133,7 @@ describe("reports.service", () => {
 
       expect(apiRequest).toHaveBeenCalledWith(
         REPORTS_ENDPOINTS.commentReportCount(commentId),
-        { method: "GET" }
+        { method: "GET" },
       );
       expect(result).toBe(3);
     });
@@ -161,7 +161,7 @@ describe("reports.service", () => {
       (apiRequest as jest.Mock).mockRejectedValueOnce(error);
 
       await expect(Reports.reportPost(postId, reportData)).rejects.toThrow(
-        "API Error"
+        "API Error",
       );
     });
 
@@ -172,7 +172,7 @@ describe("reports.service", () => {
       (apiRequest as jest.Mock).mockRejectedValueOnce(error);
 
       await expect(Reports.getPostReportCount(postId)).rejects.toThrow(
-        "Network Error"
+        "Network Error",
       );
     });
   });

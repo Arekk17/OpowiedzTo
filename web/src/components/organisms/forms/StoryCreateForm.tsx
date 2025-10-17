@@ -38,7 +38,7 @@ export const StoryCreateForm: React.FC<StoryCreateFormProps> = ({
 }) => {
   const [tags, setTags] = useState<string[]>(defaultValues?.tags || []);
   const [image, setImage] = useState<File | string | undefined>(
-    defaultValues?.image
+    defaultValues?.image,
   );
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewData, setPreviewData] = useState<StoryCreateFormValues>({
@@ -70,7 +70,7 @@ export const StoryCreateForm: React.FC<StoryCreateFormProps> = ({
       setTags(newTags);
       setValue("tags", newTags, { shouldValidate: false });
     },
-    [setValue]
+    [setValue],
   );
 
   const handlePreview = useCallback(() => {
@@ -88,14 +88,14 @@ export const StoryCreateForm: React.FC<StoryCreateFormProps> = ({
       setImage(file);
       setValue("image", file, { shouldValidate: false });
     },
-    [setValue]
+    [setValue],
   );
 
   const handleFormSubmit = useCallback(
     async (data: StoryCreateFormValues) => {
       await onSubmit(data);
     },
-    [onSubmit]
+    [onSubmit],
   );
 
   return (

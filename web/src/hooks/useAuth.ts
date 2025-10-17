@@ -59,7 +59,7 @@ export function useAuth() {
             setTokenExpiresAt(adjustedExpiresAt);
             console.log(
               "[useAuth] Token refreshed, new expiry:",
-              new Date(adjustedExpiresAt).toISOString()
+              new Date(adjustedExpiresAt).toISOString(),
             );
           }
           refetch();
@@ -91,7 +91,7 @@ export function useAuth() {
           setTokenExpiresAt(adjustedExpiresAt);
           console.log(
             "[useAuth] Token refreshed, new expiry:",
-            new Date(adjustedExpiresAt).toISOString()
+            new Date(adjustedExpiresAt).toISOString(),
           );
         }
 

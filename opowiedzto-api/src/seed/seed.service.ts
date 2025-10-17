@@ -181,8 +181,6 @@ export class SeedService implements OnApplicationBootstrap {
       return;
     }
 
-    let totalLikes = 0;
-
     // Każdy post może mieć od 0 do 50 polubień
     for (const post of posts) {
       const likesCount = Math.floor(Math.random() * 51); // 0-50 polubień
@@ -203,7 +201,6 @@ export class SeedService implements OnApplicationBootstrap {
             postId: post.id,
           });
           await this.postLikesRepository.save(like);
-          totalLikes++;
         }
       }
 
@@ -238,8 +235,6 @@ export class SeedService implements OnApplicationBootstrap {
       'Dzięki za te słowa. Bardzo mi pomogły.',
     ];
 
-    let totalComments = 0;
-
     // Każdy post może mieć od 0 do 15 komentarzy
     for (const post of posts) {
       const commentsCount = Math.floor(Math.random() * 16); // 0-15 komentarzy
@@ -263,7 +258,6 @@ export class SeedService implements OnApplicationBootstrap {
         });
 
         await this.commentsRepository.save(comment);
-        totalComments++;
       }
 
       // Aktualizuj licznik komentarzy w poście
