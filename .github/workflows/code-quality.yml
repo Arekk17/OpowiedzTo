@@ -57,7 +57,10 @@ jobs:
       - name: Install Web dependencies
         if: ${{ github.event_name != 'workflow_dispatch' || inputs.check_type == 'all' || inputs.check_type == 'web' }}
         working-directory: ./web
-        run: npm ci
+        run: npm ci --ignore-platform
+        env:
+          npm_config_target_platform: linux
+          npm_config_target_arch: x64
 
       - name: Check API formatting
         if: ${{ github.event_name != 'workflow_dispatch' || inputs.check_type == 'all' || inputs.check_type == 'api' }}
