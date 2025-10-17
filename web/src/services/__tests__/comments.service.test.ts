@@ -10,7 +10,7 @@ describe("commentsService", () => {
     await Comments.getComments("p1");
     expect(apiRequest).toHaveBeenCalledWith(
       `${COMMENTS_ENDPOINTS.list("p1")}?limit=10`,
-      { method: "GET" }
+      { method: "GET" },
     );
   });
   it("getComments: niestandardowy limit oraz cookieHeader przechodzą do opcji", async () => {
@@ -18,7 +18,7 @@ describe("commentsService", () => {
     await Comments.getComments("p1", { limit: 25, cookieHeader: "a=b" });
     expect(apiRequest).toHaveBeenCalledWith(
       `${COMMENTS_ENDPOINTS.list("p1")}?limit=25`,
-      { method: "GET", cookieHeader: "a=b", limit: 25 }
+      { method: "GET", cookieHeader: "a=b", limit: 25 },
     );
   });
   it("createComment: POST z JSON body", async () => {

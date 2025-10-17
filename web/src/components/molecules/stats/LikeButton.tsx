@@ -14,7 +14,7 @@ export const LikeButton: React.FC<Props> = ({
   const { liked, count, toggle, isPending } = useLike(
     postId,
     initialLiked,
-    initialCount
+    initialCount,
   );
 
   return (

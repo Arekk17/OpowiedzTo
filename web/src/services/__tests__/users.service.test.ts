@@ -51,7 +51,7 @@ describe("users.service", () => {
       {
         method: "PATCH",
         body: JSON.stringify(updateData),
-      }
+      },
     );
     expect(result).toEqual(mockUser);
   });
@@ -110,7 +110,7 @@ describe("users.service", () => {
 
     expect(apiRequest).toHaveBeenCalledWith(
       USERS_ENDPOINTS.followers("user1"),
-      { method: "GET" }
+      { method: "GET" },
     );
     expect(result).toEqual(mockFollowers);
   });
@@ -132,7 +132,7 @@ describe("users.service", () => {
 
     expect(apiRequest).toHaveBeenCalledWith(
       USERS_ENDPOINTS.following("user1"),
-      { method: "GET" }
+      { method: "GET" },
     );
     expect(result).toEqual(mockFollowing);
   });

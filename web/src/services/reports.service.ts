@@ -4,7 +4,7 @@ import { CreateReportFormData } from "@/types/report";
 
 export const reportPost = async (
   postId: string,
-  data: CreateReportFormData
+  data: CreateReportFormData,
 ): Promise<void> => {
   return apiRequest(REPORTS_ENDPOINTS.reportPost(postId), {
     method: "POST",
@@ -14,7 +14,7 @@ export const reportPost = async (
 
 export const reportComment = async (
   commentId: string,
-  data: CreateReportFormData
+  data: CreateReportFormData,
 ): Promise<void> => {
   return apiRequest(REPORTS_ENDPOINTS.reportComment(commentId), {
     method: "POST",
@@ -27,19 +27,19 @@ export const getPostReportCount = async (postId: string): Promise<number> => {
     REPORTS_ENDPOINTS.postReportCount(postId),
     {
       method: "GET",
-    }
+    },
   );
   return response.count;
 };
 
 export const getCommentReportCount = async (
-  commentId: string
+  commentId: string,
 ): Promise<number> => {
   const response = await apiRequest<{ count: number }>(
     REPORTS_ENDPOINTS.commentReportCount(commentId),
     {
       method: "GET",
-    }
+    },
   );
   return response.count;
 };

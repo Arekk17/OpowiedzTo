@@ -7,7 +7,7 @@ type ApiRequestOptions = RequestInit & {
 
 export async function apiRequest<T>(
   endpoint: string,
-  options: ApiRequestOptions = {}
+  options: ApiRequestOptions = {},
 ): Promise<T> {
   const { cookieHeader, skipRefreshOn401, ...fetchOptions } = options;
 
@@ -49,7 +49,7 @@ export async function apiRequest<T>(
       throw new ApiError(
         errorData?.message || ERROR_MESSAGES[401] || "Unauthorized",
         401,
-        errorData?.error || "Unauthorized"
+        errorData?.error || "Unauthorized",
       );
     }
 
@@ -70,7 +70,7 @@ export async function apiRequest<T>(
         throw new ApiError(
           errorData?.message || ERROR_MESSAGES[401] || "Unauthorized",
           401,
-          errorData?.error || "Unauthorized"
+          errorData?.error || "Unauthorized",
         );
       }
     }
@@ -80,7 +80,7 @@ export async function apiRequest<T>(
         ERROR_MESSAGES[response.status] ||
         `API Error: ${response.status}`,
       response.status,
-      errorData?.error || "Error"
+      errorData?.error || "Error",
     );
   }
 
@@ -89,6 +89,6 @@ export async function apiRequest<T>(
       ERROR_MESSAGES[response.status] ||
       `API Error: ${response.status}`,
     response.status,
-    errorData?.error || "Error"
+    errorData?.error || "Error",
   );
 }

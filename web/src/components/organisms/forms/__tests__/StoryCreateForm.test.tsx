@@ -16,7 +16,7 @@ function renderWithProviders(ui: React.ReactElement) {
     },
   });
   return render(
-    <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
+    <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>,
   );
 }
 
@@ -28,7 +28,7 @@ describe("StoryCreateForm", () => {
         options={["tag1", "tag2"]}
         defaultValues={overrides}
         onSubmit={onSubmit}
-      />
+      />,
     );
     return { onSubmit };
   };
@@ -40,10 +40,10 @@ describe("StoryCreateForm", () => {
 
     expect(await screen.findAllByText(/minimum 3 znaki/i)).not.toHaveLength(0);
     expect(await screen.findAllByText(/minimum 20 znaków/i)).not.toHaveLength(
-      0
+      0,
     );
     expect(
-      await screen.findByText(/wybierz co najmniej 1 tag/i)
+      await screen.findByText(/wybierz co najmniej 1 tag/i),
     ).toBeInTheDocument();
   });
 
@@ -52,16 +52,16 @@ describe("StoryCreateForm", () => {
 
     await userEvent.type(
       screen.getByPlaceholderText(/wpisz tytuł/i),
-      "Mój tytuł"
+      "Mój tytuł",
     );
     await userEvent.type(
       screen.getByPlaceholderText(/opowiedz swoją historię/i),
-      "To jest wystarczająco długa treść historii, ponad 20 znaków."
+      "To jest wystarczająco długa treść historii, ponad 20 znaków.",
     );
 
     await userEvent.type(
       screen.getByPlaceholderText(/wpisz nazwę tagu/i),
-      "nowyTag"
+      "nowyTag",
     );
     await userEvent.click(screen.getByTitle(/dodaj tag/i));
 
@@ -84,12 +84,12 @@ describe("StoryCreateForm", () => {
     await userEvent.type(screen.getByPlaceholderText(/wpisz tytuł/i), "ABC");
     await userEvent.type(
       screen.getByPlaceholderText(/opowiedz swoją historię/i),
-      "To jest wystarczająco długa treść historii, ponad 20 znaków."
+      "To jest wystarczająco długa treść historii, ponad 20 znaków.",
     );
 
     await userEvent.type(
       screen.getByPlaceholderText(/wpisz nazwę tagu/i),
-      "tagX"
+      "tagX",
     );
     await userEvent.click(screen.getByTitle(/dodaj tag/i));
 
@@ -97,8 +97,8 @@ describe("StoryCreateForm", () => {
 
     await waitFor(() =>
       expect(
-        screen.queryByText(/wybierz co najmniej 1 tag/i)
-      ).not.toBeInTheDocument()
+        screen.queryByText(/wybierz co najmniej 1 tag/i),
+      ).not.toBeInTheDocument(),
     );
   });
 });

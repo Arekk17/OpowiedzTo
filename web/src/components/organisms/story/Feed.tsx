@@ -137,7 +137,7 @@ export const Feed: React.FC<Props> = ({
 
   const items: StoryListItem[] = useMemo(
     () => (data?.pages ?? []).flatMap((p) => p.data.map(mapPostToStoryItem)),
-    [data]
+    [data],
   );
 
   const sentinelRef = useRef<HTMLDivElement | null>(null);
@@ -152,7 +152,7 @@ export const Feed: React.FC<Props> = ({
           void fetchNextPage();
         }
       },
-      { rootMargin: "800px 0px 1200px 0px", threshold: 0 }
+      { rootMargin: "800px 0px 1200px 0px", threshold: 0 },
     );
     obs.observe(el);
     return () => obs.disconnect();

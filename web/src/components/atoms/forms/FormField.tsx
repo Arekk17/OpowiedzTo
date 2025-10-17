@@ -18,15 +18,9 @@ export const FormField: React.FC<FormFieldProps> = ({
     <div className={clsx("space-y-2", className)}>
       {children}
       {helperText && !error && (
-        <p className="text-sm text-content-secondary">
-          {helperText}
-        </p>
+        <p className="text-sm text-content-secondary">{helperText}</p>
       )}
-      {error && (
-        <p className="text-sm text-accent-error">
-          {error}
-        </p>
-      )}
+      {error && <p className="text-sm text-accent-error">{error}</p>}
     </div>
   );
 };

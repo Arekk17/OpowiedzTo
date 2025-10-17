@@ -28,7 +28,7 @@ export const login = async (data: LoginFormData): Promise<AuthApiResponse> => {
 };
 
 export const register = async (
-  data: RegisterApiData
+  data: RegisterApiData,
 ): Promise<AuthApiResponse> => {
   return apiRequest<AuthApiResponse>(AUTH_ENDPOINTS.register, {
     method: "POST",

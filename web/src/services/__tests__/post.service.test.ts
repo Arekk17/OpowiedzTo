@@ -22,7 +22,7 @@ describe("posts.service", () => {
     } as CursorFilters);
     expect(apiRequest).toHaveBeenCalledWith(
       expect.stringMatching(/^\/posts\?/),
-      expect.objectContaining({ method: "GET" })
+      expect.objectContaining({ method: "GET" }),
     );
     expect(res).toEqual({ data: [{ id: "1" }], meta: { nextCursor: "abc" } });
   });

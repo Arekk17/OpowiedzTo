@@ -22,7 +22,7 @@ export const postSchema = z.object({
       postCount: z.number(),
       createdAt: z.string(),
       updatedAt: z.string(),
-    })
+    }),
   ),
   authorId: z.string(),
   author: z.object({
@@ -51,7 +51,7 @@ export const postSchema = z.object({
           updatedAt: z.string(),
           avatar: z.string().nullable().optional(),
         }),
-      })
+      }),
     )
     .default([]),
   likesCount: z.number(),

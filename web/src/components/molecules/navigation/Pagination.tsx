@@ -48,7 +48,7 @@ export const Pagination: React.FC<PaginationProps> = ({
           type="button"
           className={clsx(
             "flex flex-row justify-center items-center p-0 w-10 h-10 rounded-lg transition-colors text-content-secondary hover:bg-ui-hover",
-            (isFirst || disabled) && "opacity-50 cursor-not-allowed"
+            (isFirst || disabled) && "opacity-50 cursor-not-allowed",
           )}
           onClick={() => pushPage(currentPage - 1)}
           disabled={isFirst || disabled}
@@ -61,7 +61,7 @@ export const Pagination: React.FC<PaginationProps> = ({
             type="button"
             className={clsx(
               "flex flex-row justify-center items-center p-0 w-10 h-10 rounded-lg transition-colors text-content-secondary hover:bg-ui-hover",
-              page === currentPage && "bg-ui-notification text-content-primary"
+              page === currentPage && "bg-ui-notification text-content-primary",
             )}
             onClick={() => pushPage(page)}
             disabled={disabled}
@@ -73,7 +73,7 @@ export const Pagination: React.FC<PaginationProps> = ({
           type="button"
           className={clsx(
             "flex flex-row justify-center items-center p-0 w-10 h-10 rounded-lg transition-colors text-content-secondary hover:bg-ui-hover",
-            (isLast || disabled) && "opacity-50 cursor-not-allowed"
+            (isLast || disabled) && "opacity-50 cursor-not-allowed",
           )}
           onClick={() => pushPage(currentPage + 1)}
           disabled={isLast || disabled}

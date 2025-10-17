@@ -9,7 +9,7 @@ import { format, formatDistanceToNow } from "date-fns";
  * Bezpośrednie użycie w Server Components spowoduje hydration errors!
  */
 export const formatDateTime = (
-  dateTime: string | Date | undefined | null
+  dateTime: string | Date | undefined | null,
 ): string => {
   if (!dateTime) return "";
 
@@ -31,7 +31,7 @@ export const formatDateTime = (
  * ⚠️ UWAGA: Używaj tylko w Client Components lub przez <RelativeTime>
  */
 export const formatRelativeTime = (
-  dateTime: string | Date | undefined | null
+  dateTime: string | Date | undefined | null,
 ): string => {
   if (!dateTime) return "";
 

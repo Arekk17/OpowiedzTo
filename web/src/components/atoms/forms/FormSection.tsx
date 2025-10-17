@@ -14,7 +14,7 @@ export const FormSection: React.FC<FormSectionProps> = ({
 }) => {
   const backgroundClasses = {
     none: "",
-    subtle: "bg-ui-notification/30 rounded-xl p-4"
+    subtle: "bg-ui-notification/30 rounded-xl p-4",
   };
 
   return (

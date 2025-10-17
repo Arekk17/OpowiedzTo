@@ -19,7 +19,7 @@ describe("RegisterPage", () => {
     const mockError = new ApiError(
       "Email już istnieje w systemie",
       409,
-      "Conflict"
+      "Conflict",
     );
 
     mockUseAuth.mockReturnValue({
@@ -40,7 +40,7 @@ describe("RegisterPage", () => {
     render(<RegisterPage />);
 
     expect(
-      screen.getByText("Email już istnieje w systemie")
+      screen.getByText("Email już istnieje w systemie"),
     ).toBeInTheDocument();
   });
 
@@ -63,7 +63,7 @@ describe("RegisterPage", () => {
     render(<RegisterPage />);
 
     expect(
-      screen.queryByText("Email już istnieje w systemie")
+      screen.queryByText("Email już istnieje w systemie"),
     ).not.toBeInTheDocument();
   });
 
@@ -110,7 +110,7 @@ describe("RegisterPage", () => {
     render(<RegisterPage />);
 
     expect(
-      screen.getByRole("button", { name: /zarejestruj się/i })
+      screen.getByRole("button", { name: /zarejestruj się/i }),
     ).toBeInTheDocument();
   });
 
@@ -118,7 +118,7 @@ describe("RegisterPage", () => {
     const mockError = new ApiError(
       "Hasło musi zawierać co najmniej 8 znaków",
       400,
-      "Bad Request"
+      "Bad Request",
     );
 
     mockUseAuth.mockReturnValue({
@@ -139,7 +139,7 @@ describe("RegisterPage", () => {
     render(<RegisterPage />);
 
     expect(
-      screen.getByText("Hasło musi zawierać co najmniej 8 znaków")
+      screen.getByText("Hasło musi zawierać co najmniej 8 znaków"),
     ).toBeInTheDocument();
   });
 
@@ -166,5 +166,3 @@ describe("RegisterPage", () => {
     expect(screen.getByText("Inne")).toBeInTheDocument();
   });
 });
-
-

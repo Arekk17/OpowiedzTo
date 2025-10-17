@@ -25,7 +25,7 @@ export const ProfileSubnav: React.FC<ProfileSubnavProps> = ({
     <nav
       className={clsx(
         "box-border flex flex-row items-start gap-8 px-4 w-full max-w-[960px] h-[54px] border-b border-ui-border",
-        className
+        className,
       )}
       aria-label="Nawigacja profilu"
       role="tablist"
@@ -38,12 +38,12 @@ export const ProfileSubnav: React.FC<ProfileSubnavProps> = ({
           "-mb-[2px]",
           "border-b-[3px] border-transparent",
           "min-w-[54px]",
-          !isActive && "hover:text-content-primary/80"
+          !isActive && "hover:text-content-primary/80",
         );
 
         const labelClasses = clsx(
           "font-jakarta font-bold text-sm leading-[21px]",
-          isActive ? "text-content-primary" : "text-content-secondary"
+          isActive ? "text-content-primary" : "text-content-secondary",
         );
 
         const content = (
@@ -56,7 +56,7 @@ export const ProfileSubnav: React.FC<ProfileSubnavProps> = ({
           <div
             className={clsx(
               baseClasses,
-              isActive && "border-b-[3px] border-content-primary"
+              isActive && "border-b-[3px] border-content-primary",
             )}
           >
             {content}

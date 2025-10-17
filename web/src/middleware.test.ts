@@ -23,7 +23,7 @@ interface MockRequestCookie {
 
 function makeReq(
   path: string,
-  cookies: Record<string, string> = {}
+  cookies: Record<string, string> = {},
 ): NextRequest {
   return {
     nextUrl: {
@@ -47,7 +47,7 @@ describe("middleware", () => {
     const res = middleware(makeReq("/dashboard"));
     expect(res.status).toBe(307);
     expect(res.headers.get("location")).toContain(
-      "/auth/login?callbackUrl=%2Fdashboard"
+      "/auth/login?callbackUrl=%2Fdashboard",
     );
   });
 

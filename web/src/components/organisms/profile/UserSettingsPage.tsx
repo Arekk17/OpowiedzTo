@@ -16,18 +16,18 @@ export const UserSettingsPage: React.FC<UserSettingsPageProps> = ({
 }) => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<"profile" | "password" | "danger">(
-    "profile"
+    "profile",
   );
 
   const handleProfileSubmit = async (
-    data: Parameters<React.ComponentProps<typeof ProfileForm>["onSubmit"]>[0]
+    data: Parameters<React.ComponentProps<typeof ProfileForm>["onSubmit"]>[0],
   ) => {
     // TODO: Implement profile update
     console.log("Profile update:", data);
   };
 
   const handlePasswordSubmit = async (
-    data: Parameters<React.ComponentProps<typeof PasswordForm>["onSubmit"]>[0]
+    data: Parameters<React.ComponentProps<typeof PasswordForm>["onSubmit"]>[0],
   ) => {
     // TODO: Implement password change
     console.log("Password change:", data);

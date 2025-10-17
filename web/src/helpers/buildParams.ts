@@ -43,7 +43,7 @@ export const buildCursorParams = (filters: {
 
 export const updateSearchParams = (
   sp: URLSearchParams,
-  patch: Record<string, string | undefined | null>
+  patch: Record<string, string | undefined | null>,
 ): URLSearchParams => {
   const next = new URLSearchParams(sp.toString());
   for (const [k, v] of Object.entries(patch)) {

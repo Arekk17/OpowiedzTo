@@ -29,7 +29,7 @@ export const StoryCardComments: React.FC<StoryCardCommentsProps> = ({
     3,
     {
       enabled: isExpanded,
-    }
+    },
   );
 
   useEffect(() => {

@@ -40,7 +40,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       onRightIconClick,
       ...props
     },
-    ref
+    ref,
   ) => {
     const reactId = useId();
     const inputId = id || `input-${reactId}`;
@@ -98,14 +98,14 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             "focus-within:ring-2 focus-within:ring-ui-focus/20 focus-within:border-ui-focus",
             sizeStyles.container,
             disabled && "cursor-not-allowed opacity-60",
-            fullWidth ? "w-full" : "w-[288px] min-w-[160px]"
+            fullWidth ? "w-full" : "w-[288px] min-w-[160px]",
           )}
         >
           {hasLeft && (
             <div
               className={clsx(
                 "flex items-center justify-center mr-2",
-                sizeStyles.iconBox
+                sizeStyles.iconBox,
               )}
             >
               <div className={clsx("text-content-secondary", sizeStyles.icon)}>
@@ -126,7 +126,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
               hasLeft && "pl-0",
               hasRight && "pr-0",
               sizeStyles.input,
-              className
+              className,
             )}
             placeholder={placeholder}
             aria-invalid={error ? "true" : "false"}
@@ -134,8 +134,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
               error
                 ? `${inputId}-error`
                 : helperText
-                ? `${inputId}-helper`
-                : undefined
+                  ? `${inputId}-helper`
+                  : undefined
             }
             {...props}
           />
@@ -147,7 +147,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
                 sizeStyles.iconBox,
                 rightIconClickable &&
                   !loading &&
-                  "cursor-pointer hover:bg-gray-50 rounded transition-colors"
+                  "cursor-pointer hover:bg-gray-50 rounded transition-colors",
               )}
               onClick={handleRightIconClick}
             >
@@ -178,7 +178,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         )}
       </div>
     );
-  }
+  },
 );
 
 Input.displayName = "Input";

@@ -39,7 +39,7 @@ export async function getAuthUser(): Promise<User | null> {
 
         if (newCookieHeader) {
           console.log(
-            "[auth-ssr] Refresh successful, retrying /auth/me with new token"
+            "[auth-ssr] Refresh successful, retrying /auth/me with new token",
           );
 
           response = await fetch(`${apiUrl}/auth/me`, {

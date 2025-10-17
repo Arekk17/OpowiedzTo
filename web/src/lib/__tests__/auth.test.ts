@@ -20,7 +20,7 @@ describe("apiRequest", () => {
   it("should return data on successful response", async () => {
     const mockData = { id: 1, name: "Test" };
     (global.fetch as jest.Mock).mockResolvedValueOnce(
-      new Response(JSON.stringify({ id: 1, name: "Test" }), { status: 200 })
+      new Response(JSON.stringify({ id: 1, name: "Test" }), { status: 200 }),
     );
 
     const result = await apiRequest("/test");
@@ -32,7 +32,7 @@ describe("apiRequest", () => {
         headers: expect.objectContaining({
           "Content-Type": "application/json",
         }),
-      })
+      }),
     );
   });
 
@@ -44,15 +44,15 @@ describe("apiRequest", () => {
     };
 
     (global.fetch as jest.Mock).mockResolvedValueOnce(
-      new Response(JSON.stringify(errorResponse), { status: 401 })
+      new Response(JSON.stringify(errorResponse), { status: 401 }),
     );
 
     await expect(
-      apiRequest("/auth/login", { skipRefreshOn401: true })
+      apiRequest("/auth/login", { skipRefreshOn401: true }),
     ).rejects.toThrow(ApiError);
 
     (global.fetch as jest.Mock).mockResolvedValueOnce(
-      new Response(JSON.stringify(errorResponse), { status: 401 })
+      new Response(JSON.stringify(errorResponse), { status: 401 }),
     );
 
     try {
@@ -66,7 +66,7 @@ describe("apiRequest", () => {
 
   it("should use ERROR_MESSAGES fallback when backend returns no message", async () => {
     (global.fetch as jest.Mock).mockResolvedValueOnce(
-      new Response("invalid json", { status: 401 })
+      new Response("invalid json", { status: 401 }),
     );
 
     try {
@@ -85,7 +85,7 @@ describe("apiRequest", () => {
     };
 
     (global.fetch as jest.Mock).mockResolvedValueOnce(
-      new Response(JSON.stringify(errorResponse), { status: 409 })
+      new Response(JSON.stringify(errorResponse), { status: 409 }),
     );
 
     try {
@@ -105,7 +105,7 @@ describe("apiRequest", () => {
     };
 
     (global.fetch as jest.Mock).mockResolvedValueOnce(
-      new Response(JSON.stringify(errorResponse), { status: 500 })
+      new Response(JSON.stringify(errorResponse), { status: 500 }),
     );
 
     try {
@@ -118,7 +118,7 @@ describe("apiRequest", () => {
 
   it("should include credentials when no cookieHeader is provided", async () => {
     (global.fetch as jest.Mock).mockResolvedValueOnce(
-      new Response(JSON.stringify({ success: true }), { status: 200 })
+      new Response(JSON.stringify({ success: true }), { status: 200 }),
     );
 
     await apiRequest("/test");
@@ -127,13 +127,13 @@ describe("apiRequest", () => {
       "http://localhost:3001/test",
       expect.objectContaining({
         credentials: "include",
-      })
+      }),
     );
   });
 
   it("should not include credentials when cookieHeader is provided", async () => {
     (global.fetch as jest.Mock).mockResolvedValueOnce(
-      new Response(JSON.stringify({ success: true }), { status: 200 })
+      new Response(JSON.stringify({ success: true }), { status: 200 }),
     );
 
     await apiRequest("/test", { cookieHeader: "refreshToken=abc123" });
@@ -144,10 +144,10 @@ describe("apiRequest", () => {
         headers: expect.objectContaining({
           Cookie: "refreshToken=abc123",
         }),
-      })
+      }),
     );
     expect((global.fetch as jest.Mock).mock.calls[0][1]).not.toHaveProperty(
-      "credentials"
+      "credentials",
     );
   });
 });

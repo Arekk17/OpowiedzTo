@@ -30,7 +30,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
       compact = false,
       ...props
     },
-    ref
+    ref,
   ) => {
     const textareaId =
       id || `textarea-${Math.random().toString(36).slice(2, 11)}`;
@@ -54,7 +54,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
             "focus-within:ring-2 focus-within:ring-ui-focus/20 focus-within:border-ui-focus",
             isDisabled && "cursor-not-allowed opacity-60",
             fullWidth ? "w-full" : "w-[448px] min-w-[160px]",
-            "flex items-center" // Dodaj flexbox dla wyśrodkowania
+            "flex items-center", // Dodaj flexbox dla wyśrodkowania
           )}
         >
           <textarea
@@ -67,7 +67,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
               "font-jakarta font-normal text-content-primary",
               "placeholder:text-content-secondary placeholder:font-normal",
               compact ? "px-3 py-2 text-sm leading-5" : "p-[15px] leading-6",
-              className
+              className,
             )}
             placeholder={placeholder}
             aria-invalid={error ? "true" : "false"}
@@ -86,7 +86,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
         )}
       </div>
     );
-  }
+  },
 );
 
 Textarea.displayName = "Textarea";

@@ -64,7 +64,7 @@ export const registerSchema = z
       .min(8, "Hasło musi mieć minimum 8 znaków")
       .regex(
         /((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/,
-        "Hasło musi zawierać małe i wielkie litery, cyfry lub znaki specjalne"
+        "Hasło musi zawierać małe i wielkie litery, cyfry lub znaki specjalne",
       ),
     confirmPassword: z
       .string()
@@ -75,7 +75,7 @@ export const registerSchema = z
       .trim()
       .regex(
         /^[a-zA-Z0-9_-]{3,20}$/,
-        "Nickname może zawierać tylko litery, cyfry, podkreślenia i myślniki (3-20 znaków)"
+        "Nickname może zawierać tylko litery, cyfry, podkreślenia i myślniki (3-20 znaków)",
       )
       .optional(),
     gender: z.enum([Gender.MALE, Gender.FEMALE, Gender.OTHER]).optional(),

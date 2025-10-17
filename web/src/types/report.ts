@@ -41,7 +41,7 @@ export const createReportSchema = z.object({
     ],
     {
       message: "Wybierz kategorię zgłoszenia",
-    }
+    },
   ),
   reason: z
     .string()

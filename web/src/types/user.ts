@@ -35,7 +35,7 @@ export const updateProfileSchema = z.object({
     .string()
     .regex(
       /^[a-zA-Z0-9_-]{3,20}$/,
-      "Nickname może zawierać tylko litery, cyfry, podkreślenia i myślniki (3-20 znaków)"
+      "Nickname może zawierać tylko litery, cyfry, podkreślenia i myślniki (3-20 znaków)",
     )
     .optional(),
   gender: z.enum([Gender.MALE, Gender.FEMALE, Gender.OTHER]).optional(),

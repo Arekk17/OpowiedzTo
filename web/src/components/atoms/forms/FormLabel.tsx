@@ -1,7 +1,8 @@
 import React from "react";
 import { clsx } from "clsx";
 
-export interface FormLabelProps extends React.LabelHTMLAttributes<HTMLLabelElement> {
+export interface FormLabelProps
+  extends React.LabelHTMLAttributes<HTMLLabelElement> {
   required?: boolean;
   size?: "sm" | "md" | "lg";
 }
@@ -16,7 +17,7 @@ export const FormLabel: React.FC<FormLabelProps> = ({
   const sizeClasses = {
     sm: "text-sm",
     md: "text-base",
-    lg: "text-lg"
+    lg: "text-lg",
   };
 
   return (
@@ -25,7 +26,7 @@ export const FormLabel: React.FC<FormLabelProps> = ({
       className={clsx(
         "font-jakarta font-medium text-content-primary block",
         sizeClasses[size],
-        className
+        className,
       )}
     >
       {children}

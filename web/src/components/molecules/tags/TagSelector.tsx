@@ -28,7 +28,7 @@ export const TagSelector: React.FC<TagSelectorProps> = ({
 
   const exists = useCallback(
     (t: string) => value.some((v) => v.toLowerCase() === t.toLowerCase()),
-    [value]
+    [value],
   );
 
   const canAdd = useMemo(
@@ -37,7 +37,7 @@ export const TagSelector: React.FC<TagSelectorProps> = ({
       query.trim().length > 0 &&
       !exists(query) &&
       value.length < max,
-    [allowCustom, query, exists, value.length, max]
+    [allowCustom, query, exists, value.length, max],
   );
 
   const addTag = useCallback(
@@ -47,14 +47,14 @@ export const TagSelector: React.FC<TagSelectorProps> = ({
       onChange([...value, tag]);
       setQuery("");
     },
-    [normalized, exists, value, max, onChange]
+    [normalized, exists, value, max, onChange],
   );
 
   const removeTag = useCallback(
     (t: string) => {
       onChange(value.filter((v) => v.toLowerCase() !== t.toLowerCase()));
     },
-    [onChange, value]
+    [onChange, value],
   );
 
   const toggleTag = useCallback(
@@ -65,15 +65,15 @@ export const TagSelector: React.FC<TagSelectorProps> = ({
         addTag(t);
       }
     },
-    [exists, removeTag, addTag]
+    [exists, removeTag, addTag],
   );
 
   const filtered = useMemo(
     () =>
       options.filter(
-        (o) => o.toLowerCase().includes(query.toLowerCase()) && !exists(o)
+        (o) => o.toLowerCase().includes(query.toLowerCase()) && !exists(o),
       ),
-    [options, query, exists]
+    [options, query, exists],
   );
 
   const handleKeyDown = useCallback(
@@ -83,14 +83,14 @@ export const TagSelector: React.FC<TagSelectorProps> = ({
         if (canAdd) addTag(query);
       }
     },
-    [canAdd, addTag, query]
+    [canAdd, addTag, query],
   );
 
   const handleQueryChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       setQuery(e.target.value);
     },
-    []
+    [],
   );
 
   return (

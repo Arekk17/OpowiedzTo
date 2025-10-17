@@ -10,7 +10,7 @@ export const useComments = (
   postId: string,
   initialComments: Comment[] = [],
   limit?: number,
-  options?: { enabled?: boolean }
+  options?: { enabled?: boolean },
 ) => {
   const queryClient = useQueryClient();
   const { user } = useAuth();
