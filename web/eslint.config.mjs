@@ -14,7 +14,10 @@ const compat = new FlatCompat({
 
 const eslintConfig = [
   ...compat.extends("next/core-web-vitals", "next/typescript"),
-  ...storybook.configs["flat/recommended"]
+  ...storybook.configs["flat/recommended"],
+  {
+    ignores: ["src/stories/_archive/**"],
+  },
 ];
 
 export default eslintConfig;

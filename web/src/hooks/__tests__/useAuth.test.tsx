@@ -170,10 +170,13 @@ describe("useAuth", () => {
       expect(mockRefresh).toHaveBeenCalled();
     });
 
-    expect(mockLogin).toHaveBeenCalledWith({
-      email: "a@b.c",
-      password: "x",
-    });
+    expect(mockLogin).toHaveBeenCalledWith(
+      {
+        email: "a@b.c",
+        password: "x",
+      },
+      expect.anything()
+    );
   });
 
   it("register mutation updates cache and redirects to callbackUrl from search params", async () => {
@@ -207,11 +210,14 @@ describe("useAuth", () => {
       expect(mockRefresh).toHaveBeenCalled();
     });
 
-    expect(mockRegister).toHaveBeenCalledWith({
-      email: "a@b.c",
-      password: "x",
-      nickname: "Alice",
-    });
+    expect(mockRegister).toHaveBeenCalledWith(
+      {
+        email: "a@b.c",
+        password: "x",
+        nickname: "Alice",
+      },
+      expect.anything()
+    );
   });
 
   it("logout mutation clears cache, resets token, and redirects to /auth/login", async () => {
