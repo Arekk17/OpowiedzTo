@@ -1,0 +1,31 @@
+coverage:
+  precision: 2
+  round: down
+  range: "70...100"
+
+  status:
+    project:
+      default:
+        target: 80%
+        threshold: 1%
+    patch:
+      default:
+        target: 80%
+
+comment:
+  layout: "header,diff,files,footer"
+  behavior: default
+  require_changes: false
+  require_base: no
+  require_head: yes
+
+github_checks:
+  annotations: true
+
+ignore:
+  - "**/*.stories.tsx"
+  - "**/*.stories.ts"
+  - "**/node_modules/**"
+  - "**/dist/**"
+  - "**/build/**"
+  - "**/.next/**"

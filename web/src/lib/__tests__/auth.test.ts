@@ -19,10 +19,9 @@ describe("apiRequest", () => {
 
   it("should return data on successful response", async () => {
     const mockData = { id: 1, name: "Test" };
-    (global.fetch as jest.Mock).mockResolvedValueOnce({
-      ok: true,
-      json: jest.fn().mockResolvedValueOnce(mockData),
-    });
+    (global.fetch as jest.Mock).mockResolvedValueOnce(
+      new Response(JSON.stringify({ id: 1, name: "Test" }), { status: 200 })
+    );
 
     const result = await apiRequest("/test");
 
@@ -44,21 +43,17 @@ describe("apiRequest", () => {
       statusCode: 401,
     };
 
-    (global.fetch as jest.Mock).mockResolvedValueOnce({
-      ok: false,
-      status: 401,
-      json: jest.fn().mockResolvedValueOnce(errorResponse),
-    });
+    (global.fetch as jest.Mock).mockResolvedValueOnce(
+      new Response(JSON.stringify(errorResponse), { status: 401 })
+    );
 
     await expect(
       apiRequest("/auth/login", { skipRefreshOn401: true })
     ).rejects.toThrow(ApiError);
 
-    (global.fetch as jest.Mock).mockResolvedValueOnce({
-      ok: false,
-      status: 401,
-      json: jest.fn().mockResolvedValueOnce(errorResponse),
-    });
+    (global.fetch as jest.Mock).mockResolvedValueOnce(
+      new Response(JSON.stringify(errorResponse), { status: 401 })
+    );
 
     try {
       await apiRequest("/auth/login", { skipRefreshOn401: true });
@@ -70,11 +65,9 @@ describe("apiRequest", () => {
   });
 
   it("should use ERROR_MESSAGES fallback when backend returns no message", async () => {
-    (global.fetch as jest.Mock).mockResolvedValueOnce({
-      ok: false,
-      status: 401,
-      json: jest.fn().mockRejectedValueOnce(new Error("Not JSON")),
-    });
+    (global.fetch as jest.Mock).mockResolvedValueOnce(
+      new Response("invalid json", { status: 401 })
+    );
 
     try {
       await apiRequest("/test", { skipRefreshOn401: true });
@@ -91,11 +84,9 @@ describe("apiRequest", () => {
       statusCode: 409,
     };
 
-    (global.fetch as jest.Mock).mockResolvedValueOnce({
-      ok: false,
-      status: 409,
-      json: jest.fn().mockResolvedValueOnce(errorResponse),
-    });
+    (global.fetch as jest.Mock).mockResolvedValueOnce(
+      new Response(JSON.stringify(errorResponse), { status: 409 })
+    );
 
     try {
       await apiRequest("/auth/register");
@@ -113,11 +104,9 @@ describe("apiRequest", () => {
       statusCode: 500,
     };
 
-    (global.fetch as jest.Mock).mockResolvedValueOnce({
-      ok: false,
-      status: 500,
-      json: jest.fn().mockResolvedValueOnce(errorResponse),
-    });
+    (global.fetch as jest.Mock).mockResolvedValueOnce(
+      new Response(JSON.stringify(errorResponse), { status: 500 })
+    );
 
     try {
       await apiRequest("/test");
@@ -128,11 +117,9 @@ describe("apiRequest", () => {
   });
 
   it("should include credentials when no cookieHeader is provided", async () => {
-    const mockData = { success: true };
-    (global.fetch as jest.Mock).mockResolvedValueOnce({
-      ok: true,
-      json: jest.fn().mockResolvedValueOnce(mockData),
-    });
+    (global.fetch as jest.Mock).mockResolvedValueOnce(
+      new Response(JSON.stringify({ success: true }), { status: 200 })
+    );
 
     await apiRequest("/test");
 
@@ -145,11 +132,9 @@ describe("apiRequest", () => {
   });
 
   it("should not include credentials when cookieHeader is provided", async () => {
-    const mockData = { success: true };
-    (global.fetch as jest.Mock).mockResolvedValueOnce({
-      ok: true,
-      json: jest.fn().mockResolvedValueOnce(mockData),
-    });
+    (global.fetch as jest.Mock).mockResolvedValueOnce(
+      new Response(JSON.stringify({ success: true }), { status: 200 })
+    );
 
     await apiRequest("/test", { cookieHeader: "refreshToken=abc123" });
 
