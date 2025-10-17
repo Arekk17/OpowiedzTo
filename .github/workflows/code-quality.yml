@@ -30,7 +30,24 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "npm"
+
+      - name: Cache API dependencies
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.check_type == 'all' || inputs.check_type == 'api' }}
+        uses: actions/cache@v4
+        with:
+          path: ./opowiedzto-api/node_modules
+          key: ${{ runner.os }}-api-${{ hashFiles('opowiedzto-api/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-api-
+
+      - name: Cache Web dependencies
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.check_type == 'all' || inputs.check_type == 'web' }}
+        uses: actions/cache@v4
+        with:
+          path: ./web/node_modules
+          key: ${{ runner.os }}-web-${{ hashFiles('web/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-web-
 
       - name: Install API dependencies
         if: ${{ github.event_name != 'workflow_dispatch' || inputs.check_type == 'all' || inputs.check_type == 'api' }}
