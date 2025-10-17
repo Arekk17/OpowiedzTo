@@ -20,7 +20,7 @@ export const useComments = (
   const { data: comments = initialComments, refetch } = useQuery({
     queryKey,
     queryFn: () => getComments(postId, { limit }),
-    initialData: initialComments,
+    initialData: initialComments.length > 0 ? initialComments : undefined,
     staleTime: 30_000,
     enabled: enabled && Boolean(postId),
   });
@@ -72,7 +72,8 @@ export const useComments = (
     },
 
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey });
+      // Nie invalidujemy queries po success - dane są już aktualne
+      // Invalidujemy tylko po error, żeby refetchować dane
     },
   });
 

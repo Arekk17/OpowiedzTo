@@ -1,0 +1,46 @@
+name: Code Quality
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main, develop]
+
+jobs:
+  lint-and-format:
+    name: Lint and Format Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install API dependencies
+        working-directory: ./opowiedzto-api
+        run: npm ci
+
+      - name: Install Web dependencies
+        working-directory: ./web
+        run: npm ci
+
+      - name: Check API formatting
+        working-directory: ./opowiedzto-api
+        run: npm run format -- --check
+
+      - name: Check Web formatting
+        working-directory: ./web
+        run: npm run format:check
+
+      - name: Lint API code
+        working-directory: ./opowiedzto-api
+        run: npm run lint
+
+      - name: Lint Web code
+        working-directory: ./web
+        run: npm run lint
