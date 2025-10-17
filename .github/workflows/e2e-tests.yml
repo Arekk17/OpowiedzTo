@@ -101,16 +101,7 @@ jobs:
         working-directory: ./opowiedzto-api
         run: npm run build
         env:
-          DATABASE_NAME: opowiedzto_test
-          DATABASE_HOST: localhost
-          DATABASE_PORT: 5432
-          DATABASE_USERNAME: postgres
-          DATABASE_PASSWORD: postgres
-
-      - name: Run database migrations
-        working-directory: ./opowiedzto-api
-        run: npm run migration:run
-        env:
+          NODE_ENV: test
           DATABASE_NAME: opowiedzto_test
           DATABASE_HOST: localhost
           DATABASE_PORT: 5432
@@ -125,6 +116,7 @@ jobs:
         working-directory: ./opowiedzto-api
         run: npm run test:e2e
         env:
+          NODE_ENV: test
           DATABASE_NAME: opowiedzto_test
           DATABASE_HOST: localhost
           DATABASE_PORT: 5432
