@@ -57,7 +57,10 @@ jobs:
 
       - name: Install Web dependencies
         working-directory: ./web
-        run: npm ci
+        run: npm ci --ignore-platform
+        env:
+          npm_config_target_platform: linux
+          npm_config_target_arch: x64
 
       - name: Build API
         working-directory: ./opowiedzto-api
