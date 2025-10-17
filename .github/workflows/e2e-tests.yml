@@ -93,17 +93,29 @@ jobs:
           npm_config_target_platform: linux
           npm_config_target_arch: x64
 
+      - name: Create test database
+        run: |
+          PGPASSWORD=postgres psql -h localhost -U postgres -c "CREATE DATABASE opowiedzto_test;" || true
+
       - name: Build API
         working-directory: ./opowiedzto-api
         run: npm run build
         env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/opowiedzto_test
+          DATABASE_NAME: opowiedzto_test
+          DATABASE_HOST: localhost
+          DATABASE_PORT: 5432
+          DATABASE_USERNAME: postgres
+          DATABASE_PASSWORD: postgres
 
       - name: Run database migrations
         working-directory: ./opowiedzto-api
         run: npm run migration:run
         env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/opowiedzto_test
+          DATABASE_NAME: opowiedzto_test
+          DATABASE_HOST: localhost
+          DATABASE_PORT: 5432
+          DATABASE_USERNAME: postgres
+          DATABASE_PASSWORD: postgres
 
       - name: Build Web
         working-directory: ./web
@@ -113,4 +125,8 @@ jobs:
         working-directory: ./opowiedzto-api
         run: npm run test:e2e
         env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/opowiedzto_test
+          DATABASE_NAME: opowiedzto_test
+          DATABASE_HOST: localhost
+          DATABASE_PORT: 5432
+          DATABASE_USERNAME: postgres
+          DATABASE_PASSWORD: postgres
