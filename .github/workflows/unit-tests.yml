@@ -36,10 +36,16 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "npm"
-          cache-dependency-path: opowiedzto-api/package-lock.json
 
-      - name: Install dependencies
+      - name: Cache API dependencies
+        uses: actions/cache@v4
+        with:
+          path: ./opowiedzto-api/node_modules
+          key: ${{ runner.os }}-api-${{ hashFiles('opowiedzto-api/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-api-
+
+      - name: Install API dependencies
         working-directory: ./opowiedzto-api
         run: npm ci
 
@@ -72,10 +78,16 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "npm"
-          cache-dependency-path: web/package-lock.json
 
-      - name: Install dependencies
+      - name: Cache Web dependencies
+        uses: actions/cache@v4
+        with:
+          path: ./web/node_modules
+          key: ${{ runner.os }}-web-${{ hashFiles('web/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-web-
+
+      - name: Install Web dependencies
         working-directory: ./web
         run: npm ci
 
