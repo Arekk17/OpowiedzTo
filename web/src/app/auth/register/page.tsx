@@ -1,4 +1,5 @@
 "use client";
+export const dynamic = "force-dynamic";
 import { Input } from "@/components/atoms/inputs/Input";
 import { RadioField } from "@/components/molecules/forms/RadioField";
 import { AuthFormLayout } from "@/components/templates/AuthFormLayout";

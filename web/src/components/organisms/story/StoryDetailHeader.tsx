@@ -1,10 +1,15 @@
-import React from "react";
+"use client";
+
+import React, { useState } from "react";
 import Image from "next/image";
 import { Tag } from "../../atoms/tags/Tag";
 import { FormattedDate } from "../../atoms/time/FormattedDate";
 import { TagType } from "@/types/tags";
+import { FlagIcon } from "@heroicons/react/24/outline";
+import { ReportModal } from "../../molecules/modals/ReportModal";
 
 export interface StoryDetailHeaderProps {
+  postId?: string;
   title: string;
   content: string;
   tags: TagType[];
@@ -16,6 +21,7 @@ export interface StoryDetailHeaderProps {
 }
 
 export const StoryDetailHeader: React.FC<StoryDetailHeaderProps> = ({
+  postId,
   title,
   content,
   tags,
@@ -25,6 +31,8 @@ export const StoryDetailHeader: React.FC<StoryDetailHeaderProps> = ({
   imageAlt,
   className = "",
 }) => {
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+
   return (
     <div
       className={`flex flex-col items-start w-full max-w-[960px] ${className}`}
@@ -68,6 +76,27 @@ export const StoryDetailHeader: React.FC<StoryDetailHeaderProps> = ({
           przez {author}
         </p>
       </div>
+
+      {postId && (
+        <>
+          <div className="flex flex-row items-center px-4 pb-3 w-full">
+            <button
+              onClick={() => setIsReportModalOpen(true)}
+              className="flex items-center gap-2 px-3 py-2 text-sm text-content-secondary hover:text-accent-error hover:bg-background-subtle rounded-lg transition-colors"
+            >
+              <FlagIcon className="w-4 h-4" />
+              Zgłoś historię
+            </button>
+          </div>
+
+          <ReportModal
+            isOpen={isReportModalOpen}
+            onClose={() => setIsReportModalOpen(false)}
+            targetId={postId}
+            targetType="post"
+          />
+        </>
+      )}
     </div>
   );
 };

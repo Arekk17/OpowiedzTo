@@ -1,4 +1,5 @@
 "use client";
+export const dynamic = "force-dynamic";
 import { Input } from "@/components/atoms/inputs/Input";
 import { useAuth } from "@/hooks/useAuth";
 import { LoginForm, loginSchema } from "@/types/auth";

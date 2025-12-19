@@ -69,6 +69,7 @@ export default async function HistoryPage({
   return (
     <PageLayout className="flex-col">
       <StoryDetailHeader
+        postId={post.id}
         title={post.title}
         content={post.content}
         tags={post.tags}

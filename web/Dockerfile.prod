@@ -1,0 +1,34 @@
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# Zmienna buildtime dla Next.js public env
+ARG NEXT_PUBLIC_API_URL=http://localhost:3002
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+
+COPY package*.json ./
+RUN npm ci
+
+COPY . .
+# Wyklucz pliki Storybook z builda
+RUN find . -name "*.stories.tsx" -type f -delete || true
+RUN find . -name "*.stories.ts" -type f -delete || true
+RUN find . -name "*.archived.tsx" -type f -delete || true
+RUN find . -path "*/stories/*" -type f -delete || true
+RUN npm run build
+
+FROM node:20-alpine
+
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+# Kopiuj standalone output
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/public ./public
+
+EXPOSE 3000
+
+CMD ["node", "server.js"]
+

@@ -1,9 +1,9 @@
 import React from "react";
-import { Tag } from "@/types/tags";
+import { TagType } from "@/types/tags";
 import Link from "next/link";
 
 type TagChipsProps = {
-  tags: Tag[];
+  tags: TagType[];
   activeTag: string | undefined;
   makeHref: (tag: string | undefined) => string;
   className?: string;
