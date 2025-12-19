@@ -26,7 +26,7 @@ const meta = {
     author: {
       control: "text",
     },
-    timestamp: {
+    createdAt: {
       control: "text",
     },
   },
@@ -37,11 +37,12 @@ type Story = StoryObj<typeof meta>;
 
 export const Anonymous: Story = {
   args: {
+    id: "1",
     title: "Tajemnicza historia z dawnych czasów",
     excerpt:
       "To była ciemna noc, gdy zdecydowałam się podzielić tą historią. Nikt nie wie, kim jestem, ale moja historia zasługuje na opowiedzenie...",
     author: "Jan Kowalski",
-    timestamp: "2 godziny temu",
+    createdAt: "2024-01-01T10:00:00Z",
     category: "anonymous",
     isAnonymous: true,
   },
@@ -49,11 +50,12 @@ export const Anonymous: Story = {
 
 export const Featured: Story = {
   args: {
+    id: "2",
     title: "Niesamowita przygoda w górach",
     excerpt:
       "Podczas wędrówki w Tatrach natknęliśmy się na coś, czego nigdy nie spodziewaliśmy się zobaczyć. Ta historia zmieni wasze postrzeganie natury...",
     author: "Anna Nowak",
-    timestamp: "1 dzień temu",
+    createdAt: "2024-01-02T10:00:00Z",
     category: "featured",
     isAnonymous: false,
   },
@@ -61,11 +63,12 @@ export const Featured: Story = {
 
 export const Trending: Story = {
   args: {
+    id: "3",
     title: "Historia, która poruszyła całą społeczność",
     excerpt:
       "Nie spodziewałem się, że ta historia stanie się tak popularna. Dziękuję wszystkim za wsparcie i komentarze...",
     author: "Piotr Wiśniewski",
-    timestamp: "3 dni temu",
+    createdAt: "2024-01-03T10:00:00Z",
     category: "trending",
     isAnonymous: false,
   },
@@ -73,11 +76,12 @@ export const Trending: Story = {
 
 export const New: Story = {
   args: {
+    id: "4",
     title: "Świeżo dodana historia o miłości",
     excerpt:
       "Poznałem ją w najbardziej nieoczekiwanym miejscu. Ta historia pokazuje, że miłość może zdarzyć się wszędzie...",
     author: "Maria Kowalczyk",
-    timestamp: "30 minut temu",
+    createdAt: "2024-01-04T10:00:00Z",
     category: "new",
     isAnonymous: false,
   },
@@ -85,11 +89,12 @@ export const New: Story = {
 
 export const LongTitle: Story = {
   args: {
+    id: "5",
     title:
       "To jest bardzo długi tytuł historii, który ma pokazać jak komponenet radzi sobie z długimi tytułami i czy odpowiednio je obcina",
     excerpt: "Krótki opis",
     author: "Test User",
-    timestamp: "1 godzina temu",
+    createdAt: "2024-01-05T10:00:00Z",
     category: "anonymous",
     isAnonymous: true,
   },
@@ -97,11 +102,12 @@ export const LongTitle: Story = {
 
 export const LongExcerpt: Story = {
   args: {
+    id: "6",
     title: "Historia z długim opisem",
     excerpt:
       "To jest bardzo długi opis historii, który ma sprawdzić jak komponenet radzi sobie z długimi opisami i czy odpowiednio je obcina. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation.",
     author: "Test User",
-    timestamp: "2 godziny temu",
+    createdAt: "2024-01-06T10:00:00Z",
     category: "featured",
     isAnonymous: false,
   },
@@ -110,11 +116,12 @@ export const LongExcerpt: Story = {
 export const WithoutBadge: Story = {
   name: "Bez odznaki",
   args: {
+    id: "7",
     title: "Niespodziewane spotkanie",
     excerpt:
       "Historia o tym, jak przypadkowe spotkanie może zmienić całe życie.",
     author: "Ktoś",
-    timestamp: "5 min temu",
+    createdAt: "2024-01-07T10:00:00Z",
     category: "none",
     isAnonymous: false,
   },
@@ -123,11 +130,12 @@ export const WithoutBadge: Story = {
 export const WithImage: Story = {
   name: "Z obrazkiem (Unsplash)",
   args: {
+    id: "8",
     title: "Niespodziewane spotkanie",
     excerpt:
       "Historia o tym, jak przypadkowe spotkanie może zmienić całe życie.",
     author: "Ktoś",
-    timestamp: "5 min temu",
+    createdAt: "2024-01-08T10:00:00Z",
     category: "none",
     isAnonymous: false,
     imageSrc:
@@ -137,6 +145,15 @@ export const WithImage: Story = {
 };
 
 export const Interactive: Story = {
+  args: {
+    id: "9",
+    title: "Kliknij mnie!",
+    excerpt: "Ta karta reaguje na kliknięcia i pokazuje interaktywne funkcje.",
+    author: "Interaktywny Bot",
+    createdAt: new Date().toISOString(),
+    category: "featured",
+    isAnonymous: false,
+  },
   render: () => {
     const [clicked, setClicked] = React.useState(false);
     const [likes, setLikes] = React.useState(42);
@@ -144,18 +161,17 @@ export const Interactive: Story = {
 
     return (
       <div className="space-y-4 w-full max-w-md">
-        <StoryCard
-          title={clicked ? "Kliknięta historia!" : "Kliknij mnie!"}
-          excerpt="Ta karta reaguje na kliknięcia i pokazuje interaktywne funkcje."
-          author="Interaktywny Bot"
-          timestamp="teraz"
-          category="featured"
-          isAnonymous={false}
-          onClick={() => {
-            setClicked(!clicked);
-            alert(clicked ? "Historia odkliknięta" : "Historia kliknięta!");
-          }}
-        />
+        <div onClick={() => setClicked(!clicked)}>
+          <StoryCard
+            id="9"
+            title={clicked ? "Kliknięta historia!" : "Kliknij mnie!"}
+            excerpt="Ta karta reaguje na kliknięcia i pokazuje interaktywne funkcje."
+            author="Interaktywny Bot"
+            createdAt={new Date().toISOString()}
+            category="featured"
+            isAnonymous={false}
+          />
+        </div>
 
         <div className="flex gap-4 justify-center">
           <button

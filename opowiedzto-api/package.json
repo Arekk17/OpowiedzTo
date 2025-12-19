@@ -17,6 +17,7 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:ci": "jest --ci --coverage --watchAll=false --passWithNoTests",
+    "test:unit": "jest --runInBand",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js",
@@ -90,9 +91,25 @@
       "^.+\\.(t|j)s$": "ts-jest"
     },
     "collectCoverageFrom": [
-      "**/*.(t|j)s"
+      "**/*.(t|j)s",
+      "!**/*.spec.ts",
+      "!**/node_modules/**",
+      "!**/dist/**",
+      "!**/migrations/**"
     ],
     "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "moduleNameMapper": {
+      "^src/(.*)$": "<rootDir>/$1"
+    },
+    "setupFilesAfterEnv": [
+      "<rootDir>/../test/jest.setup.ts"
+    ],
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "repositories/.*\\.spec\\.ts$",
+      "tags/repository/tag.repository.spec.ts",
+      "optional-jwt-auth.guard.spec.ts"
+    ]
   }
 }

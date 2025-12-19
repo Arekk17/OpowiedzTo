@@ -33,12 +33,15 @@ const options: DataSourceOptions = {
   ],
   migrations: [join(__dirname, '..', 'migrations', '*.{ts,js}')],
   migrationsTableName: 'migrations',
-  migrationsRun: process.env.NODE_ENV === 'production',
+  migrationsRun:
+    process.env.NODE_ENV === 'production' &&
+    process.env.MIGRATIONS_RUN !== 'false',
   synchronize:
     process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test',
   logging: ['error'],
   ssl:
-    process.env.NODE_ENV === 'production'
+    process.env.NODE_ENV === 'production' &&
+    process.env.DATABASE_SSL !== 'false'
       ? {
           rejectUnauthorized: false,
         }

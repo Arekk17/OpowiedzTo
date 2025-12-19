@@ -32,7 +32,7 @@ export const StoriesLayout: React.FC<StoriesLayoutProps> = ({
 
     <div className="w-full px-4 py-5 pb-3">
       <h1 className="font-jakarta font-bold text-[22px] leading-7 text-content-primary">
-        Polecane historie
+        Moje historie
       </h1>
     </div>
 

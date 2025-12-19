@@ -1,5 +1,19 @@
+// Server-side używa API_URL (wewnętrzna sieć Docker), client-side używa NEXT_PUBLIC_API_URL
+const getBaseURL = () => {
+  if (typeof window === "undefined") {
+    // Server-side rendering
+    return (
+      process.env.API_URL ||
+      process.env.NEXT_PUBLIC_API_URL ||
+      "http://localhost:3001"
+    );
+  }
+  // Client-side
+  return process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+};
+
 export const API_CONFIG = {
-  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001",
+  baseURL: getBaseURL(),
   timeout: 10000,
   headers: {
     "Content-Type": "application/json",

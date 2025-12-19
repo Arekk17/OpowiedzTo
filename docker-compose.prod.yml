@@ -1,0 +1,66 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: opowiedzto-db-prod
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=opowiedzto
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d opowiedzto"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+  api:
+    build:
+      context: ./opowiedzto-api
+      dockerfile: Dockerfile
+    container_name: opowiedzto-api-prod
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - DATABASE_HOST=db
+      - DATABASE_PORT=5432
+      - DATABASE_USERNAME=postgres
+      - DATABASE_PASSWORD=postgres
+      - DATABASE_NAME=opowiedzto
+      - JWT_SECRET=OpowiedzTo_Prod_Secret_Key_2024
+      - JWT_REFRESH_SECRET=OpowiedzTo_Prod_Refresh_Secret
+      - JWT_EXPIRATION_TIME=15m
+      - FRONTEND_URL=http://localhost:3003
+      - CROSS_SITE_COOKIES=false
+      - DATABASE_SSL=false
+      - MIGRATIONS_RUN=false
+    ports:
+      - "3002:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./web
+      dockerfile: Dockerfile.prod
+      args:
+        - NEXT_PUBLIC_API_URL=http://localhost:3002
+    container_name: opowiedzto-frontend-prod
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:3002
+      - API_URL=http://api:3000
+    ports:
+      - "3003:3000"
+    depends_on:
+      - api
+    restart: unless-stopped
+
+volumes:
+  postgres_data_dev:
+
